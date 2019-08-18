@@ -1,0 +1,22 @@
+# Source: https://github.com/MattIPv4/template/blob/master/.gitignore
+# Defaults
+
+## JetBrains
+.idea/
+
+## Python: Virtual Environments
+venv/
+## Python: Module building
+*.egg-info/
+
+## Web Configs
+web.config
+.user.ini
+
+## Node
+node_modules/
+
+## macOS
+.DS_Store
+
+# Custom
