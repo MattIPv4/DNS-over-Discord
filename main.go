@@ -76,14 +76,20 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Do all types if none given
-	if len(args) < 2 {
-		for _, value := range TypeMap {
-			_, _ = DoDNS(args[0], value, s, m)
+	// Default to all types
+	var types []string
+	for _, value := range TypeMap {
+		types = append(types, value)
+	}
+
+	// Allow user types if valid
+	if len(args) >= 2 {
+		inter := Intersection(types, args)
+		if len(inter) > 0 {
+			types = inter
 		}
-		return
 	}
 
 	// Run with given type
-	_, _ = DoDNS(args[0], args[1], s, m)
+	_, _ = DoDNS(args[0], types, s, m)
 }

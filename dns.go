@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"github.com/bwmarrin/discordgo"
-	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -102,61 +101,47 @@ func FetchDNSJSON(u string, t string) (*DNS, error) {
 	return &f, nil
 }
 
-func FormatDNSJSON(d DNS) map[string]string {
+func FormatDNSJSON(d DNS) (string, string) {
 	// Generate data array
-	sections := make(map[int][][]string)
+	var RecordType string
+	var RecordData [][]string
 	for _, element := range d.Answer {
 		data := []string{
 			element.Name,
 			strconv.Itoa(element.TTL) + "ms",
 			element.Data,
 		}
-		if sections[element.Type] == nil {
-			sections[element.Type] = [][]string{}
-		}
-		sections[element.Type] = append(sections[element.Type], data)
+		RecordType = element.TypeString()
+		RecordData = append(RecordData, data)
 	}
 
-	// Generate tables
-	tables := make(map[string]string)
-	for key, value := range sections {
-		tableString := &strings.Builder{}
-		table := tablewriter.NewWriter(tableString)
-		table.SetHeader([]string{"Name", "TTL", "Data"})
-		table.SetBorder(false)
-		table.AppendBulk(value)
-		table.Render()
-		tables[TypeMap[key]] = tableString.String()
-	}
+	// Generate table
+	tableString := &strings.Builder{}
+	table := tablewriter.NewWriter(tableString)
+	table.SetHeader([]string{"Name", "TTL", "Data"})
+	table.SetBorder(false)
+	table.AppendBulk(RecordData)
+	table.Render()
 
 	// Done
-	return tables
+	return RecordType, tableString.String()
 }
 
-func TitleFormat(l int, p string, t string) string {
-	space := l - len(t) - 2
-	left := math.Ceil(float64(space) / float64(2))
-	right := math.Floor(float64(space) / float64(2))
-	return strings.Repeat(p, int(left)) + " " + t + " " + strings.Repeat(p, int(right))
-}
+func DoDNS(n string, t []string, s *discordgo.Session, m *discordgo.MessageCreate) (*discordgo.Message, error) {
+	var AllData []string
 
-func SendDNSJSON(d map[string]string, s *discordgo.Session, m *discordgo.MessageCreate) (*discordgo.Message, error) {
-	var sections []string
-	for key, value := range d {
-		l := len(strings.Split(value, "\n")[1])
-		sections = append(sections, TitleFormat(l, "=", key)+"\n"+value+strings.Repeat("=", l))
+	// TODO: Make this async?
+	for _, e := range t {
+		DNSData, err := FetchDNSJSON(n, e)
+		if err != nil {
+			AllData = append(AllData, WrapDataTitle(e, "Could not fetch due to error `"+err.Error()+"`"))
+			continue
+		}
+		Type, FormatData := FormatDNSJSON(*DNSData)
+		AllData = append(AllData, WrapDataTitle(Type, FormatData))
 	}
-	message, err := s.ChannelMessageSend(m.ChannelID, "```\n"+strings.Join(sections, "\n")+"\n```")
-	return message, err
-}
 
-func DoDNS(n string, t string, s *discordgo.Session, m *discordgo.MessageCreate) (*discordgo.Message, error) {
-	DNSData, err := FetchDNSJSON(n, t)
-	if err != nil {
-		message, err := s.ChannelMessageSend(m.ChannelID, "Could not fetch due to error `"+err.Error()+"`")
-		return message, err
-	}
-	FormatData := FormatDNSJSON(*DNSData)
-	message, err := SendDNSJSON(FormatData, s, m)
+	// TODO: Paginate to keep under 2048
+	message, err := s.ChannelMessageSend(m.ChannelID, "```\n"+strings.Join(AllData, "\n\n")+"\n```")
 	return message, err
 }
