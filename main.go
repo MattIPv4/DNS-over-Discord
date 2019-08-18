@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"regexp"
@@ -57,6 +60,43 @@ func IsValidDomain(d string) bool {
 	return domainReg.Match([]byte(d))
 }
 
+func GetDNS(u string, t string) (interface{}, error) {
+	// Create the query params
+	params := url.Values{}
+	params.Add("name", u)
+	if t != "" {
+		params.Add("type", t)
+	}
+	query := params.Encode()
+	fmt.Println(query)
+
+	// Create the http client & error
+	var err error
+	client := &http.Client{}
+
+	// Run the request
+	req, err := http.NewRequest("GET", "https://cloudflare-dns.com/dns-query?"+query, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Accept", "application/dns-json")
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Parse the JSON
+	var f interface{}
+	err = json.NewDecoder(resp.Body).Decode(&f)
+	if err != nil {
+		return nil, err
+	}
+
+	// Done
+	return f, nil
+}
+
 func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Ignore all messages created by the bot itself
@@ -79,5 +119,13 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Inject blank type if none given
+	if len(args) < 2 {
+		args = append(args, "")
+	}
+
+	data, err := GetDNS(args[0], args[1])
+	fmt.Println(err)
+	fmt.Println(data)
 	_, _ = s.ChannelMessageSend(m.ChannelID, args[0])
 }
