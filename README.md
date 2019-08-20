@@ -1,20 +1,17 @@
 <!-- Source: https://github.com/MattIPv4/template/blob/master/README.md -->
 
 <!-- Title -->
-<h1 align="center" id="Template">
-    <!-- Text only -->
-    <!-- Template -->
-    <!-- or, Image logo -->
-    <img src="https://via.placeholder.com/500x60.png?text=Template" alt="Template" width="500"/>
+<h1 align="center" id="dns-over-discord">
+    DNS over Discord
 </h1>
 
 <!-- Tag line -->
-<h3 align="center">The template README (and other files) for my GitHub repositories.</h3>
+<h3 align="center">A 1.1.1.1 DNS resolver built in Go for Discord</h3>
 
 <!-- Badges -->
 <p align="center">
-    <a href="https://shields.io/" target="_blank">
-        <img src="https://img.shields.io/badge/style-flat--square-green.svg?style=flat-square" alt="Style"/>
+    <a href="https://1.1.1.1/" target="_blank">
+        <img src="https://img.shields.io/badge/Cloudflare%20DNS-1.1.1.1-F38020?logo=cloudflare&style=flat-square" alt="Cloudflare DNS - 1.1.1.1"/>
     </a>
     <a href="http://patreon.mattcowley.co.uk/" target="_blank">
         <img src="https://img.shields.io/badge/patreon-IPv4-blue.svg?style=flat-square" alt="Patreon"/>
@@ -27,9 +24,53 @@
 ----
 
 <!-- Content -->
-## Hello
+## Build
 
-This repository stores my template README file along with other useful default & template files for my GitHub repositories.
+This assumes you already have a working Go environment setup and that DiscordGo is correctly installed on your system.
+
+From within the 1.1.1.1-Discord project folder, run the below command to compile the example.
+
+```
+go build
+```
+
+## Usage
+
+### Go
+
+You can start the Discord bot by running the following, where `<token>` is your Discord Bot token.
+
+```
+./1.1.1.1-Discord -t <token> 
+```
+
+### Discord
+
+The bot can be used in Discord by mentioning the bot and then providing a domain name to look up using 1.1.1.1.
+By default, if only a domain name is provided, the bot will lookup all supported record types and report them all.
+However, you can also provide a list of record types (space separated) after the domain name to select which to lookup.
+
+Mentioning the bot in Discord with no additional arguments will generate the usage message as follows:
+
+```
+Usage: @1.1.1.1 <domain> [...types]
+Examples:
+@1.1.1.1 mattcowley.co.uk
+@1.1.1.1 mattcowley.co.uk A AAAA
+```
+
+## Supported Record Types
+
+ - A
+ - NS
+ - CNAME
+ - MX
+ - TXT
+ - AAAA
+ - SRV
+ - CAA
+ 
+_The latest supported record types can be found at the top of dns.go in the types map._
 
 <!-- Contributing -->
 ## Contributing

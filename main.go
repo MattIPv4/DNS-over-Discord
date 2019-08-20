@@ -70,6 +70,12 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	content := strings.Trim(strings.Replace(m.Content, s.State.User.Mention(), "", 1), " ")
 	args := strings.Split(content, " ")
 
+	// If blank message, send usage
+	if len(content) == 0 {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "```\nUsage: @1.1.1.1 <domain> [...types]\nExamples:\n@1.1.1.1 mattcowley.co.uk\n@1.1.1.1 mattcowley.co.uk A AAAA\n```")
+		return
+	}
+
 	// Validate domain
 	if !IsValidDomain(args[0]) {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "Could not validate `"+args[0]+"` as a domain")
