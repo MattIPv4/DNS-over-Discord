@@ -151,6 +151,7 @@ func DoDNS(n string, t []string, s *discordgo.Session, m *discordgo.MessageCreat
 		AllData = append(AllData, <-listener)
 	}
 
+	// TODO: Sort all data by record type
 	// TODO: Paginate to keep under 2048
 	message, err := s.ChannelMessageSend(m.ChannelID, "```\n"+strings.Join(AllData, "\n\n")+"\n```")
 	return message, err
