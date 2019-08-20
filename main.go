@@ -72,7 +72,7 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// If blank message, send usage
 	if len(content) == 0 {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "```\nUsage: @1.1.1.1 <domain> [...types]\nExamples:\n@1.1.1.1 mattcowley.co.uk\n@1.1.1.1 mattcowley.co.uk A AAAA\n```")
+		_, _ = s.ChannelMessageSend(m.ChannelID, "```\nUsage: @1.1.1.1 <domain> [...types]\n\nExamples:\n@1.1.1.1 mattcowley.co.uk\n@1.1.1.1 mattcowley.co.uk A AAAA\n\nInvite: https://bit.ly/1111-Discord\n```")
 		return
 	}
 

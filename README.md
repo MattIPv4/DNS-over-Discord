@@ -24,6 +24,12 @@
 ----
 
 <!-- Content -->
+## Invite
+
+I'm hosting a copy of this bot myself and you can invite it to your Discord server using this link:
+
+> https://bit.ly/1111-Discord
+
 ## Build
 
 This assumes you already have a working Go environment setup and that DiscordGo is correctly installed on your system.
