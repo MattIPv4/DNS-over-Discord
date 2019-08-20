@@ -16,12 +16,14 @@ import (
 // Variables used for command line parameters
 var (
 	Token string
+	Admin string
 )
 
 var Usage string
 
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
+	flag.StringVar(&Admin, "a", "", "Admin User ID")
 	flag.Parse()
 }
 
@@ -84,6 +86,21 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if len(content) == 0 {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Usage+"\n```")
 		return
+	}
+
+	// Admin commands
+	if m.Author.ID == Admin {
+		// Git pull
+		if args[0] == "pull" {
+			Pull(s, m)
+			return
+		}
+
+		// Exit
+		if args[0] == "exit" {
+			Exit(s, m)
+			return
+		}
 	}
 
 	// Assume DNS command

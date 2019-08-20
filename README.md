@@ -44,10 +44,11 @@ go build
 
 ### Go
 
-You can start the Discord bot by running the following, where `<token>` is your Discord Bot token.
+You can start the Discord bot by running the following, where `<token>` is your Discord Bot token and `<user-id>` is
+ your Discord user ID to be the bot admin.
 
 ```
-./1.1.1.1-Discord -t <token> 
+./1.1.1.1-Discord -t <token> -a <user-id>
 ```
 
 ### Discord
