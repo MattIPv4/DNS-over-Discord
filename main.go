@@ -97,5 +97,5 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Run with given type
-	_, _ = DoDNS(args[0], types, s, m)
+	DoDNS(args[0], types, s, m)
 }

@@ -129,7 +129,7 @@ func FormatDNSJSON(d DNS) string {
 	return tableString.String()
 }
 
-func DoDNS(n string, t []string, s *discordgo.Session, m *discordgo.MessageCreate) (*discordgo.Message, error) {
+func DoDNS(n string, t []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	var AllData []string
 	listener := make(chan string, len(t))
 
@@ -152,7 +152,9 @@ func DoDNS(n string, t []string, s *discordgo.Session, m *discordgo.MessageCreat
 	}
 
 	// TODO: Sort all data by record type
-	// TODO: Paginate to keep under 2048
-	message, err := s.ChannelMessageSend(m.ChannelID, "```\n"+strings.Join(AllData, "\n\n")+"\n```")
-	return message, err
+	// Paginate data and send to channel
+	pages := Paginate(AllData, "```\n", "\n```")
+	for _, page := range pages {
+		_, _ = s.ChannelMessageSend(m.ChannelID, page)
+	}
 }
