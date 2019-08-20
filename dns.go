@@ -5,6 +5,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -130,30 +131,41 @@ func FormatDNSJSON(d DNS) string {
 }
 
 func DoDNS(n string, t []string, s *discordgo.Session, m *discordgo.MessageCreate) {
-	var AllData []string
-	listener := make(chan string, len(t))
+	allData := make(map[string]string)
+	listener := make(chan []string, len(t))
 
 	// Run all the lookups in parallel
 	for _, e := range t {
 		go func(n string, t string) {
 			DNSData, err := FetchDNSJSON(n, t)
 			if err != nil {
-				listener <- WrapDataTitle(t, "Could not fetch due to error `"+err.Error()+"`")
+				listener <- []string{t, WrapDataTitle(t, "Could not fetch due to error `"+err.Error()+"`")}
 				return
 			}
 			FormatData := FormatDNSJSON(*DNSData)
-			listener <- WrapDataTitle(t, FormatData)
+			listener <- []string{t, WrapDataTitle(t, FormatData)}
 		}(n, e)
 	}
 
 	// Wait for all goroutines to finish
 	for range t {
-		AllData = append(AllData, <-listener)
+		resp := <-listener
+		allData[resp[0]] = resp[1]
 	}
 
-	// TODO: Sort all data by record type
+	// Sort
+	keys := make([]string, 0, len(allData))
+	for key := range allData {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	data := make([]string, 0)
+	for _, key := range keys {
+		data = append(data, allData[key])
+	}
+
 	// Paginate data and send to channel
-	pages := Paginate(AllData, "```\n", "\n```")
+	pages := Paginate(data, "```\n", "\n```")
 	for _, page := range pages {
 		_, _ = s.ChannelMessageSend(m.ChannelID, page)
 	}
