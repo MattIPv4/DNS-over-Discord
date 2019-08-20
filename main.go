@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/signal"
-	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -66,11 +65,6 @@ func main() {
 	_ = dg.Close()
 }
 
-func IsValidDomain(d string) bool {
-	domainReg := regexp.MustCompile(`([\w-]+\.)+\w+`)
-	return domainReg.Match([]byte(d))
-}
-
 func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
@@ -92,26 +86,6 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Validate domain
-	if !IsValidDomain(args[0]) {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "Could not validate `"+args[0]+"` as a domain")
-		return
-	}
-
-	// Default to all types
-	var types []string
-	for _, value := range TypeMap {
-		types = append(types, value)
-	}
-
-	// Allow user types if valid
-	if len(args) >= 2 {
-		inter := Intersection(types, args)
-		if len(inter) > 0 {
-			types = inter
-		}
-	}
-
-	// Run with given type
-	DoDNS(args[0], types, s, m)
+	// Assume DNS command
+	DNS(args, s, m)
 }

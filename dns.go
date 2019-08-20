@@ -5,6 +5,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"net/http"
 	"net/url"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -54,7 +55,7 @@ func (item Authority) TypeString() string {
 	return TypeMap[item.Type]
 }
 
-type DNS struct {
+type DNSResponse struct {
 	Status    int
 	TC        bool
 	RD        bool
@@ -66,7 +67,7 @@ type DNS struct {
 	Authority []Authority
 }
 
-func FetchDNSJSON(u string, t string) (*DNS, error) {
+func FetchDNSJSON(u string, t string) (*DNSResponse, error) {
 	// Create the query params
 	params := url.Values{}
 	params.Add("name", u)
@@ -92,7 +93,7 @@ func FetchDNSJSON(u string, t string) (*DNS, error) {
 	defer resp.Body.Close()
 
 	// Parse the JSON
-	var f DNS
+	var f DNSResponse
 	err = json.NewDecoder(resp.Body).Decode(&f)
 	if err != nil {
 		return nil, err
@@ -102,7 +103,7 @@ func FetchDNSJSON(u string, t string) (*DNS, error) {
 	return &f, nil
 }
 
-func FormatDNSJSON(d DNS) string {
+func FormatDNSJSON(d DNSResponse) string {
 	// Generate data array
 	var RecordData [][]string
 	for _, element := range d.Answer {
@@ -130,12 +131,38 @@ func FormatDNSJSON(d DNS) string {
 	return tableString.String()
 }
 
-func DoDNS(n string, t []string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func IsValidDomain(d string) bool {
+	domainReg := regexp.MustCompile(`([\w-]+\.)+\w+`)
+	return domainReg.Match([]byte(d))
+}
+
+func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
+	// Validate domain
+	name := args[0]
+	if !IsValidDomain(name) {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "Could not validate `"+name+"` as a domain")
+		return
+	}
+
+	// Default to all types
+	var types []string
+	for _, value := range TypeMap {
+		types = append(types, value)
+	}
+
+	// Allow user types if valid
+	if len(args) >= 2 {
+		inter := Intersection(types, args)
+		if len(inter) > 0 {
+			types = inter
+		}
+	}
+
 	allData := make(map[string]string)
-	listener := make(chan []string, len(t))
+	listener := make(chan []string, len(types))
 
 	// Run all the lookups in parallel
-	for _, e := range t {
+	for _, e := range types {
 		go func(n string, t string) {
 			DNSData, err := FetchDNSJSON(n, t)
 			if err != nil {
@@ -144,11 +171,11 @@ func DoDNS(n string, t []string, s *discordgo.Session, m *discordgo.MessageCreat
 			}
 			FormatData := FormatDNSJSON(*DNSData)
 			listener <- []string{t, WrapDataTitle(t, FormatData)}
-		}(n, e)
+		}(name, e)
 	}
 
 	// Wait for all goroutines to finish
-	for range t {
+	for range types {
 		resp := <-listener
 		allData[resp[0]] = resp[1]
 	}
