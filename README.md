@@ -32,9 +32,10 @@ I'm hosting a copy of this bot myself and you can invite it to your Discord serv
 
 ## Build
 
-This assumes you already have a working Go environment setup and that DiscordGo is correctly installed on your system.
+This assumes you already have a working Go environment setup, with DiscordGo (github.com/bwmarrin/discordgo) and
+ tablewriter (github.com/olekukonko/tablewriter) installed correctly on your system.
 
-From within the 1.1.1.1-Discord project folder, run the below command to compile the example.
+From within the 1.1.1.1-Discord project folder, run the below command to compile the Discord bot.
 
 ```
 go build
@@ -61,10 +62,18 @@ Mentioning the bot in Discord with no additional arguments will generate the usa
 
 ```
 Usage: @1.1.1.1 <domain> [...types]
+
 Examples:
 @1.1.1.1 mattcowley.co.uk
 @1.1.1.1 mattcowley.co.uk A AAAA
+
+Invite: https://bit.ly/1111-Discord
+Open-source: https://github.com/MattIPv4/1.1.1.1-Discord
 ```
+
+As the bot admin (see the `-a` argument above), this also enables two extra commands I find useful for production
+ deployment. These are the `pull` command than runs `git pull` in the bot directory to fetch updates from Github, as
+  well as `exit` which cleanly terminates the bot process.
 
 ## Supported Record Types
 
