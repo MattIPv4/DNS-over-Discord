@@ -1,0 +1,8 @@
+Usage: @1.1.1.1 <domain> [...types]
+
+Examples:
+@1.1.1.1 mattcowley.co.uk
+@1.1.1.1 mattcowley.co.uk A AAAA
+
+Invite: https://bit.ly/1111-Discord
+Open-source: https://github.com/MattIPv4/1.1.1.1-Discord

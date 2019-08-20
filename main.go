@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -17,12 +19,26 @@ var (
 	Token string
 )
 
+var Usage string
+
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
 }
 
+func getStrings() {
+	// Usage
+	data, err := ioutil.ReadFile("./strings/usage.txt")
+	if err != nil {
+		panic(err)
+	}
+	Usage = string(data)
+}
+
 func main() {
+	// Fetch strings
+	getStrings()
+
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + Token)
 	if err != nil {
@@ -41,7 +57,7 @@ func main() {
 	}
 
 	// Wait here until CTRL-C or other term signal is received.
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	fmt.Println("Bot is now running in " + strconv.Itoa(len(dg.State.Guilds)) + " guilds.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
@@ -72,7 +88,7 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// If blank message, send usage
 	if len(content) == 0 {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "```\nUsage: @1.1.1.1 <domain> [...types]\n\nExamples:\n@1.1.1.1 mattcowley.co.uk\n@1.1.1.1 mattcowley.co.uk A AAAA\n\nInvite: https://bit.ly/1111-Discord\n```")
+		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Usage+"\n```")
 		return
 	}
 
