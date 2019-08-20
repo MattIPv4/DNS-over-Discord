@@ -101,9 +101,8 @@ func FetchDNSJSON(u string, t string) (*DNS, error) {
 	return &f, nil
 }
 
-func FormatDNSJSON(d DNS) (string, string) {
+func FormatDNSJSON(d DNS) string {
 	// Generate data array
-	var RecordType string
 	var RecordData [][]string
 	for _, element := range d.Answer {
 		data := []string{
@@ -111,8 +110,11 @@ func FormatDNSJSON(d DNS) (string, string) {
 			strconv.Itoa(element.TTL) + "ms",
 			element.Data,
 		}
-		RecordType = element.TypeString()
 		RecordData = append(RecordData, data)
+	}
+
+	if len(RecordData) == 0 {
+		return "  No data found  \n"
 	}
 
 	// Generate table
@@ -124,21 +126,29 @@ func FormatDNSJSON(d DNS) (string, string) {
 	table.Render()
 
 	// Done
-	return RecordType, tableString.String()
+	return tableString.String()
 }
 
 func DoDNS(n string, t []string, s *discordgo.Session, m *discordgo.MessageCreate) (*discordgo.Message, error) {
 	var AllData []string
+	listener := make(chan string, len(t))
 
-	// TODO: Make this async?
+	// Run all the lookups in parallel
 	for _, e := range t {
-		DNSData, err := FetchDNSJSON(n, e)
-		if err != nil {
-			AllData = append(AllData, WrapDataTitle(e, "Could not fetch due to error `"+err.Error()+"`"))
-			continue
-		}
-		Type, FormatData := FormatDNSJSON(*DNSData)
-		AllData = append(AllData, WrapDataTitle(Type, FormatData))
+		go func(n string, t string) {
+			DNSData, err := FetchDNSJSON(n, t)
+			if err != nil {
+				listener <- WrapDataTitle(t, "Could not fetch due to error `"+err.Error()+"`")
+				return
+			}
+			FormatData := FormatDNSJSON(*DNSData)
+			listener <- WrapDataTitle(t, FormatData)
+		}(n, e)
+	}
+
+	// Wait for all goroutines to finish
+	for range t {
+		AllData = append(AllData, <-listener)
 	}
 
 	// TODO: Paginate to keep under 2048
