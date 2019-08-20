@@ -192,8 +192,5 @@ func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Paginate data and send to channel
-	pages := Paginate(data, "```\n", "\n```")
-	for _, page := range pages {
-		_, _ = s.ChannelMessageSend(m.ChannelID, page)
-	}
+	paginator.Paginate(s, m, data, "```\n", "\n```")
 }
