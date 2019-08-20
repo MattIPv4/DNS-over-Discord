@@ -20,3 +20,10 @@ node_modules/
 .DS_Store
 
 # Custom
+
+## Build
+1.1.1.1-Discord
+1.1.1.1-Discord.exe
+
+## Prod Run
+launch.bat
