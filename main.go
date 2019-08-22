@@ -74,19 +74,21 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Treat mention as prefix
-	if !strings.HasPrefix(m.Content, s.State.User.Mention()) {
+	if !strings.HasPrefix(m.Content, "<@"+s.State.User.ID+">") && !strings.HasPrefix(m.Content, "<@!"+s.State.User.ID+">") {
 		return
 	}
 
-	// Get the content and then args
-	content := strings.Trim(strings.Replace(m.Content, s.State.User.Mention(), "", 1), " ")
-	args := strings.Split(content, " ")
+	// Get the content
+	content := strings.Split(strings.Trim(m.Content, " "), " ")
 
 	// If blank message, send usage
-	if len(content) == 0 {
+	if len(content) == 1 {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Usage+"\n```")
 		return
 	}
+
+	// Get the args
+	args := content[1:]
 
 	// Admin commands
 	if m.Author.ID == Admin {
