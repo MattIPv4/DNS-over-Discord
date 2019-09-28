@@ -155,9 +155,15 @@ func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Allow user types if valid
 	var types []string
 	if len(args) >= 2 {
-		inter := Intersection(Types(), args)
-		if len(inter) > 0 {
-			types = inter
+		// If *, all types
+		if args[1] == "*" {
+			types = Types()
+		} else {
+			// Or, use valid types from provided
+			inter := Intersection(Types(), args)
+			if len(inter) > 0 {
+				types = inter
+			}
 		}
 	}
 
