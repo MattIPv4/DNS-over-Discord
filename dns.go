@@ -24,6 +24,14 @@ var TypeMap = map[int]string{
 	257: "CAA",
 }
 
+func Types() []string {
+	var types []string
+	for _, value := range TypeMap {
+		types = append(types, value)
+	}
+	return types
+}
+
 type Question struct {
 	Name string `json:"name"`
 	Type int    `json:"type"`
@@ -144,17 +152,19 @@ func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Default to all types
-	var types []string
-	for _, value := range TypeMap {
-		types = append(types, value)
-	}
-
 	// Allow user types if valid
+	var types []string
 	if len(args) >= 2 {
-		inter := Intersection(types, args)
+		inter := Intersection(Types(), args)
 		if len(inter) > 0 {
 			types = inter
+		}
+	}
+
+	// Default to A if no other types
+	if len(types) == 0 {
+		types = []string{
+			"A",
 		}
 	}
 
