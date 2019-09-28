@@ -19,7 +19,11 @@ var (
 	Admin string
 )
 
-var Usage string
+// Variables to fetch from strings
+var (
+	Usage      string
+	AdminUsage string
+)
 
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
@@ -27,13 +31,20 @@ func init() {
 	flag.Parse()
 }
 
-func getStrings() {
-	// Usage
-	data, err := ioutil.ReadFile("./strings/usage.txt")
+func getString(variable *string, file string) {
+	data, err := ioutil.ReadFile("./strings/" + file + ".txt")
 	if err != nil {
 		panic(err)
 	}
-	Usage = string(data)
+	*variable = string(data)
+}
+
+func getStrings() {
+	// Usage
+	getString(&Usage, "usage")
+
+	// Admin Usage
+	getString(&AdminUsage, "admin")
 }
 
 func main() {
@@ -84,6 +95,10 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// If blank message, send usage
 	if len(content) == 1 {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Usage+"\n```")
+		// If admin, send additional admin commands
+		if m.Author.ID == Admin {
+			_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+AdminUsage+"\n```")
+		}
 		return
 	}
 
