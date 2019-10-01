@@ -24,6 +24,7 @@ var TypeMap = map[int]string{
 	257: "CAA",
 }
 
+// Types returns all the supported DNS record types as strings
 func Types() []string {
 	var types []string
 	for _, value := range TypeMap {
