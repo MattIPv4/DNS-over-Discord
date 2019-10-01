@@ -24,6 +24,15 @@ var TypeMap = map[int]string{
 	257: "CAA",
 }
 
+// Types returns all the supported DNS record types as strings
+func Types() []string {
+	var types []string
+	for _, value := range TypeMap {
+		types = append(types, value)
+	}
+	return types
+}
+
 type Question struct {
 	Name string `json:"name"`
 	Type int    `json:"type"`
@@ -144,17 +153,25 @@ func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Default to all types
+	// Allow user types if valid
 	var types []string
-	for _, value := range TypeMap {
-		types = append(types, value)
+	if len(args) >= 2 {
+		// If *, all types
+		if args[1] == "*" {
+			types = Types()
+		} else {
+			// Or, use valid types from provided
+			inter := Intersection(Types(), args)
+			if len(inter) > 0 {
+				types = inter
+			}
+		}
 	}
 
-	// Allow user types if valid
-	if len(args) >= 2 {
-		inter := Intersection(types, args)
-		if len(inter) > 0 {
-			types = inter
+	// Default to A if no other types
+	if len(types) == 0 {
+		types = []string{
+			"A",
 		}
 	}
 
