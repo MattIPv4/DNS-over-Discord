@@ -1,0 +1,5 @@
+@1.1.1.1 Stats
+
+Guilds: {{guilds}}
+Channels: {{channels}}
+Members: {{members}}

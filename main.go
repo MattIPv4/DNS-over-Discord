@@ -23,6 +23,7 @@ var (
 var (
 	Usage      string
 	AdminUsage string
+	Stats      string
 )
 
 func init() {
@@ -45,6 +46,9 @@ func getStrings() {
 
 	// Admin Usage
 	getString(&AdminUsage, "admin")
+
+	// Stats
+	getString(&Stats, "stats")
 }
 
 func main() {
@@ -118,6 +122,30 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			Exit(s, m)
 			return
 		}
+	}
+
+	// Stats command
+	if args[0] == "stats" {
+		// Fetch the raw data
+		guilds := len(s.State.Guilds)
+		var (
+			channels int
+			members  int
+		)
+		for _, guild := range s.State.Guilds {
+			channels += len(guild.Channels)
+			members += guild.MemberCount
+		}
+
+		// Format the message
+		content := Stats
+		content = strings.Replace(content, "{{guilds}}", strconv.Itoa(guilds), 1)
+		content = strings.Replace(content, "{{channels}}", strconv.Itoa(channels), 1)
+		content = strings.Replace(content, "{{members}}", strconv.Itoa(members), 1)
+
+		// Send it
+		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+content+"\n```")
+		return
 	}
 
 	// Assume DNS command
