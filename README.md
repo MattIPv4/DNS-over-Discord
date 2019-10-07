@@ -64,8 +64,22 @@ Mentioning the bot in Discord with no additional arguments will generate the usa
 Usage: @1.1.1.1 <domain> [...types]
 
 Examples:
-@1.1.1.1 mattcowley.co.uk
-@1.1.1.1 mattcowley.co.uk A AAAA
+  @1.1.1.1 mattcowley.co.uk
+  @1.1.1.1 mattcowley.co.uk A AAAA
+
+Types:
+  If not provided, the default type of "A" will be used
+  You can provide a type of "*" to lookup all supported types
+
+Supported types:
+  A
+  NS
+  CNAME
+  MX
+  TXT
+  AAAA
+  SRV
+  CAA
 
 Invite: https://bit.ly/1111-Discord
 Open-source: https://github.com/MattIPv4/1.1.1.1-Discord
