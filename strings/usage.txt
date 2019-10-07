@@ -18,5 +18,8 @@ Supported types:
   SRV
   CAA
 
+Bot Stats:
+  @1.1.1.1 stats
+
 Invite: https://bit.ly/1111-Discord
 Open-source: https://github.com/MattIPv4/1.1.1.1-Discord
