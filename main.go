@@ -88,8 +88,16 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Treat mention as prefix
-	if !strings.HasPrefix(m.Content, "<@"+s.State.User.ID+">") && !strings.HasPrefix(m.Content, "<@!"+s.State.User.ID+">") {
+	// Prefix check
+	prefixes := [4]string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1.", "1dot"}
+	hasPrefix := false
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(m.Content, prefix+" ") {
+			hasPrefix = true
+			break
+		}
+	}
+	if !hasPrefix {
 		return
 	}
 
