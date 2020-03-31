@@ -17,6 +17,15 @@ func WrapDataTitle(t string, d string) string {
 	return TitleFormat(l, "=", t) + "\n" + d + strings.Repeat("=", l)
 }
 
+func InStrings(slice []string, val string) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
+}
+
 func Intersection(s1 []string, s2 []string) []string {
 	var intersects []string
 	hash := make(map[string]bool)
