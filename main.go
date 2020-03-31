@@ -83,7 +83,7 @@ func main() {
 }
 
 func HasPrefix(s *discordgo.Session, m *discordgo.MessageCreate) (bool, string) {
-	prefixes := [5]string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1.", "1dot", "dig"}
+	prefixes := []string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1.", "1dot", "dig", "whois"}
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(m.Content, prefix) {
 			return true, prefix
@@ -99,7 +99,7 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Prefix check
-	hasPrefix, _ := HasPrefix(s, m)
+	hasPrefix, prefix := HasPrefix(s, m)
 	if !hasPrefix {
 		return
 	}
@@ -156,6 +156,18 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// Send it
 		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+content+"\n```")
+		return
+	}
+
+	// WHOIS command
+	if prefix == "whois" || args[0] == "whois" {
+		// Prepend whois if done via prefix
+		if args[0] != "whois" {
+			args = append([]string{"whois"}, args...)
+		}
+
+		// Run!
+		WHOIS(args, s, m)
 		return
 	}
 
