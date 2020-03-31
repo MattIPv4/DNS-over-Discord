@@ -2,47 +2,45 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/olekukonko/tablewriter"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
 )
 
 type WHOISResponseResultInfo struct {
-	count   int
-	cached  int
-	bypass  int
-	version string
+	Count   int    `json:"count"`
+	Cached  int    `json:"cached"`
+	Bypass  int    `json:"bypass"`
+	Version string `json:"version"`
 }
 
 type WHOISResponseServices struct {
-	abusix  []string
-	bgpview []string
-	rdap    []string
+	Abusix  []string `json:"abusix"`
+	BGPView []string `json:"bgpview"`
+	RDAP    []string `json:"rdap"`
 }
 
 type WHOISResponseContacts struct {
-	abuse []string
+	Abuse []string `json:"abuse"`
 }
 
 type WHOISResponseResult struct {
-	asn      []string
-	cidr     string
-	netname  string
-	location string
-	ip       string
-	ip_class string
-	contacts WHOISResponseContacts
-	services WHOISResponseServices
+	ASN      []string              `json:"asn"`
+	CIDR     string                `json:"cidr"`
+	NetName  string                `json:"netname"`
+	Location string                `json:"location"`
+	IP       string                `json:"ip"`
+	IPClass  string                `json:"ip_class"`
+	Contacts WHOISResponseContacts `json:"contacts"`
+	Services WHOISResponseServices `json:"services"`
 }
 
 type WHOISResponse struct {
-	success      bool
-	results      []WHOISResponseResult
-	results_info WHOISResponseResultInfo
+	Success     bool                    `json:"success"`
+	Results     []WHOISResponseResult   `json:"results"`
+	ResultsInfo WHOISResponseResultInfo `json:"results_info"`
 }
 
 func FetchWHOISJSON(ip string) (*WHOISResponse, error) {
@@ -62,12 +60,9 @@ func FetchWHOISJSON(ip string) (*WHOISResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
-
 	// Parse the JSON
 	var f WHOISResponse
-	err = json.NewDecoder(strings.NewReader(string(body))).Decode(&f)
+	err = json.NewDecoder(resp.Body).Decode(&f)
 	if err != nil {
 		return nil, err
 	}
@@ -81,11 +76,12 @@ func FormatWHOISData(d WHOISResponse) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
 	table.SetBorder(false)
-	table.Append([]string{"NetName", d.results[0].netname})
-	table.Append([]string{"CIDR", d.results[0].cidr})
-	table.Append([]string{"Location", d.results[0].location})
-	table.Append([]string{"ASN", strings.Join(d.results[0].asn, ", ")})
-	table.Append([]string{"Abuse", strings.Join(d.results[0].contacts.abuse, ", ")})
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.Append([]string{"NetName", d.Results[0].NetName})
+	table.Append([]string{"CIDR", d.Results[0].CIDR})
+	table.Append([]string{"Location", d.Results[0].Location})
+	table.Append([]string{"ASN", strings.Join(d.Results[0].ASN, ", ")})
+	table.Append([]string{"Abuse", strings.Join(d.Results[0].Contacts.Abuse, ", ")})
 	table.Render()
 
 	// Done
@@ -102,13 +98,15 @@ func WHOIS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Get the response
 	WHOISData, err := FetchWHOISJSON(ip)
-	output := make([]string, 1)
 	if err != nil {
-		output[0] = WrapDataTitle(ip, "Could not fetch due to error `"+err.Error()+"`")
-	} else {
-		output[0] = WrapDataTitle(ip, FormatWHOISData(*WHOISData))
+		paginator.Paginate(s, m, []string{WrapDataTitle(ip, "Could not fetch due to error `"+err.Error()+"`")}, "```\n", "\n```")
+		return
+	}
+	if WHOISData.ResultsInfo.Count < 1 {
+		paginator.Paginate(s, m, []string{WrapDataTitle(ip, "No whois results found for this IP.")}, "```\n", "\n```")
+		return
 	}
 
 	// Paginate data and send to channel
-	paginator.Paginate(s, m, output, "```\n", "\n```")
+	paginator.Paginate(s, m, []string{WrapDataTitle(ip, FormatWHOISData(*WHOISData))}, "```\n", "\n```")
 }
