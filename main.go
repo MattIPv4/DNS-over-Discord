@@ -82,6 +82,16 @@ func main() {
 	_ = dg.Close()
 }
 
+func HasPrefix(s *discordgo.Session, m *discordgo.MessageCreate) (bool, string) {
+	prefixes := [5]string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1.", "1dot", "dig"}
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(m.Content, prefix) {
+			return true, prefix
+		}
+	}
+	return false, ""
+}
+
 func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
@@ -89,14 +99,7 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Prefix check
-	prefixes := [4]string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1.", "1dot"}
-	hasPrefix := false
-	for _, prefix := range prefixes {
-		if strings.HasPrefix(m.Content, prefix+" ") {
-			hasPrefix = true
-			break
-		}
-	}
+	hasPrefix, _ := HasPrefix(s, m)
 	if !hasPrefix {
 		return
 	}
