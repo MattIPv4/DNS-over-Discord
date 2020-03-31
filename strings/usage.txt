@@ -1,22 +1,38 @@
-Usage: @1.1.1.1 <domain> [...types]
+Domain lookup:
+  Usage: @1.1.1.1 <domain> [...types]
 
-Examples:
-  @1.1.1.1 mattcowley.co.uk
-  @1.1.1.1 mattcowley.co.uk A AAAA
+  Alternative prefixes:
+    1. <domain> [...types]
+    1dot <domain> [...types]
+    dig <domain> [...types]
 
-Types:
-  If not provided, the default type of "A" will be used
-  You can provide a type of "*" to lookup all supported types
+  Examples:
+    @1.1.1.1 mattcowley.co.uk
+    @1.1.1.1 mattcowley.co.uk A AAAA
 
-Supported types:
-  A
-  NS
-  CNAME
-  MX
-  TXT
-  AAAA
-  SRV
-  CAA
+  Types:
+    If not provided, the default type of "A" will be used
+    You can provide a type of "*" to lookup all supported types
+
+  Supported types:
+    A
+    NS
+    CNAME
+    MX
+    TXT
+    AAAA
+    SRV
+    CAA
+
+IP whois:
+  Usage: @1.1.1.1 whois <ip>
+
+  Alternative prefixes:
+    whois <ip>
+
+  Examples:
+    @1.1.1.1 whois 1.1.1.1
+    @1.1.1.1 whois 1.0.0.1
 
 Bot Stats:
   @1.1.1.1 stats

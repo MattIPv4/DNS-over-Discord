@@ -82,14 +82,29 @@ func main() {
 	_ = dg.Close()
 }
 
+func NamePrefixes(s *discordgo.Session) []string {
+	return []string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1.", "1dot"}
+}
+
+func HasPrefix(s *discordgo.Session, m *discordgo.MessageCreate) (bool, string) {
+	prefixes := append(NamePrefixes(s), "dig", "whois")
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(m.Content, prefix) {
+			return true, prefix
+		}
+	}
+	return false, ""
+}
+
 func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
-	// Treat mention as prefix
-	if !strings.HasPrefix(m.Content, "<@"+s.State.User.ID+">") && !strings.HasPrefix(m.Content, "<@!"+s.State.User.ID+">") {
+	// Prefix check
+	hasPrefix, prefix := HasPrefix(s, m)
+	if !hasPrefix {
 		return
 	}
 
@@ -98,10 +113,13 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// If blank message, send usage
 	if len(content) == 1 {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Usage+"\n```")
-		// If admin, send additional admin commands
-		if m.Author.ID == Admin {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+AdminUsage+"\n```")
+		// Only send usage if bot name
+		if InStrings(NamePrefixes(s), prefix) {
+			_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Usage+"\n```")
+			// If admin, send additional admin commands
+			if m.Author.ID == Admin {
+				_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+AdminUsage+"\n```")
+			}
 		}
 		return
 	}
@@ -145,6 +163,18 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// Send it
 		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+content+"\n```")
+		return
+	}
+
+	// WHOIS command
+	if prefix == "whois" || args[0] == "whois" {
+		// Prepend whois if done via prefix
+		if args[0] != "whois" {
+			args = append([]string{"whois"}, args...)
+		}
+
+		// Run!
+		WHOIS(args, s, m)
 		return
 	}
 
