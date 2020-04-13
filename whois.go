@@ -99,11 +99,11 @@ func WHOIS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Get the response
 	WHOISData, err := FetchWHOISJSON(ip)
 	if err != nil {
-		paginator.Paginate(s, m, []string{WrapDataTitle(ip, "Could not fetch due to error `"+err.Error()+"`")}, "```\n", "\n```")
+		_, _ = s.ChannelMessageSend(m.ChannelID, "Could not fetch whois information for `"+ip+"` due to an error")
 		return
 	}
 	if WHOISData.ResultsInfo.Count < 1 {
-		paginator.Paginate(s, m, []string{WrapDataTitle(ip, "No whois results found for this IP.")}, "```\n", "\n```")
+		_, _ = s.ChannelMessageSend(m.ChannelID, "No whois results found for `"+ip+"`")
 		return
 	}
 

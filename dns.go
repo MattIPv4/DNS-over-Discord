@@ -183,7 +183,7 @@ func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 		go func(n string, t string) {
 			DNSData, err := FetchDNSJSON(n, t)
 			if err != nil {
-				listener <- []string{t, WrapDataTitle(t, "Could not fetch due to error `"+err.Error()+"`")}
+				listener <- []string{t, WrapDataTitle(t, "Could not fetch due to an error")}
 				return
 			}
 			FormatData := FormatDNSJSON(*DNSData)
