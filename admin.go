@@ -6,6 +6,7 @@ import (
 	"os/exec"
 )
 
+// Pull is used to pull the bot from Git.
 func Pull(s *discordgo.Session, m *discordgo.MessageCreate) {
 	cmd := exec.Command("git", "pull")
 	stdout, err := cmd.Output()
@@ -18,6 +19,7 @@ func Pull(s *discordgo.Session, m *discordgo.MessageCreate) {
 	paginator.Paginate(s, m, []string{WrapDataTitle("Git Pull", string(stdout))}, "```\n", "\n```")
 }
 
+// Exit is used to close the bot.
 func Exit(s *discordgo.Session, m *discordgo.MessageCreate) {
 	_, _ = s.ChannelMessageSend(m.ChannelID, "Exiting...")
 	_ = s.Close()
