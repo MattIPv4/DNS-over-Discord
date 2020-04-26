@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/bwmarrin/discordgo"
-	"net/http"
-	"net/url"
+	"github.com/jakemakesstuff/structuredhttp"
 	"regexp"
 	"sort"
 	"strconv"
@@ -13,57 +11,24 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-var TypeMap = map[int]string{
-	1:   "A",
-	2:   "NS",
-	5:   "CNAME",
-	15:  "MX",
-	16:  "TXT",
-	28:  "AAAA",
-	33:  "SRV",
-	257: "CAA",
-}
+// Types defines all of the supported types.
+var Types = []string{"A", "NS", "CNAME", "MX", "TXT", "AAAA", "SRV", "CAA"}
 
-// Types returns all the supported DNS record types as strings
-func Types() []string {
-	var types []string
-	for _, value := range TypeMap {
-		types = append(types, value)
-	}
-	return types
-}
-
+// Question defines the question which was posed to the DNS.
 type Question struct {
-	Name string `json:"name"`
 	Type int    `json:"type"`
+	Name string `json:"name"`
 }
 
-func (item Question) TypeString() string {
-	return TypeMap[item.Type]
-}
-
+// Answer is the response from the DNS.
 type Answer struct {
-	Name string `json:"name"`
 	Type int    `json:"type"`
+	Name string `json:"name"`
 	TTL  int    `json:"TTL"`
 	Data string `json:"data"`
 }
 
-func (item Answer) TypeString() string {
-	return TypeMap[item.Type]
-}
-
-type Authority struct {
-	Name string `json:"name"`
-	Type int    `json:"type"`
-	TTL  int    `json:"TTL"`
-	Data string `json:"data"`
-}
-
-func (item Authority) TypeString() string {
-	return TypeMap[item.Type]
-}
-
+// DNSResponse defines the DNS response.
 type DNSResponse struct {
 	Status    int
 	TC        bool
@@ -73,37 +38,19 @@ type DNSResponse struct {
 	CD        bool
 	Question  []Question
 	Answer    []Answer
-	Authority []Authority
+	Authority []Answer
 }
 
+// FetchDNSJSON is used to fetch the DNS JSON.
 func FetchDNSJSON(u string, t string) (*DNSResponse, error) {
-	// Create the query params
-	params := url.Values{}
-	params.Add("name", u)
-	if t != "" {
-		params.Add("type", t)
-	}
-	query := params.Encode()
-
-	// Create the http client & error
-	var err error
-	client := &http.Client{}
-
 	// Run the request
-	req, err := http.NewRequest("GET", "https://cloudflare-dns.com/dns-query?"+query, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Accept", "application/dns-json")
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Parse the JSON
 	var f DNSResponse
-	err = json.NewDecoder(resp.Body).Decode(&f)
+	r, err := structuredhttp.GET("https://cloudflare-dns.com/dns-query").Query(
+		"name", u).Query("type", t).Header("Accept", "application/dns-json").Run()
+	if err != nil {
+		return nil, err
+	}
+	err = r.JSONToPointer(&f)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +59,7 @@ func FetchDNSJSON(u string, t string) (*DNSResponse, error) {
 	return &f, nil
 }
 
+// FormatDNSJSON is used to format the DNS JSON.
 func FormatDNSJSON(d DNSResponse) string {
 	// Generate data array
 	var RecordData [][]string
@@ -140,11 +88,13 @@ func FormatDNSJSON(d DNSResponse) string {
 	return tableString.String()
 }
 
+// IsValidDomain checks if the domain is valid.
 func IsValidDomain(d string) bool {
 	domainReg := regexp.MustCompile(`([\w-]+\.)+\w+`)
 	return domainReg.Match([]byte(d))
 }
 
+// DNS is the main message handler.
 func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Validate domain
 	name := args[0]
@@ -158,10 +108,10 @@ func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	if len(args) >= 2 {
 		// If *, all types
 		if args[1] == "*" {
-			types = Types()
+			types = Types
 		} else {
 			// Or, use valid types from provided
-			inter := Intersection(Types(), args)
+			inter := Intersection(Types, args)
 			if len(inter) > 0 {
 				types = inter
 			}

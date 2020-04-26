@@ -5,6 +5,7 @@ import (
 	"net"
 )
 
+// WHOISIP runs the WHOIS request on a IP.
 func WHOISIP(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	ip := args[1]
 
@@ -23,6 +24,7 @@ func WHOISIP(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	paginator.Paginate(s, m, []string{WrapDataTitle(ip, FormatWHOISIPData(*WHOISData))}, "```\n", "\n```")
 }
 
+// WHOISDomain runs the WHOIS request on a domain.
 func WHOISDomain(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	domain := args[1]
 
@@ -41,6 +43,7 @@ func WHOISDomain(args []string, s *discordgo.Session, m *discordgo.MessageCreate
 	paginator.Paginate(s, m, []string{WrapDataTitle(domain, FormatWHOISDomainData(*WHOISData))}, "```\n", "\n```")
 }
 
+// WHOIS runs the WHOIS request on either a domain or IP.
 func WHOIS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Validate ip
 	ip := args[1]

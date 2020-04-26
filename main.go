@@ -3,12 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/jakemakesstuff/structuredhttp"
 	"io/ioutil"
 	"os"
 	"os/signal"
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -49,6 +51,9 @@ func getStrings() {
 }
 
 func main() {
+	// Set the structuredhttp timeout to 5 seconds.
+	structuredhttp.SetDefaultTimeout(5 * time.Second)
+
 	// Fetch strings
 	getStrings()
 
@@ -79,10 +84,12 @@ func main() {
 	_ = dg.Close()
 }
 
+// NamePrefixes gets all possible ways to prefix the user.
 func NamePrefixes(s *discordgo.Session) []string {
 	return []string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1dot"}
 }
 
+// HasPrefix checks if the message has a prefix.
 func HasPrefix(s *discordgo.Session, m *discordgo.MessageCreate) (bool, string) {
 	prefixes := append(NamePrefixes(s), "1.", "dig", "whois")
 	for _, prefix := range prefixes {
@@ -93,6 +100,7 @@ func HasPrefix(s *discordgo.Session, m *discordgo.MessageCreate) (bool, string) 
 	return false, ""
 }
 
+// MessageCreate is fired when a message is created.
 func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
