@@ -54,6 +54,9 @@ func FetchWHOISIPJSON(ip string) (*WHOISIPResponse, error) {
 		return nil, err
 	}
 	err = r.JSONToPointer(&f)
+	if err != nil {
+		return nil, err
+	}
 
 	// Done
 	return &f, nil
