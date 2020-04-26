@@ -23,6 +23,7 @@ var (
 var (
 	Usage      string
 	AdminUsage string
+	Invite     string
 	Stats      string
 )
 
@@ -41,13 +42,9 @@ func getString(variable *string, file string) {
 }
 
 func getStrings() {
-	// Usage
 	getString(&Usage, "usage")
-
-	// Admin Usage
 	getString(&AdminUsage, "admin")
-
-	// Stats
+	getString(&Invite, "invite")
 	getString(&Stats, "stats")
 }
 
@@ -83,11 +80,11 @@ func main() {
 }
 
 func NamePrefixes(s *discordgo.Session) []string {
-	return []string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1.", "1dot"}
+	return []string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1dot"}
 }
 
 func HasPrefix(s *discordgo.Session, m *discordgo.MessageCreate) (bool, string) {
-	prefixes := append(NamePrefixes(s), "dig", "whois")
+	prefixes := append(NamePrefixes(s), "1.", "dig", "whois")
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(m.Content, prefix) {
 			return true, prefix
@@ -111,10 +108,13 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Get the content
 	content := strings.Split(strings.Trim(m.Content, " "), " ")
 
+	// Get the args
+	args := content[1:]
+
 	// If blank message, send usage
-	if len(content) == 1 {
-		// Only send usage if bot name
-		if InStrings(NamePrefixes(s), prefix) {
+	if len(content) == 1 || args[0] == "help" || args[0] == "usage" || args[0] == "commands" {
+		// Only send if command, or if bot name
+		if len(content) > 1 || InStrings(NamePrefixes(s), prefix) {
 			_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Usage+"\n```")
 			// If admin, send additional admin commands
 			if m.Author.ID == Admin {
@@ -123,9 +123,6 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		return
 	}
-
-	// Get the args
-	args := content[1:]
 
 	// Admin commands
 	if m.Author.ID == Admin {
@@ -140,6 +137,12 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			Exit(s, m)
 			return
 		}
+	}
+
+	// Invite command
+	if args[0] == "invite" {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Invite+"\n```")
+		return
 	}
 
 	// Stats command
