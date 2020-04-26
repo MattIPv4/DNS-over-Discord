@@ -74,6 +74,20 @@ func main() {
 		return
 	}
 
+	// Set status
+	go func(s *discordgo.Session) {
+		for {
+			_ = s.UpdateStatusComplex(discordgo.UpdateStatusData{
+				Status: "online",
+				Game: &discordgo.Game{
+					Name: "DNS over Discord",
+					Type: discordgo.GameTypeWatching,
+				},
+			})
+			time.Sleep(5 * time.Minute)
+		}
+	}(dg)
+
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running in " + strconv.Itoa(len(dg.State.Guilds)) + " guilds.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
