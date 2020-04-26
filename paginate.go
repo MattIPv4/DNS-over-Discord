@@ -18,12 +18,12 @@ func (pg Paginator) Split(c []string, e []string, m int) []string {
 		}
 
 		// If will be too long w/ new section, create new page
-		if len(e[len(e)-1]+section+"\n\n") > m {
+		if len(e[len(e)-1]+section+"\n") > m {
 			e = append(e, "")
 		}
 
 		// Add to last page
-		e[len(e)-1] += section + "\n\n"
+		e[len(e)-1] += section + "\n"
 	}
 	return e
 }

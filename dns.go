@@ -205,7 +205,7 @@ func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	sort.Strings(keys)
 	data := make([]string, 0)
 	for _, key := range keys {
-		data = append(data, allData[key])
+		data = append(data, allData[key]+"\n")
 	}
 
 	// Paginate data and send to channel

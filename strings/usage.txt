@@ -11,8 +11,8 @@ Domain lookup:
     @1.1.1.1 mattcowley.co.uk A AAAA
 
   Types:
-    If not provided, the default type of "A" will be used
-    You can provide a type of "*" to lookup all supported types
+    If not provided, the default type of "A" will be used.
+    You can provide a type of "*" to lookup all supported types.
 
   Supported types:
     A
@@ -24,18 +24,51 @@ Domain lookup:
     SRV
     CAA
 
+
+Domain whois:
+  Usage: @1.1.1.1 whois <domain>
+
+  Alternative prefixes:
+    whois <domain>
+
+  Description:
+    Returns the raw response from the WHOIS server responsible for the requests domain name.
+
+  Examples:
+    @1.1.1.1 whois mattcowley.co.uk
+    @1.1.1.1 whois mattcowley.co.uk
+
+
 IP whois:
   Usage: @1.1.1.1 whois <ip>
 
   Alternative prefixes:
     whois <ip>
 
+  Description:
+    Returns formatted information about who owns the IP address, including their ASN and abuse contact if available.
+
   Examples:
     @1.1.1.1 whois 1.1.1.1
     @1.1.1.1 whois 1.0.0.1
 
-Bot Stats:
-  @1.1.1.1 stats
+
+Invite the bot:
+  Usage: @1.1.1.1 invite
+
+
+Bot stats:
+  Usage: @1.1.1.1 stats
+
+
+Bot commands (this):
+  Usage: @1.1.1.1
+
+  Alternative usage:
+    @1.1.1.1 help
+    @1.1.1.1 usage
+    @1.1.1.1 commands
+
 
 Invite: https://bit.ly/1111-Discord
 Open-source: https://github.com/MattIPv4/1.1.1.1-Discord

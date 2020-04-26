@@ -13,7 +13,14 @@ func TitleFormat(l int, p string, t string) string {
 }
 
 func WrapDataTitle(t string, d string) string {
-	l := len(strings.Split(d, "\n")[0])
+	l := 0
+	lines := strings.Split(d, "\n")
+	for _, line := range lines {
+		length := len(line)
+		if length > l {
+			l = length
+		}
+	}
 	return TitleFormat(l, "=", t) + "\n" + d + strings.Repeat("=", l)
 }
 
