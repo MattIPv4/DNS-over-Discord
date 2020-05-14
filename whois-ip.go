@@ -49,7 +49,7 @@ type WHOISIPResponse struct {
 func FetchWHOISIPJSON(ip string) (*WHOISIPResponse, error) {
 	// Run the request
 	var f WHOISIPResponse
-	r, err := structuredhttp.GET("https://www.cfwho.com/api/v1/"+ip).Header("Accept", "application/json").Run()
+	r, err := structuredhttp.GET("https://cfwho.com/api/v1/"+ip).Header("Accept", "application/json").Run()
 	if err != nil {
 		return nil, err
 	}
