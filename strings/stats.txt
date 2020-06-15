@@ -2,4 +2,3 @@
 
 Guilds: {{guilds}}
 Channels: {{channels}}
-Members: {{members}}

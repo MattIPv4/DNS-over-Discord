@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/bwmarrin/discordgo"
+	"context"
+	"github.com/andersfylling/disgord"
 	"github.com/jakemakesstuff/structuredhttp"
 	"regexp"
 	"sort"
@@ -95,11 +96,11 @@ func IsValidDomain(d string) bool {
 }
 
 // DNS is the main message handler.
-func DNS(args []string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func DNS(args []string, s disgord.Session, m *disgord.Message) {
 	// Validate domain
 	name := args[0]
 	if !IsValidDomain(name) {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "Could not validate `"+name+"` as a domain")
+		_, _ = s.SendMsg(context.TODO(), m.ChannelID, "Could not validate `"+name+"` as a domain")
 		return
 	}
 

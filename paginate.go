@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/bwmarrin/discordgo"
+	"context"
+	"github.com/andersfylling/disgord"
 	"strings"
 )
 
@@ -41,9 +42,9 @@ func (pg Paginator) Pages(c []string, p string, s string) []string {
 }
 
 // Paginate sends the paginated text.
-func (pg Paginator) Paginate(s *discordgo.Session, m *discordgo.MessageCreate, c []string, px string, sx string) {
+func (pg Paginator) Paginate(s disgord.Session, m *disgord.Message, c []string, px string, sx string) {
 	pages := pg.Pages(c, px, sx)
 	for _, page := range pages {
-		_, _ = s.ChannelMessageSend(m.ChannelID, page)
+		_, _ = s.SendMsg(context.TODO(), m.ChannelID, page)
 	}
 }

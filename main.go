@@ -1,24 +1,21 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"github.com/andersfylling/disgord"
 	"github.com/jakemakesstuff/structuredhttp"
 	"io/ioutil"
-	"os"
-	"os/signal"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
-
-	"github.com/bwmarrin/discordgo"
 )
 
 // Variables used for command line parameters
 var (
 	Token string
-	Admin string
+	Admin disgord.Snowflake
 )
 
 // Variables to fetch from strings
@@ -29,10 +26,21 @@ var (
 	Stats      string
 )
 
+// Counts for the bot.
+var (
+	GuildCount   int
+	ChannelCount int
+)
+
+// The user ID.
+var UserID disgord.Snowflake
+
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
-	flag.StringVar(&Admin, "a", "", "Admin User ID")
+	var AdminString string
+	flag.StringVar(&AdminString, "a", "", "Admin User ID")
 	flag.Parse()
+	Admin = disgord.ParseSnowflakeString(AdminString)
 }
 
 func getString(variable *string, file string) {
@@ -58,54 +66,110 @@ func main() {
 	getStrings()
 
 	// Create a new Discord session using the provided bot token.
-	dg, err := discordgo.New("Bot " + Token)
-	if err != nil {
-		fmt.Println("error creating Discord session,", err)
-		return
-	}
+	dg := disgord.New(disgord.Config{
+		BotToken: Token,
+		CacheConfig: &disgord.CacheConfig{
+			DisableChannelCaching:    true,
+			DisableUserCaching:       true,
+			DisableVoiceStateCaching: true,
+			DisableGuildCaching:      true,
+		},
+	})
+
+	// Register the events to set the user ID and manage counts.
+	UnavailableGuilds := make([]disgord.Snowflake, 0)
+	var UnloadedGuilds []disgord.Snowflake
+	countCache := map[disgord.Snowflake]int{}
+	dg.On(disgord.EvtReady, func(s disgord.Session, evt *disgord.Ready) {
+		// Set the initial cache info
+		UserID = evt.User.ID
+		UnloadedGuilds = make([]disgord.Snowflake, len(evt.Guilds))
+		for i, v := range evt.Guilds {
+			UnloadedGuilds[i] = v.ID
+		}
+		GuildCount += len(UnloadedGuilds)
+
+		// Set status
+		go func(s disgord.Session) {
+			for {
+				_ = s.UpdateStatus(&disgord.UpdateStatusPayload{
+					Status: "online",
+					Game: &disgord.Activity{
+						Name: "DNS over Discord",
+						Type: disgord.ActivityTypeStreaming,
+					},
+				})
+				time.Sleep(5 * time.Minute)
+			}
+		}(dg)
+	})
+	dg.On(disgord.EvtGuildCreate, func(s disgord.Session, evt *disgord.GuildCreate) {
+		// Check if the guild was unavailable. If so, don't duplicate the channel count.
+		for i, v := range UnavailableGuilds {
+			if v == evt.Guild.ID {
+				// Yes it is. Remove this and return here.
+				UnavailableGuilds[len(UnavailableGuilds)-1], UnavailableGuilds[i] = UnavailableGuilds[i], UnavailableGuilds[len(UnavailableGuilds)-1]
+				UnavailableGuilds = UnavailableGuilds[:len(UnavailableGuilds)-1]
+				return
+			}
+		}
+
+		// Was this a guild from initialisation?
+		InitialisationGuild := false
+		for i, v := range UnloadedGuilds {
+			if v == evt.Guild.ID {
+				// Yes it is. Remove this and break here.
+				UnloadedGuilds[len(UnloadedGuilds)-1], UnloadedGuilds[i] = UnloadedGuilds[i], UnloadedGuilds[len(UnloadedGuilds)-1]
+				UnloadedGuilds = UnloadedGuilds[:len(UnloadedGuilds)-1]
+				InitialisationGuild = true
+				break
+			}
+		}
+
+		// If this was not from initialisation, +1.
+		if !InitialisationGuild {
+			GuildCount++
+		}
+
+		// Add the channels to the channel count.
+		l := len(evt.Guild.Channels)
+		countCache[evt.Guild.ID] = l
+		ChannelCount += l
+	})
+	dg.On(disgord.EvtGuildDelete, func(s disgord.Session, evt *disgord.GuildDelete) {
+		if evt.UserWasRemoved() {
+			// This was an actual removal from the guild.
+			count := countCache[evt.UnavailableGuild.ID]
+			delete(countCache, evt.UnavailableGuild.ID)
+			GuildCount--
+			ChannelCount -= count
+			return
+		}
+
+		// Mark as unavailable.
+		UnavailableGuilds = append(UnavailableGuilds, evt.UnavailableGuild.ID)
+	})
 
 	// Register the MessageCreate func as a callback for MessageCreate events.
-	dg.AddHandler(MessageCreate)
+	dg.On(disgord.EvtMessageCreate, MessageCreate)
 
 	// Open a websocket connection to Discord and begin listening.
-	err = dg.Open()
+	err := dg.StayConnectedUntilInterrupted(context.TODO())
 	if err != nil {
 		fmt.Println("error opening connection,", err)
 		return
 	}
-
-	// Set status
-	go func(s *discordgo.Session) {
-		for {
-			_ = s.UpdateStatusComplex(discordgo.UpdateStatusData{
-				Status: "online",
-				Game: &discordgo.Game{
-					Name: "DNS over Discord",
-					Type: discordgo.GameTypeWatching,
-				},
-			})
-			time.Sleep(5 * time.Minute)
-		}
-	}(dg)
-
-	// Wait here until CTRL-C or other term signal is received.
-	fmt.Println("Bot is now running in " + strconv.Itoa(len(dg.State.Guilds)) + " guilds.  Press CTRL-C to exit.")
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	<-sc
-
-	// Cleanly close down the Discord session.
-	_ = dg.Close()
 }
 
 // NamePrefixes gets all possible ways to prefix the user.
-func NamePrefixes(s *discordgo.Session) []string {
-	return []string{"<@" + s.State.User.ID + ">", "<@!" + s.State.User.ID + ">", "1dot"}
+func NamePrefixes() []string {
+	s := UserID.String()
+	return []string{"<@" + s + ">", "<@!" + s + ">", "1dot"}
 }
 
 // HasPrefix checks if the message has a prefix.
-func HasPrefix(s *discordgo.Session, m *discordgo.MessageCreate) (bool, string) {
-	prefixes := append(NamePrefixes(s), "1.", "dig", "whois")
+func HasPrefix(m *disgord.Message) (bool, string) {
+	prefixes := append(NamePrefixes(), "1.", "dig", "whois")
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(m.Content, prefix) {
 			return true, prefix
@@ -115,94 +179,87 @@ func HasPrefix(s *discordgo.Session, m *discordgo.MessageCreate) (bool, string) 
 }
 
 // MessageCreate is fired when a message is created.
-func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// Ignore all messages created by the bot itself
-	if m.Author.ID == s.State.User.ID {
-		return
-	}
+func MessageCreate(s disgord.Session, e *disgord.MessageCreate) {
+	go func() {
+		// Get the message.
+		m := e.Message
 
-	// Prefix check
-	hasPrefix, prefix := HasPrefix(s, m)
-	if !hasPrefix {
-		return
-	}
+		// Ignore all messages created by the bot itself
+		if m.Author.ID == UserID {
+			return
+		}
 
-	// Get the content
-	content := strings.Split(strings.Trim(m.Content, " "), " ")
+		// Prefix check
+		hasPrefix, prefix := HasPrefix(m)
+		if !hasPrefix {
+			return
+		}
 
-	// Get the args
-	args := content[1:]
+		// Get the content
+		content := strings.Split(strings.Trim(m.Content, " "), " ")
 
-	// If blank message, send usage
-	if len(content) == 1 || args[0] == "help" || args[0] == "usage" || args[0] == "commands" {
-		// Only send if command, or if bot name
-		if len(content) > 1 || InStrings(NamePrefixes(s), prefix) {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Usage+"\n```")
-			// If admin, send additional admin commands
-			if m.Author.ID == Admin {
-				_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+AdminUsage+"\n```")
+		// Get the args
+		args := content[1:]
+
+		// If blank message, send usage
+		if len(content) == 1 || args[0] == "help" || args[0] == "usage" || args[0] == "commands" {
+			// Only send if command, or if bot name
+			if len(content) > 1 || InStrings(NamePrefixes(), prefix) {
+				_, _ = s.SendMsg(context.TODO(), m.ChannelID, "```\n"+Usage+"\n```")
+				// If admin, send additional admin commands
+				if m.Author.ID == Admin {
+					_, _ = s.SendMsg(context.TODO(), m.ChannelID, "```\n"+AdminUsage+"\n```")
+				}
+			}
+			return
+		}
+
+		// Admin commands
+		if m.Author.ID == Admin {
+			// Git pull
+			if args[0] == "pull" {
+				Pull(s, m)
+				return
+			}
+
+			// Exit
+			if args[0] == "exit" {
+				Exit(s, m)
+				return
 			}
 		}
-		return
-	}
 
-	// Admin commands
-	if m.Author.ID == Admin {
-		// Git pull
-		if args[0] == "pull" {
-			Pull(s, m)
+		// Invite command
+		if args[0] == "invite" {
+			_, _ = s.SendMsg(context.TODO(), m.ChannelID, "```\n"+Invite+"\n```")
 			return
 		}
 
-		// Exit
-		if args[0] == "exit" {
-			Exit(s, m)
+		// Stats command
+		if args[0] == "stats" {
+			// Format the message
+			content := Stats
+			content = strings.Replace(content, "{{guilds}}", strconv.Itoa(GuildCount), 1)
+			content = strings.Replace(content, "{{channels}}", strconv.Itoa(ChannelCount), 1)
+
+			// Send it
+			_, _ = s.SendMsg(context.TODO(), m.ChannelID, "```\n"+content+"\n```")
 			return
 		}
-	}
 
-	// Invite command
-	if args[0] == "invite" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+Invite+"\n```")
-		return
-	}
+		// WHOIS command
+		if prefix == "whois" || args[0] == "whois" {
+			// Prepend whois if done via prefix
+			if args[0] != "whois" {
+				args = append([]string{"whois"}, args...)
+			}
 
-	// Stats command
-	if args[0] == "stats" {
-		// Fetch the raw data
-		guilds := len(s.State.Guilds)
-		var (
-			channels int
-			members  int
-		)
-		for _, guild := range s.State.Guilds {
-			channels += len(guild.Channels)
-			members += guild.MemberCount
+			// Run!
+			WHOIS(args, s, m)
+			return
 		}
 
-		// Format the message
-		content := Stats
-		content = strings.Replace(content, "{{guilds}}", strconv.Itoa(guilds), 1)
-		content = strings.Replace(content, "{{channels}}", strconv.Itoa(channels), 1)
-		content = strings.Replace(content, "{{members}}", strconv.Itoa(members), 1)
-
-		// Send it
-		_, _ = s.ChannelMessageSend(m.ChannelID, "```\n"+content+"\n```")
-		return
-	}
-
-	// WHOIS command
-	if prefix == "whois" || args[0] == "whois" {
-		// Prepend whois if done via prefix
-		if args[0] != "whois" {
-			args = append([]string{"whois"}, args...)
-		}
-
-		// Run!
-		WHOIS(args, s, m)
-		return
-	}
-
-	// Assume DNS command
-	DNS(args, s, m)
+		// Assume DNS command
+		DNS(args, s, m)
+	}()
 }

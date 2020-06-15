@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/bwmarrin/discordgo"
+	"context"
+	"github.com/andersfylling/disgord"
 	"os"
 	"os/exec"
 )
 
 // Pull is used to pull the bot from Git.
-func Pull(s *discordgo.Session, m *discordgo.MessageCreate) {
+func Pull(s disgord.Session, m *disgord.Message) {
 	cmd := exec.Command("git", "pull")
 	stdout, err := cmd.Output()
 
@@ -20,8 +21,8 @@ func Pull(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 // Exit is used to close the bot.
-func Exit(s *discordgo.Session, m *discordgo.MessageCreate) {
-	_, _ = s.ChannelMessageSend(m.ChannelID, "Exiting...")
-	_ = s.Close()
+func Exit(s disgord.Session, m *disgord.Message) {
+	_, _ = s.SendMsg(context.TODO(), m.ChannelID, "Exiting...")
+	_ = s.Disconnect()
 	os.Exit(0)
 }
