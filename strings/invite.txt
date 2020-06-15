@@ -1,5 +1,5 @@
 Invite 1.1.1.1 (DNS over Discord) with:
-  https://bit.ly/1111-Discord
+  https://bit.ly/DNS-over-Discord
 
 1.1.1.1 is also open source:
   https://github.com/MattIPv4/1.1.1.1-Discord

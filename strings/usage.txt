@@ -7,8 +7,8 @@ DNS over Discord lookup:
     dig <domain> [...types]
 
   Examples:
-    @1.1.1.1 mattcowley.co.uk
-    @1.1.1.1 mattcowley.co.uk A AAAA
+    @1.1.1.1 cloudflare.com
+    @1.1.1.1 cloudflare.com A AAAA
 
   Types:
     If not provided, the default type of "A" will be used.
@@ -35,8 +35,8 @@ Domain whois:
     Returns the raw response from the WHOIS server responsible for the requests domain name.
 
   Examples:
-    @1.1.1.1 whois mattcowley.co.uk
-    @1.1.1.1 whois mattcowley.co.uk
+    @1.1.1.1 whois cloudflare.com
+    @1.1.1.1 whois cloudflare.com
 
 
 IP whois:
@@ -70,5 +70,5 @@ Bot commands (this):
     @1.1.1.1 commands
 
 
-Invite: https://bit.ly/1111-Discord
+Invite: https://bit.ly/DNS-over-Discord
 Open-source: https://github.com/MattIPv4/1.1.1.1-Discord
