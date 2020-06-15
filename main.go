@@ -68,12 +68,12 @@ func main() {
 	// Create a new Discord session using the provided bot token.
 	dg := disgord.New(disgord.Config{
 		BotToken: Token,
-		CacheConfig: &disgord.CacheConfig{
+		/*CacheConfig: &disgord.CacheConfig{
 			DisableChannelCaching:    true,
 			DisableUserCaching:       true,
 			DisableVoiceStateCaching: true,
 			DisableGuildCaching:      true,
-		},
+		},*/
 	})
 
 	// Register the events to set the user ID and manage counts.
@@ -88,6 +88,9 @@ func main() {
 			UnloadedGuilds[i] = v.ID
 		}
 		GuildCount += len(UnloadedGuilds)
+
+		// Log that we're ready
+		fmt.Println("Connected to Discord as", evt.User.ID, evt.User.Username)
 
 		// Set status
 		go func(s disgord.Session) {
