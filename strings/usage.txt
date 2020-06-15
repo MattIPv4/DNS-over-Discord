@@ -2,7 +2,7 @@ DNS over Discord lookup:
   Usage: @1.1.1.1 <domain> [...types]
 
   Alternative prefixes:
-    1. <domain> [...types]
+    1.1.1.1 <domain> [...types]
     1dot <domain> [...types]
     dig <domain> [...types]
 

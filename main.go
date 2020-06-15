@@ -164,12 +164,12 @@ func main() {
 // NamePrefixes gets all possible ways to prefix the user.
 func NamePrefixes() []string {
 	s := UserID.String()
-	return []string{"<@" + s + ">", "<@!" + s + ">", "1dot"}
+	return []string{"<@" + s + ">", "<@!" + s + ">", "1.1.1.1", "1dot"}
 }
 
 // HasPrefix checks if the message has a prefix.
 func HasPrefix(m *disgord.Message) (bool, string) {
-	prefixes := append(NamePrefixes(), "1.", "dig", "whois")
+	prefixes := append(NamePrefixes(), "dig", "whois")
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(m.Content, prefix) {
 			return true, prefix
