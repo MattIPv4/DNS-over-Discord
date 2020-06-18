@@ -68,12 +68,12 @@ func main() {
 	// Create a new Discord session using the provided bot token.
 	dg := disgord.New(disgord.Config{
 		BotToken: Token,
-		/*CacheConfig: &disgord.CacheConfig{
+		CacheConfig: &disgord.CacheConfig{
 			DisableChannelCaching:    true,
 			DisableUserCaching:       true,
 			DisableVoiceStateCaching: true,
 			DisableGuildCaching:      true,
-		},*/
+		},
 	})
 
 	// Register the events to set the user ID and manage counts.
