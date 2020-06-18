@@ -7,7 +7,6 @@ import (
 	"github.com/andersfylling/disgord"
 	"github.com/jakemakesstuff/structuredhttp"
 	"io/ioutil"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -23,13 +22,6 @@ var (
 	Usage      string
 	AdminUsage string
 	Invite     string
-	Stats      string
-)
-
-// Counts for the bot.
-var (
-	GuildCount   int
-	ChannelCount int
 )
 
 // The user ID.
@@ -55,7 +47,6 @@ func getStrings() {
 	getString(&Usage, "usage")
 	getString(&AdminUsage, "admin")
 	getString(&Invite, "invite")
-	getString(&Stats, "stats")
 }
 
 func main() {
@@ -74,23 +65,16 @@ func main() {
 			DisableVoiceStateCaching: true,
 			DisableGuildCaching:      true,
 		},
+		Intents: disgord.IntentGuildMessages,
 	})
 
-	// Register the events to set the user ID and manage counts.
-	UnavailableGuilds := make([]disgord.Snowflake, 0)
-	var UnloadedGuilds []disgord.Snowflake
-	countCache := map[disgord.Snowflake]int{}
+	// Register the event for when we initially connect to Discord.
 	dg.On(disgord.EvtReady, func(s disgord.Session, evt *disgord.Ready) {
 		// Set the initial cache info
 		UserID = evt.User.ID
-		UnloadedGuilds = make([]disgord.Snowflake, len(evt.Guilds))
-		for i, v := range evt.Guilds {
-			UnloadedGuilds[i] = v.ID
-		}
-		GuildCount += len(UnloadedGuilds)
 
 		// Log that we're ready
-		fmt.Println("Connected to Discord as", evt.User.ID, evt.User.Username)
+		fmt.Println("Connected to Discord as", evt.User.ID, evt.User.Username, "with", len(evt.Guilds), "guilds")
 
 		// Set status
 		go func(s disgord.Session) {
@@ -105,52 +89,6 @@ func main() {
 				time.Sleep(5 * time.Minute)
 			}
 		}(dg)
-	})
-	dg.On(disgord.EvtGuildCreate, func(s disgord.Session, evt *disgord.GuildCreate) {
-		// Check if the guild was unavailable. If so, don't duplicate the channel count.
-		for i, v := range UnavailableGuilds {
-			if v == evt.Guild.ID {
-				// Yes it is. Remove this and return here.
-				UnavailableGuilds[len(UnavailableGuilds)-1], UnavailableGuilds[i] = UnavailableGuilds[i], UnavailableGuilds[len(UnavailableGuilds)-1]
-				UnavailableGuilds = UnavailableGuilds[:len(UnavailableGuilds)-1]
-				return
-			}
-		}
-
-		// Was this a guild from initialisation?
-		InitialisationGuild := false
-		for i, v := range UnloadedGuilds {
-			if v == evt.Guild.ID {
-				// Yes it is. Remove this and break here.
-				UnloadedGuilds[len(UnloadedGuilds)-1], UnloadedGuilds[i] = UnloadedGuilds[i], UnloadedGuilds[len(UnloadedGuilds)-1]
-				UnloadedGuilds = UnloadedGuilds[:len(UnloadedGuilds)-1]
-				InitialisationGuild = true
-				break
-			}
-		}
-
-		// If this was not from initialisation, +1.
-		if !InitialisationGuild {
-			GuildCount++
-		}
-
-		// Add the channels to the channel count.
-		l := len(evt.Guild.Channels)
-		countCache[evt.Guild.ID] = l
-		ChannelCount += l
-	})
-	dg.On(disgord.EvtGuildDelete, func(s disgord.Session, evt *disgord.GuildDelete) {
-		if evt.UserWasRemoved() {
-			// This was an actual removal from the guild.
-			count := countCache[evt.UnavailableGuild.ID]
-			delete(countCache, evt.UnavailableGuild.ID)
-			GuildCount--
-			ChannelCount -= count
-			return
-		}
-
-		// Mark as unavailable.
-		UnavailableGuilds = append(UnavailableGuilds, evt.UnavailableGuild.ID)
 	})
 
 	// Register the MessageCreate func as a callback for MessageCreate events.
@@ -235,18 +173,6 @@ func MessageCreate(s disgord.Session, e *disgord.MessageCreate) {
 		// Invite command
 		if args[0] == "invite" {
 			_, _ = s.SendMsg(context.TODO(), m.ChannelID, "```\n"+Invite+"\n```")
-			return
-		}
-
-		// Stats command
-		if args[0] == "stats" {
-			// Format the message
-			content := Stats
-			content = strings.Replace(content, "{{guilds}}", strconv.Itoa(GuildCount), 1)
-			content = strings.Replace(content, "{{channels}}", strconv.Itoa(ChannelCount), 1)
-
-			// Send it
-			_, _ = s.SendMsg(context.TODO(), m.ChannelID, "```\n"+content+"\n```")
 			return
 		}
 

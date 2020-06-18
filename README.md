@@ -152,10 +152,6 @@ Invite the bot:
   Usage: @1.1.1.1 invite
 
 
-Bot stats:
-  Usage: @1.1.1.1 stats
-
-
 Bot commands (this):
   Usage: @1.1.1.1
 
