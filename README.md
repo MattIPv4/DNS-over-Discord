@@ -152,6 +152,16 @@ Invite the bot:
   Usage: @1.1.1.1 invite
 
 
+Privacy Policy:
+  Usage: @1.1.1.1 privacy
+
+  Alternative usage:
+    @1.1.1.1 privacy-policy
+    @1.1.1.1 policy
+    @1.1.1.1 terms
+    @1.1.1.1 tos
+
+
 Bot commands (this):
   Usage: @1.1.1.1
 

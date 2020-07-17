@@ -19,9 +19,10 @@ var (
 
 // Variables to fetch from strings
 var (
-	Usage      string
-	AdminUsage string
-	Invite     string
+	Usage         string
+	AdminUsage    string
+	Invite        string
+	PrivacyPolicy string
 )
 
 // The user ID.
@@ -47,6 +48,7 @@ func getStrings() {
 	getString(&Usage, "usage")
 	getString(&AdminUsage, "admin")
 	getString(&Invite, "invite")
+	getString(&PrivacyPolicy, "privacy-policy")
 }
 
 func main() {
@@ -173,6 +175,12 @@ func MessageCreate(s disgord.Session, e *disgord.MessageCreate) {
 		// Invite command
 		if args[0] == "invite" {
 			_, _ = s.SendMsg(context.TODO(), m.ChannelID, "```\n"+Invite+"\n```")
+			return
+		}
+
+		// Privacy command
+		if args[0] == "privacy" || args[0] == "privacy-policy" || args[0] == "policy" || args[0] == "terms" || args[0] == "tos" {
+			_, _ = s.SendMsg(context.TODO(), m.ChannelID, "```\n"+PrivacyPolicy+"\n```")
 			return
 		}
 
