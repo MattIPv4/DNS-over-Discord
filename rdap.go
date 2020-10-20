@@ -6,8 +6,14 @@ import (
 )
 
 type RDAPResponse struct {
-	Success bool              `json:"success"`
-	Results map[string][]byte `json:"results"`
+	Success bool                       `json:"success"`
+	Results map[string]RDAPSubResponse `json:"results"`
+}
+
+type RDAPSubResponse struct {
+	Success bool   `json:"success"`
+	Type    string `json:"type"`
+	Data    []byte `json:"data"`
 }
 
 func FetchRawRDAP(query string) (*RDAPResponse, error) {
@@ -41,7 +47,12 @@ func FetchRDAP(query string) (interface{}, error) {
 
 	// Return the parsed first result
 	for k := range raw.Results {
-		d := rdap.NewDecoder(raw.Results[k])
+		// Validate response
+		if !raw.Results[k].Success {
+			continue
+		}
+
+		d := rdap.NewDecoder(raw.Results[k].Data)
 		return d.Decode()
 	}
 
