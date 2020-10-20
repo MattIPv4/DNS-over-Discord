@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/jakemakesstuff/structuredhttp"
 	"github.com/openrdap/rdap"
 )
@@ -11,9 +12,9 @@ type RDAPResponse struct {
 }
 
 type RDAPSubResponse struct {
-	Success bool   `json:"success"`
-	Type    string `json:"type"`
-	Data    []byte `json:"data"`
+	Success bool        `json:"success"`
+	Type    string      `json:"type"`
+	Data    interface{} `json:"data"`
 }
 
 func FetchRawRDAP(query string) (*RDAPResponse, error) {
@@ -49,10 +50,17 @@ func FetchRDAP(query string) (interface{}, error) {
 	for k := range raw.Results {
 		// Validate response
 		if !raw.Results[k].Success {
-			continue
+			return nil, err
 		}
 
-		d := rdap.NewDecoder(raw.Results[k].Data)
+		// Get as bytes
+		b, err := json.Marshal(raw.Results[k].Data)
+		if err != nil {
+			return nil, err
+		}
+
+		// Decode to RDAP data
+		d := rdap.NewDecoder(b)
 		return d.Decode()
 	}
 
