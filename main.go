@@ -111,10 +111,10 @@ func NamePrefixes() []string {
 }
 
 // HasPrefix checks if the message has a prefix.
-func HasPrefix(m *disgord.Message) (bool, string) {
+func HasPrefix(content string) (bool, string) {
 	prefixes := append(NamePrefixes(), "dig", "whois")
 	for _, prefix := range prefixes {
-		if strings.HasPrefix(m.Content, prefix) {
+		if content == prefix {
 			return true, prefix
 		}
 	}
@@ -132,14 +132,14 @@ func MessageCreate(s disgord.Session, e *disgord.MessageCreate) {
 			return
 		}
 
+		// Get the content
+		content := strings.Split(strings.Trim(m.Content, " "), " ")
+
 		// Prefix check
-		hasPrefix, prefix := HasPrefix(m)
+		hasPrefix, prefix := HasPrefix(content[0])
 		if !hasPrefix {
 			return
 		}
-
-		// Get the content
-		content := strings.Split(strings.Trim(m.Content, " "), " ")
 
 		// Get the args
 		args := content[1:]
