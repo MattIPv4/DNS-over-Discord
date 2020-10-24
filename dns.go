@@ -67,7 +67,7 @@ func FormatDNSJSON(d DNSResponse) string {
 	for _, element := range d.Answer {
 		data := []string{
 			element.Name,
-			strconv.Itoa(element.TTL) + "ms",
+			strconv.Itoa(element.TTL) + "s",
 			element.Data,
 		}
 		RecordData = append(RecordData, data)
