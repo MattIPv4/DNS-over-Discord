@@ -16,13 +16,24 @@ DNS over Discord lookup:
 
   Supported types:
     A
-    NS
-    CNAME
-    MX
-    TXT
     AAAA
-    SRV
     CAA
+    CERT
+    CNAME
+    DNSKEY
+    DS
+    LOC
+    MX
+    NAPTR
+    NS
+    PTR
+    SMIMEA
+    SPF
+    SRV
+    SSHFP
+    TLSA
+    TXT
+    URI
 
 
 Domain whois:
