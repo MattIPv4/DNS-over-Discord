@@ -4,11 +4,11 @@ import (
 	"context"
 	"github.com/andersfylling/disgord"
 	"github.com/jakemakesstuff/structuredhttp"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -89,17 +89,11 @@ func FormatDNSJSON(d DNSResponse) string {
 	return tableString.String()
 }
 
-// IsValidDomain checks if the domain is valid.
-func IsValidDomain(d string) bool {
-	domainReg := regexp.MustCompile(`([\w-]+\.)+\w+`)
-	return domainReg.Match([]byte(d))
-}
-
 // DNS is the main message handler.
 func DNS(args []string, s disgord.Session, m *disgord.Message) {
 	// Validate domain
 	name := args[0]
-	if !IsValidDomain(name) {
+	if !govalidator.IsDNSName(name) {
 		_, _ = s.SendMsg(context.TODO(), m.ChannelID, "Could not validate `"+name+"` as a domain")
 		return
 	}
