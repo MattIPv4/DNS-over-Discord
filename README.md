@@ -50,13 +50,24 @@ _@1.1.1.1 cloudflare.com A AAAA_
 ## Supported record types
 
 *   A
-*   NS
-*   CNAME
-*   MX
-*   TXT
 *   AAAA
-*   SRV
 *   CAA
+*   CERT
+*   CNAME
+*   DNSKEY
+*   DS
+*   LOC
+*   MX
+*   NAPTR
+*   NS
+*   PTR
+*   SMIMEA
+*   SPF
+*   SRV
+*   SSHFP
+*   TLSA
+*   TXT
+*   URI
 
 _Use "*" (asterisk) in place of a record type to get DNS results for all supported types._
 
