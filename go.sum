@@ -2,6 +2,8 @@ github.com/andersfylling/disgord v0.18.0 h1:IUSLOHk7ll6UeZi64W313KuJjmUtBSe5I8f3
 github.com/andersfylling/disgord v0.18.0/go.mod h1:pVzPt8z0aye3LkxuM0NA0u11h5y2x+1Z3Bf8Ipru/GA=
 github.com/andersfylling/snowflake/v4 v4.0.2 h1:7po1HHxq8Pz7F+vsMFMoGiHOlpzBzqXoop4O8b24wqI=
 github.com/andersfylling/snowflake/v4 v4.0.2/go.mod h1:4lIbDTtWCTaYBCZVVIDjIH8xbzHSYz+RvxK2KZND840=
+github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef h1:46PFijGLmAjMPwCCCo7Jf0W6f9slllCkkv7vyc1yOSg=
+github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
