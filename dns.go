@@ -13,7 +13,7 @@ import (
 )
 
 // Types defines all of the supported types.
-var Types = []string{"A", "NS", "CNAME", "MX", "TXT", "AAAA", "SRV", "CAA"}
+var Types = []string{"A", "AAAA", "CAA", "CERT", "CNAME", "DNSKEY", "DS", "LOC", "MX", "NAPTR", "NS", "PTR", "SMIMEA", "SPF", "SRV", "SSHFP", "TLSA", "TXT", "URI"}
 
 // Question defines the question which was posed to the DNS.
 type Question struct {
