@@ -1,0 +1,25 @@
+{
+  "name": "dns-over-discord",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/webserver.js",
+  "scripts": {
+    "web": "node src/webserver.js",
+    "cmds": "node src/commands.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MattIPv4/DNS-over-Discord.git"
+  },
+  "author": "Matt (IPv4) Cowley",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/MattIPv4/DNS-over-Discord/issues"
+  },
+  "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
+  "dependencies": {
+    "discord-interactions": "^1.4.1",
+    "express": "^4.17.1",
+    "slash-commands": "^1.2.2"
+  }
+}
