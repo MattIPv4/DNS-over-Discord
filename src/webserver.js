@@ -1,5 +1,5 @@
 const express = require('express');
-const { InteractionType, InteractionResponseType, verifyKeyMiddleware } = require('discord-interactions');
+const { InteractionType, verifyKeyMiddleware } = require('discord-interactions');
 
 module.exports.runServer = commandsArray => {
     // Map commands to be keyed by their API ID
@@ -12,13 +12,10 @@ module.exports.runServer = commandsArray => {
     const app = express();
 
     // Add our route for Discord
+    // Middleware handles PINGs and verifying requests
     app.post('/interactions', verifyKeyMiddleware(process.env.CLIENT_PUBLIC_KEY), (req, res) => {
+        // Only handle commands
         const interaction = req.body;
-
-        // Handle PINGs
-        if (interaction.type === InteractionType.PING) return res.send({ type: InteractionResponseType.PONG });
-
-        // Only handle commands past this point
         if (interaction.type !== InteractionType.COMMAND) return;
 
         // Locate the command

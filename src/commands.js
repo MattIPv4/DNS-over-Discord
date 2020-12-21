@@ -1,7 +1,10 @@
-const { DiscordInteractions, ApplicationCommandOptionType, InteractionResponseType } = require('slash-commands');
+const fs = require('fs').promises;
+const path = require('path');
+const { DiscordInteractions } = require('slash-commands');
 
 module.exports.registerCommands = async () => {
     // Define the builder
+    // TODO: Investigate replacing token with https://discord.com/developers/docs/topics/oauth2#client-credentials-grant
     const interaction = new DiscordInteractions({
         applicationId: process.env.CLIENT_ID,
         authToken: process.env.CLIENT_BOT_TOKEN,
@@ -9,36 +12,18 @@ module.exports.registerCommands = async () => {
     });
 
     // Define the commands
-    const commands = [{
-        name: 'dig',
-        description: 'Perform a DNS over Discord lookup',
-        options: [
-            {
-                name: 'domain',
-                description: 'The domain to lookup',
-                type: ApplicationCommandOptionType.STRING,
-                required: true,
-            },
-            {
-                name: 'types',
-                description: 'Space-separated DNS record types to lookup',
-                type: ApplicationCommandOptionType.STRING,
-                required: false,
-                // TODO: https://github.com/discord/discord-api-docs/issues/2331
-            },
-        ],
-        execute: (data, respond) => {
-            const domain = data.options.find(opt => opt.name === 'domain') || {};
-            const types = data.options.find(opt => opt.name === 'types') || {};
+    const commands = [];
+    const commandDirectory = path.join(__dirname, 'commands');
+    const commandFiles = await fs.readdir(commandDirectory);
+    for (const commandFile of commandFiles) {
+        if (!commandFile.endsWith('.js')) continue;
+        const commandData = require(path.join(commandDirectory, commandFile));
+        if (!('name' in commandData)) continue;
+        if (!('execute' in commandData)) continue;
+        commands.push(commandData);
+    }
 
-            respond({
-                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                data: {
-                    content: `Diggy diggy hole ${domain.value} ${types.value}`,
-                },
-            });
-        },
-    }];
+    // TODO: Fetch existing commands from Discord, only create missing ones, update outdated ones, remove old ones
 
     // Register the commands with Discord
     const commandData = [];
