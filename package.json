@@ -4,8 +4,7 @@
   "description": "",
   "main": "src/webserver.js",
   "scripts": {
-    "web": "node src/webserver.js",
-    "cmds": "node src/commands.js"
+    "start": "node src/index.js"
   },
   "repository": {
     "type": "git",

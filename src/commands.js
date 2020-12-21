@@ -1,13 +1,15 @@
-const { DiscordInteractions, ApplicationCommandOptionType } = require('slash-commands');
+const { DiscordInteractions, ApplicationCommandOptionType, InteractionResponseType } = require('slash-commands');
 
-const main = async () => {
+module.exports.registerCommands = async () => {
+    // Define the builder
     const interaction = new DiscordInteractions({
         applicationId: process.env.CLIENT_ID,
         authToken: process.env.CLIENT_BOT_TOKEN,
         publicKey: process.env.CLIENT_PUBLIC_KEY,
     });
 
-    const command = {
+    // Define the commands
+    const commands = [{
         name: 'dig',
         description: 'Perform a DNS over Discord lookup',
         options: [
@@ -19,28 +21,32 @@ const main = async () => {
             },
             {
                 name: 'types',
-                description: 'The record types to lookup',
+                description: 'Space-separated DNS record types to lookup',
                 type: ApplicationCommandOptionType.STRING,
                 required: false,
-                // TODO: This needs https://github.com/discord/discord-api-docs/issues/2331
-                choices: [
-                    {
-                        name: 'A',
-                        value: 'A',
-                    },
-                    {
-                        name: 'AAAA',
-                        value: 'AAAA',
-                    },
-                ],
+                // TODO: https://github.com/discord/discord-api-docs/issues/2331
             },
         ],
-    };
+        execute: (data, respond) => {
+            const domain = data.options.find(opt => opt.name === 'domain') || {};
+            const types = data.options.find(opt => opt.name === 'types') || {};
 
-    await interaction
-        .createApplicationCommand(command, '613327370807672833')
-        .then(console.log)
-        .catch(console.error);
+            respond({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: `Diggy diggy hole ${domain.value} ${types.value}`,
+                },
+            });
+        },
+    }];
+
+    // Register the commands with Discord
+    const commandData = [];
+    for (const command of commands) {
+        const data = await interaction.createApplicationCommand(command, '613327370807672833');
+        commandData.push({ ...command, ...data });
+    }
+
+    // Done
+    return commandData;
 };
-
-main().then(() => {});

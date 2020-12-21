@@ -1,33 +1,37 @@
 const express = require('express');
 const { InteractionType, InteractionResponseType, verifyKeyMiddleware } = require('discord-interactions');
 
-const main = () => {
+module.exports.runServer = commandsArray => {
+    // Map commands to be keyed by their API ID
+    const commands = commandsArray.reduce((obj, cmd) => {
+        obj[cmd.id] = cmd;
+        return obj;
+    }, {});
+
+    // Create the Express app
     const app = express();
 
+    // Add our route for Discord
     app.post('/interactions', verifyKeyMiddleware(process.env.CLIENT_PUBLIC_KEY), (req, res) => {
         const interaction = req.body;
+
+        // Handle PINGs
+        if (interaction.type === InteractionType.PING) return res.send({ type: InteractionResponseType.PONG });
+
+        // Only handle commands past this point
         if (interaction.type !== InteractionType.COMMAND) return;
-        const command = interaction.data;
 
-        switch (command.name) {
-            case 'dig':
-                res.send({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        content: 'Diggy diggy hole',
-                    },
-                });
-                break;
+        // Locate the command
+        const commandData = interaction.data;
+        const command = commands[commandData.id];
+        if (!command) return;
 
-            default:
-                console.error('Unknown command', interaction);
-                break;
-        }
+        // Execute
+        command.execute(commandData, res.send.bind(res));
     });
 
-    app.listen(8999, () => {
-        console.log('Example app listening at http://localhost:8999');
+    // Run the app
+    app.listen(3000, () => {
+        console.log('Example app listening at http://localhost:3000');
     });
 };
-
-main();
