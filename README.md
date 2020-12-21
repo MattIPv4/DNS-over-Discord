@@ -6,7 +6,7 @@
 </h1>
 
 <!-- Tag line -->
-<h3 align="center">A 1.1.1.1 DNS resolver built in Go for Discord</h3>
+<h3 align="center">A 1.1.1.1 DNS resolver built for Discord</h3>
 
 <!-- Badges -->
 <p align="center">
@@ -23,6 +23,14 @@
         <img src="https://img.shields.io/badge/Slack-MattIPv4-blue.svg?style=flat-square" alt="Slack"/>
     </a>
 </p>
+
+----
+
+## This branch is work in progress
+
+The docs in this README are likely incorrect as it was copied from the v1 (Golang) branch and have not yet been updated for the logic in this branch (v2, JavaScript).
+
+You have been warned!
 
 ----
 
