@@ -3,6 +3,8 @@ const { InteractionType, verifyKeyMiddleware } = require('discord-interactions')
 const Privacy = require('./utils/privacy');
 const { registerCommands } = require('./utils/commands');
 
+const PORT = process.env.PORT || 3000;
+
 const main = async () => {
     // Register the commands with Discord
     const discordCommands = await registerCommands();
@@ -53,8 +55,8 @@ const main = async () => {
     });
 
     // Run the app
-    app.listen(3000, () => {
-        console.log('DNS over Discord listening at http://localhost:3000');
+    app.listen(PORT, () => {
+        console.log(`DNS over Discord listening at http://localhost:${PORT}`);
     });
 };
 
