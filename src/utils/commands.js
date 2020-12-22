@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { DiscordInteractions } = require('slash-commands');
+const { grantToken } = require('./credentials');
 
 const getCommands = module.exports.getCommands = () => {
     const commands = [];
@@ -25,22 +26,40 @@ const getCommands = module.exports.getCommands = () => {
 };
 
 module.exports.registerCommands = async () => {
+    // Get a token to talk to Discord
+    const token = await grantToken();
+
     // Define the builder
-    // TODO: Investigate replacing token with https://discord.com/developers/docs/topics/oauth2#client-credentials-grant
     const interaction = new DiscordInteractions({
         applicationId: process.env.CLIENT_ID,
-        authToken: process.env.CLIENT_BOT_TOKEN,
+        authToken: token.access_token,
+        tokenPrefix: token.token_type,
         publicKey: process.env.CLIENT_PUBLIC_KEY,
     });
 
-    // Define the commands
+    // Define the commands and get what Discord currently has
     const commands = getCommands();
+    const discordCommands = await interaction.getApplicationCommands(process.env.TEST_GUILD_ID);
 
-    // TODO: Fetch existing commands from Discord, only create missing ones, update outdated ones, remove old ones
+    // Remove old commands
+    for (const command of discordCommands) {
+        if (commands.find(cmd => cmd.name === command.name)) continue;
+        await interaction.deleteApplicationCommand(command.id, process.env.TEST_GUILD_ID);
+    }
 
-    // Register the commands with Discord
+    // Register or update the commands with Discord
     const commandData = [];
     for (const command of commands) {
+        // This command already exists in Discord
+        const discordCommand = discordCommands.find(cmd => cmd.name === command.name);
+        if (discordCommand) {
+            // TODO: Compare discordCommand & command, only edit if needed
+            const data = await interaction.editApplicationCommand(discordCommand.id, command, process.env.TEST_GUILD_ID);
+            commandData.push({ ...command, ...data });
+            continue;
+        }
+
+        // Register the new command
         const data = await interaction.createApplicationCommand(command, process.env.TEST_GUILD_ID);
         commandData.push({ ...command, ...data });
     }
