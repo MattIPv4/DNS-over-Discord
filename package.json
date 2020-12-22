@@ -18,6 +18,7 @@
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
     "discord-interactions": "^1.4.1",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "node-fetch": "^2.6.1",
     "slash-commands": "^1.2.2"

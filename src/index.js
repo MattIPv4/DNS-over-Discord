@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const { InteractionType, verifyKeyMiddleware } = require('discord-interactions');
 const Privacy = require('./utils/privacy');
