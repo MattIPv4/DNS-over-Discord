@@ -41,7 +41,7 @@ module.exports.registerCommands = async () => {
     // Register the commands with Discord
     const commandData = [];
     for (const command of commands) {
-        const data = await interaction.createApplicationCommand(command, '613327370807672833');
+        const data = await interaction.createApplicationCommand(command, process.env.TEST_GUILD_ID);
         commandData.push({ ...command, ...data });
     }
 
