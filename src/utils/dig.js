@@ -1,6 +1,7 @@
 const { InteractionResponseType } = require('slash-commands');
 const { performLookup, presentTable } = require('./dns');
 const { sendFollowup } = require('./followup');
+const { createEmbed } = require('./embed');
 
 module.exports.handleDig = async (interaction, respond, domain, types, short) => {
     // Make the DNS queries
@@ -35,15 +36,7 @@ module.exports.handleDig = async (interaction, respond, domain, types, short) =>
     };
 
     // Convert results to an embed
-    const embeds = results.map(({ type, data }) => ({
-        title: `DNS over Discord: ${type} records`,
-        description: present(data),
-        color: 0xf48120,
-        timestamp: (new Date).toISOString(),
-        footer: {
-            text: 'diggy diggy hole',
-        },
-    }));
+    const embeds = results.map(({ type, data }) => createEmbed(`${type} records`, present(data), 'diggy diggy hole'));
 
     // If we have 10 or fewer embeds, we can respond with them directly
     if (embeds.length <= 10)

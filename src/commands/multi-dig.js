@@ -15,6 +15,7 @@ module.exports = {
         {
             name: 'types',
             description: 'Space-separated DNS record types to lookup, `*` for all types',
+            help: `Supported types:\n${ValidTypes.map(type => `  ${type}`).join('\n')}\n\nUse \`*\` to lookup all types.`,
             type: ApplicationCommandOptionType.STRING,
             required: false,
             // TODO: https://github.com/discord/discord-api-docs/issues/2331

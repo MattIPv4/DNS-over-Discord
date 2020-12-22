@@ -15,6 +15,7 @@ module.exports = {
         {
             name: 'type',
             description: 'DNS record type to lookup',
+            help: `Supported types:\n${PopularTypes.map(type => `  ${type}`).join('\n')}\n\nDefaults to \`A\` records.`,
             type: ApplicationCommandOptionType.STRING,
             required: false,
             choices: PopularTypes.map(type => ({
