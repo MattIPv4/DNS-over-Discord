@@ -19,12 +19,11 @@ module.exports.runServer = commandsArray => {
         if (interaction.type !== InteractionType.COMMAND) return;
 
         // Locate the command
-        const commandData = interaction.data;
-        const command = commands[commandData.id];
+        const command = commands[interaction.data.id];
         if (!command) return;
 
         // Execute
-        command.execute(commandData, res.send.bind(res));
+        command.execute(interaction, res.send.bind(res));
     });
 
     // Run the app

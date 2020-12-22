@@ -20,7 +20,6 @@
     "discord-interactions": "^1.4.1",
     "express": "^4.17.1",
     "node-fetch": "^2.6.1",
-    "slash-commands": "^1.2.2",
-    "table": "^6.0.4"
+    "slash-commands": "^1.2.2"
   }
 }
