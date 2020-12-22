@@ -1,10 +1,10 @@
 const { ApplicationCommandOptionType } = require('slash-commands');
-const { ValidTypes, PopularTypes } = require('../utils/dns');
+const { ValidTypes } = require('../utils/dns');
 const { handleDig } = require('../utils/dig');
 
 module.exports = {
-    name: 'dig',
-    description: 'Perform a DNS over Discord lookup',
+    name: 'multi-dig',
+    description: 'Perform a DNS over Discord lookup with multiple record types',
     options: [
         {
             name: 'domain',
@@ -13,14 +13,11 @@ module.exports = {
             required: true,
         },
         {
-            name: 'type',
-            description: 'DNS record type to lookup',
+            name: 'types',
+            description: 'Space-separated DNS record types to lookup, `*` for all types',
             type: ApplicationCommandOptionType.STRING,
             required: false,
-            choices: PopularTypes.map(type => ({
-                name: `${type} records`,
-                value: type,
-            })),
+            // TODO: https://github.com/discord/discord-api-docs/issues/2331
         },
         {
             name: 'short',
@@ -32,17 +29,20 @@ module.exports = {
     execute: async (interaction, respond) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
-        const rawType = ((interaction.data.options.find(opt => opt.name === 'type') || {}).value || '').trim();
+        const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
         const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
 
         // Parse domain input
         // TODO: Validate domain
         const domain = rawDomain;
 
-        // Validate type, fallback to 'A'
-        const type = ValidTypes.includes(rawType) ? rawType : 'A';
+        // Parse types input, mapping '*' to all records and defaulting to 'A' if none given
+        const types = rawTypes === '*'
+            ? ValidTypes
+            : rawTypes.split(' ').map(x => x.trim().toUpperCase()).filter(x => ValidTypes.includes(x));
+        if (!types.length) types.push('A');
 
         // Go!
-        await handleDig(interaction, respond, domain, [type], rawShort);
+        await handleDig(interaction, respond, domain, types, rawShort);
     },
 };
