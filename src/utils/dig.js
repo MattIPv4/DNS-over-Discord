@@ -1,6 +1,6 @@
 const { InteractionResponseType } = require('slash-commands');
 const { performLookup, presentTable } = require('./dns');
-const { sendFollowup } = require('./followup');
+const { sendFollowup } = require('./discord');
 const { createEmbed } = require('./embed');
 
 module.exports.handleDig = async (interaction, respond, domain, types, short) => {
@@ -14,6 +14,10 @@ module.exports.handleDig = async (interaction, respond, domain, types, short) =>
 
     // Define the presenter
     const present = data => {
+        // Error message
+        if (typeof data === 'object' && data.message) return data.message;
+
+        // Map the data if short requested
         const sourceRows = short ? data.map(x => x.data) : data;
         const finalRows = [];
 

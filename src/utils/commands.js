@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { DiscordInteractions } = require('slash-commands');
-const { grantToken } = require('./credentials');
+const { grantToken } = require('./discord');
 
 const getCommands = module.exports.getCommands = () => {
     const commands = [];

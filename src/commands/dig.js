@@ -1,5 +1,5 @@
 const { ApplicationCommandOptionType } = require('slash-commands');
-const { ValidTypes, PopularTypes } = require('../utils/dns');
+const { VALID_TYPES, POPULAR_TYPES } = require('../utils/dns');
 const { handleDig } = require('../utils/dig');
 
 module.exports = {
@@ -15,10 +15,10 @@ module.exports = {
         {
             name: 'type',
             description: 'DNS record type to lookup',
-            help: `Supported types:\n${PopularTypes.map(type => `  ${type}`).join('\n')}\n\nDefaults to \`A\` records.`,
+            help: `Supported types:\n${POPULAR_TYPES.map(type => `  ${type}`).join('\n')}\n\nDefaults to \`A\` records.`,
             type: ApplicationCommandOptionType.STRING,
             required: false,
-            choices: PopularTypes.map(type => ({
+            choices: POPULAR_TYPES.map(type => ({
                 name: `${type} records`,
                 value: type,
             })),
@@ -41,7 +41,7 @@ module.exports = {
         const domain = rawDomain;
 
         // Validate type, fallback to 'A'
-        const type = ValidTypes.includes(rawType) ? rawType : 'A';
+        const type = VALID_TYPES.includes(rawType) ? rawType : 'A';
 
         // Go!
         await handleDig(interaction, respond, domain, [type], rawShort);

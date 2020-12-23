@@ -2,7 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const express = require('express');
-const { InteractionType, verifyKeyMiddleware } = require('discord-interactions');
+const { InteractionType, InteractionResponseType, verifyKeyMiddleware } = require('discord-interactions');
 const Privacy = require('./utils/privacy');
 const { registerCommands } = require('./utils/commands');
 
@@ -23,7 +23,7 @@ const main = async () => {
 
     // Add our route for Discord
     // Middleware handles PINGs and verifying requests
-    app.post('/interactions', verifyKeyMiddleware(process.env.CLIENT_PUBLIC_KEY), (req, res) => {
+    app.post('/interactions', verifyKeyMiddleware(process.env.CLIENT_PUBLIC_KEY), async (req, res) => {
         // Only handle commands
         const interaction = req.body;
         if (interaction.type !== InteractionType.COMMAND) return;
@@ -33,7 +33,20 @@ const main = async () => {
         if (!command) return;
 
         // Execute
-        command.execute(interaction, res.send.bind(res));
+        command.execute(interaction, res.send.bind(res)).then(() => {}).catch(err => {
+            // Catch & log any errors
+            console.log(interaction);
+            console.error(err);
+
+            // Send an ephemeral message to the user
+            res.send({
+                type: InteractionResponseType.CHANNEL_MESSAGE,
+                data: {
+                    content: 'An unexpected error occurred when executing the command.',
+                    flags: 1 << 6,
+                },
+            });
+        });
     });
 
     app.get('/invite', (req, res) => {
