@@ -70,6 +70,11 @@ const main = async () => {
         res.redirect('https://developers.cloudflare.com/1.1.1.1/fun-stuff/dns-over-discord');
     });
 
+    app.get('/health', (req, res) => {
+        res.set('Content-Type', 'text/plain');
+        res.send('OK');
+    });
+
     // Run the app
     app.listen(PORT, () => {
         console.log(`DNS over Discord listening at http://localhost:${PORT}`);
