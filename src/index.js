@@ -2,6 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const express = require('express');
+const nocache = require('nocache')
 const { InteractionType, InteractionResponseType, verifyKeyMiddleware } = require('discord-interactions');
 const Privacy = require('./utils/privacy');
 const { registerCommands } = require('./utils/commands');
@@ -70,7 +71,7 @@ const main = async () => {
         res.redirect('https://developers.cloudflare.com/1.1.1.1/fun-stuff/dns-over-discord');
     });
 
-    app.get('/health', (req, res) => {
+    app.get('/health', nocache(), (req, res) => {
         res.set('Content-Type', 'text/plain');
         res.send('OK');
     });
