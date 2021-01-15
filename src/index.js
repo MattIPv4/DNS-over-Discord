@@ -9,6 +9,13 @@ const jsonResponse = obj => new Response(JSON.stringify(obj), {
     },
 });
 
+const redirectResponse = url => new Response(null, {
+    status: 301,
+    headers: {
+        'Location': url,
+    },
+});
+
 const handleInteractionVerification = (request, bodyBuffer) => {
     const timestamp = request.headers.get('X-Signature-Timestamp') || '';
     const signature = request.headers.get('X-Signature-Ed25519') || '';
@@ -96,39 +103,19 @@ const handleRequest = async ({ request, wait }) => {
 
     // Invite redirect
     if (url.pathname === '/privacy')
-        return new Response(null, {
-            status: 301,
-            headers: {
-                'Location': `https://discord.com/oauth2/authorize?client_id=${env.CLIENT_ID}&scope=applications.commands`,
-            }
-        });
+        return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${env.CLIENT_ID}&scope=applications.commands`);
 
     // Discord redirect
     if (url.pathname === '/server')
-        return new Response(null, {
-            status: 301,
-            headers: {
-                'Location': 'https://discord.gg/JgxVfGn',
-            }
-        });
+        return redirectResponse('https://discord.gg/JgxVfGn');
 
     // GitHub redirect
     if (url.pathname === '/github')
-        return new Response(null, {
-            status: 301,
-            headers: {
-                'Location': 'https://github.com/MattIPv4/DNS-over-Discord/',
-            }
-        });
+        return redirectResponse('https://github.com/MattIPv4/DNS-over-Discord/');
 
     // Docs redirect
     if (url.pathname === '/')
-        return new Response(null, {
-            status: 301,
-            headers: {
-                'Location': 'https://developers.cloudflare.com/1.1.1.1/fun-stuff/dns-over-discord',
-            }
-        });
+        return redirectResponse('https://developers.cloudflare.com/1.1.1.1/fun-stuff/dns-over-discord');
 
     // Not found
     return new Response(null, { status: 404 });
