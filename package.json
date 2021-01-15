@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "NODE_ENV=development wrangler dev",
     "publish:production": "NODE_ENV=production wrangler publish -e production",
-    "publish:staging": "NODE_ENV=staging wrangler publish -e staging"
+    "publish:staging": "NODE_ENV=staging wrangler publish -e staging",
+    "logs:production": "wrangler tail -e production",
+    "logs:staging": "wrangler tail -e staging"
   },
   "repository": {
     "type": "git",
