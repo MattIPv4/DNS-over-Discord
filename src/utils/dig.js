@@ -3,7 +3,7 @@ const { performLookup, presentTable } = require('./dns');
 const { sendFollowup } = require('./follow-up');
 const { createEmbed } = require('./embed');
 
-module.exports.handleDig = async (interaction, env, response, domain, types, short) => {
+module.exports.handleDig = async ({ interaction, env, response, wait, domain, types, short }) => {
     // Make the DNS queries
     const results = [];
     for (const type of types)
@@ -14,6 +14,9 @@ module.exports.handleDig = async (interaction, env, response, domain, types, sho
 
     // Define the presenter
     const present = data => {
+        // No results
+        if (typeof data === 'undefined' || (Array.isArray(data) && data.length === 0)) return 'No records found';
+
         // Error message
         if (typeof data === 'object' && data.message) return data.message;
 
@@ -53,10 +56,15 @@ module.exports.handleDig = async (interaction, env, response, domain, types, sho
 
     // Otherwise, ack and then send followups for chunks of 10 embeds
     //  This ensures the embeds arrive in the correct order
-    while (embeds.length) {
-        await sendFollowup(interaction, env, {
-            embeds: embeds.splice(0, 10),
-        });
-    }
+    wait((async () => {
+        // TODO: The ack w/ message still shows up after followups sometimes
+        await new Promise(resolve => setTimeout(resolve, 5));
+
+        while (embeds.length) {
+            await sendFollowup(interaction, env, {
+                embeds: embeds.splice(0, 10),
+            });
+        }
+    })());
     return response({ type: InteractionResponseType.ACK_WITH_SOURCE });
 };

@@ -16,7 +16,7 @@ const handleInteractionVerification = (request, bodyBuffer) => {
     return verifyKey(bodyBuffer, signature, timestamp, env.CLIENT_PUBLIC_KEY);
 };
 
-const handleInteraction = async request => {
+const handleInteraction = async ({ request, wait }) => {
     // Get the body as a buffer
     const bodyBuffer = await request.arrayBuffer();
 
@@ -47,7 +47,7 @@ const handleInteraction = async request => {
         const command = require(`./commands/${commandData.file}`);
 
         // Execute
-        return await command.execute({ interaction: body, env, response: jsonResponse });
+        return await command.execute({ interaction: body, env, response: jsonResponse, wait });
     } catch (err) {
         // Catch & log any errors
         console.log(body);
@@ -64,14 +64,16 @@ const handleInteraction = async request => {
     }
 };
 
-const handleRequest = async request => {
+const handleRequest = async ({ request, wait }) => {
     const url = new URL(request.url);
 
     // Send interactions off to their own handler
-    if (request.method === 'POST' && url.pathname === '/interactions') return await handleInteraction(request);
+    if (request.method === 'POST' && url.pathname === '/interactions')
+        return await handleInteraction({ request, wait });
 
     // Otherwise, we only care for GET requests
-    if (request.method !== 'GET') return new Response(null, { status: 404 });
+    if (request.method !== 'GET')
+        return new Response(null, { status: 404 });
 
     // Health check route
     if (url.pathname === '/health')
@@ -133,4 +135,5 @@ const handleRequest = async request => {
 };
 
 // Register the worker listener
-addEventListener('fetch', event => event.respondWith(handleRequest(event.request)));
+addEventListener('fetch', event =>
+    event.respondWith(handleRequest({ request: event.request, wait: event.waitUntil.bind(event) })));
