@@ -4,8 +4,9 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "dev": "wrangler dev",
-    "publish": "wrangler publish"
+    "dev": "NODE_ENV=development wrangler dev",
+    "publish:production": "NODE_ENV=production wrangler publish -e production",
+    "publish:staging": "NODE_ENV=staging wrangler publish -e staging"
   },
   "repository": {
     "type": "git",

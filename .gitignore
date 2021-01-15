@@ -1,7 +1,7 @@
 .idea/
 node_modules/
 .DS_Store
-.env
 src/build/data/
 worker/
 dist/
+*.env

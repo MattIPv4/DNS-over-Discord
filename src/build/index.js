@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs').promises;
-const env = require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
+const env = require('dotenv').config({ path: path.join(__dirname, '..', '..', `${process.env.NODE_ENV}.env`) });
 
 const { getCommands, registerCommands } = require('./commands');
 
