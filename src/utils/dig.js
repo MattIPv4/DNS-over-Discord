@@ -1,9 +1,9 @@
 const { InteractionResponseType } = require('slash-commands');
 const { performLookup, presentTable } = require('./dns');
-const { sendFollowup } = require('./discord');
+const { sendFollowup } = require('./follow-up');
 const { createEmbed } = require('./embed');
 
-module.exports.handleDig = async (interaction, respond, domain, types, short) => {
+module.exports.handleDig = async (interaction, env, response, domain, types, short) => {
     // Make the DNS queries
     const results = [];
     for (const type of types)
@@ -44,7 +44,7 @@ module.exports.handleDig = async (interaction, respond, domain, types, short) =>
 
     // If we have 10 or fewer embeds, we can respond with them directly
     if (embeds.length <= 10)
-        return respond({
+        return response({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
                 embeds: embeds.splice(0, 10),
@@ -53,10 +53,10 @@ module.exports.handleDig = async (interaction, respond, domain, types, short) =>
 
     // Otherwise, ack and then send followups for chunks of 10 embeds
     //  This ensures the embeds arrive in the correct order
-    respond({ type: InteractionResponseType.ACK_WITH_SOURCE });
     while (embeds.length) {
-        await sendFollowup(interaction, {
+        await sendFollowup(interaction, env, {
             embeds: embeds.splice(0, 10),
-        }).catch(console.error);
+        });
     }
+    return response({ type: InteractionResponseType.ACK_WITH_SOURCE });
 };
