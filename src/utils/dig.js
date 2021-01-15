@@ -57,9 +57,10 @@ module.exports.handleDig = async ({ interaction, env, response, wait, domain, ty
     // Otherwise, ack and then send followups for chunks of 10 embeds
     //  This ensures the embeds arrive in the correct order
     wait((async () => {
-        // TODO: The ack w/ message still shows up after followups sometimes
-        await new Promise(resolve => setTimeout(resolve, 5));
+        // Give Discord time to process the ACK response
+        await new Promise(resolve => setTimeout(resolve, 250));
 
+        // Send the embeds
         while (embeds.length) {
             await sendFollowup(interaction, env, {
                 embeds: embeds.splice(0, 10),
