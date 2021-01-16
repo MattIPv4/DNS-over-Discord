@@ -1,6 +1,7 @@
 const chunkStr = (str, size) => {
     const strArr = str.split('');
     let ret = [];
+    // TODO: Prefer to wrap at ', ' if possible
     while (strArr.length) ret.push(strArr.splice(0, size).join(''));
     return ret;
 };

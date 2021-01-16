@@ -8,37 +8,48 @@ const rdapLookup = module.exports.rdapLookup = async query => {
         return false;
 
     // Utils to find the data
-    const findEntity = name =>
-        data.data?.entities?.find(entity => entity.roles.map(role => role.trim().toLowerCase()).includes(name))
-            ?.vcardArray?.[1].find(card => card[0] === 'fn')?.[3];
+    const uniqueCommaSep = arr => [...new Set(arr)].join(', ');
+
+    const findEntities = name => data.data?.entities?.filter(entity =>
+        entity.roles.map(role => role.trim().toLowerCase()).includes(name));
+
+    const findEntityName = name => uniqueCommaSep(findEntities(name).map(entity =>
+        entity?.vcardArray?.[1].find(card => card[0] === 'fn')?.[3] || entity?.handle));
+
+    const findEntityEmail = name => uniqueCommaSep(findEntities(name).map(entity =>
+        entity?.vcardArray?.[1].find(card => card[0] === 'email')?.[3]));
+
     const findEvent = name =>
         data.data?.events?.find(event => event.eventAction.trim().toLowerCase() === name)?.eventDate;
+
     const formatCidr = cidr => cidr && (cidr.v4prefix || cidr.v6prefix) && cidr.length
         ? (cidr.v4prefix || cidr.v6prefix) + '/' + cidr.length.toString()
         : undefined;
 
     // Find the useful information for us
-    const registrar = findEntity('registrar');
-    const registrant = findEntity('registrant');
+    const registrar = findEntityName('registrar');
+    const registrant = findEntityName('registrant');
     const registration = findEvent('registration');
     const expiration = findEvent('expiration');
+    const abuse = findEntityEmail('abuse');
     const name = data.data?.name;
-    const asn = (data.data?.arin_originas0_originautnums || []).map(asn => asn.toString()).join(', ');
-    const cidr = (data.data?.cidr0_cidrs || []).map(formatCidr).filter(cidr => cidr !== undefined).join(', ');
+    const asn = uniqueCommaSep((data.data?.arin_originas0_originautnums || []).map(asn => asn.toString()));
+    const cidr = uniqueCommaSep((data.data?.cidr0_cidrs || []).map(formatCidr).filter(cidr => cidr !== undefined));
 
     // If we found nothing, abort
-    if (!registrar && !registrant && !registration && !expiration)
+    if (!registrar && !registrant && !registration && !expiration && !name && !asn && !cidr)
         return false;
 
     // Done
     return {
-        registrar,
-        registrant,
+        name,
+        registrant: registrant || undefined,
+        asn: asn || undefined,
+        registrar: registrar || undefined,
         registration: registration ? new Date(registration) : undefined,
         expiration: expiration ? new Date(expiration) : undefined,
-        name,
-        asn: asn || undefined,
         cidr: cidr || undefined,
+        abuse: abuse || undefined,
     };
 };
 
@@ -62,12 +73,15 @@ const parseWhois = text => {
     // Find the matches in the string
     const singleLineMatches = text.match(regExpSingleLineGm);
     const splitLineMatches = text.match(regExpSplitLineGm);
-    const matches = {};
+    const matches = [];
 
     // All single line matches are valid
     for (const rawMatch of singleLineMatches) {
         const match = rawMatch.trim().match(regExpSingleLine);
-        matches[match[1]] = match[2];
+        matches.push({
+            key: match[1],
+            value: match[2],
+        });
     }
 
     // Split line matches that don't include a single line match are valid
@@ -76,7 +90,10 @@ const parseWhois = text => {
             continue;
 
         const match = rawMatch.trim().match(regExpSplitLine);
-        matches[match[1]] = match[2];
+        matches.push({
+            key: match[1],
+            value: match[2],
+        });
     }
 
     // Return the final parsed data
@@ -97,8 +114,7 @@ const whoisLookup = module.exports.whoisLookup = async query => {
         return false;
 
     // Util to find the data
-    const findAttribute = name =>
-        data.find(attribute => attribute.attribute.trim().toLowerCase() === name)?.value?.trim();
+    const findAttribute = name => data.find(entry => entry.key.trim().toLowerCase() === name)?.value?.trim();
 
     // Find the useful information for us
     const registrar = findAttribute('registrar');
@@ -112,8 +128,8 @@ const whoisLookup = module.exports.whoisLookup = async query => {
 
     // Done
     return {
-        registrar,
         registrant,
+        registrar,
         registration: registration ? new Date(registration) : undefined,
         expiration: expiration ? new Date(expiration) : undefined,
     };
