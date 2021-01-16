@@ -102,7 +102,7 @@ const handleRequest = async ({ request, wait }) => {
         });
 
     // Invite redirect
-    if (url.pathname === '/privacy')
+    if (url.pathname === '/invite')
         return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${env.CLIENT_ID}&scope=applications.commands`);
 
     // Discord redirect
