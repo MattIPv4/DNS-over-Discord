@@ -1,6 +1,7 @@
 const { ApplicationCommandOptionType, InteractionResponseType } = require('slash-commands');
 const { createEmbed } = require('../utils/embed');
 const { performLookup } = require('../utils/whois');
+const { presentTable } = require('../utils/table');
 
 module.exports = {
     name: 'whois',
@@ -18,7 +19,9 @@ module.exports = {
         const query = ((interaction.data.options.find(opt => opt.name === 'query') || {}).value || '').trim()
             .replace(/^as([0-9]+)$/i, '$1') // Remove 'AS' from start of an ASN
             .replace(/^[a-z][a-z0-9+.-]+:\/\/(.+)$/i, '$1') // Remove scheme from a URI
-            .replace(/^([0-9]{1,3}(?:\.[0-9]{1,3}){3}):[0-9]+$/i, '$1'); // Remove port from an IPv4 address
+            .replace(/^([0-9]{1,3}(?:\.[0-9]{1,3}){3}):[0-9]+$/, '$1'); // Remove port from an IPv4 address
+
+        // TODO: Try to validate as domain/IPv4/IPv6/ASN before running lookup
 
         // Do the rdap/whois lookup
         const data = await performLookup(query);
@@ -29,29 +32,34 @@ module.exports = {
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
                     embeds: [createEmbed('WHOIS',
-                        'The query does not appear to be a valid domain name, IP address or ASN')],
+                        'The query does not appear to be a valid domain name, IP address or ASN, or no results could be found')],
                 },
             });
 
         // Generate the fields
-        const fields = Object.entries(data).filter(entry => entry[1] !== undefined).map(([ name, value ]) => ({
-            name: ['asn', 'cidr'].includes(name)
+        const fields = Object.entries(data).filter(entry => entry[1] !== undefined).map(([ name, value ]) => ([
+            ['asn', 'cidr'].includes(name)
                 ? name.toUpperCase()
                 : name[0].toUpperCase() + name.slice(1).toLowerCase(),
-            value: value instanceof Date
+            value instanceof Date
                 ? value.toUTCString()
                 : value.toString(),
-        }));
+        ]));
 
-        // TODO: Print as a table (keys in first column), similar to DNS results
+        // Generate the table
+        const table = presentTable([
+            ['', ''],
+            ...fields,
+        ]).split('\n').slice(1).join('\n');
+
+        // Title for the result (query, but with 'AS' added to any ASN)
+        const title = query.replace(/^([0-9]+)$/, 'AS$1');
 
         // Send the embed
-        const em = createEmbed('WHOIS', '');
-        em.fields = fields;
         return response({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
-                embeds: [em],
+                embeds: [createEmbed('WHOIS', `\`\`\`\n${title}\n${table}\n\`\`\``)],
             },
         });
     },

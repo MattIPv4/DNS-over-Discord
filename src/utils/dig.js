@@ -1,5 +1,6 @@
 const { InteractionResponseType } = require('slash-commands');
-const { performLookup, presentTable } = require('./dns');
+const { performLookup } = require('./dns');
+const { presentTable } = require('./table');
 const { sendFollowup } = require('./follow-up');
 const { createEmbed } = require('./embed');
 
@@ -28,7 +29,10 @@ module.exports.handleDig = async ({ interaction, env, response, wait, domain, ty
         const output = rows => {
             const trunc = sourceRows.length - rows.length;
             const truncStr = trunc ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
-            const rowsStr = short ? rows.join('\n') : presentTable(rows);
+            const rowsStr = short ? rows.join('\n') : presentTable([
+                ['NAME', 'TTL', 'DATA'],
+                ...rows.map(rowData => [rowData.name, `${rowData.TTL.toLocaleString()}s`, rowData.data]),
+            ]);
             return `\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
 
