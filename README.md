@@ -38,10 +38,12 @@ Due to limitations in Discord, the `/dig` command can only offer 10 different DN
 
 ### Examples
 
-![dig domain: cloudflare.com](assets/dig-command-example-1.png)\
+![dig domain: cloudflare.com](assets/dig-command-example-1.png)
+
 _`/dig domain: cloudflare.com`_
 
-![dig domain: cloudflare.com type: AAAA short: True](assets/dig-command-example-2.png)\
+![dig domain: cloudflare.com type: AAAA short: True](assets/dig-command-example-2.png)
+
 _`/dig domain: cloudflare.com type: AAAA short: True`_
 
 ## multi-dig command
@@ -83,11 +85,38 @@ Please provide a space-separated list of valid DNS record types to lookup, any i
 
 ### Examples
 
-![multi-dig domain: cloudflare.com types: A AAAA](assets/multi-dig-command-example-1.png)\
+![multi-dig domain: cloudflare.com types: A AAAA](assets/multi-dig-command-example-1.png)
+
 _`/multi-dig domain: cloudflare.com types: A AAAA`_
 
-![multi-dig domain: cloudflare.com types: DNSKEY short: True](assets/multi-dig-command-example-2.png)\
+![multi-dig domain: cloudflare.com types: DNSKEY short: True](assets/multi-dig-command-example-2.png)
+
 _`/multi-dig domain: cloudflare.com types: DNSKEY short: True`_
+
+## whois command
+
+Curious about who's behind a domain name, an IP address or even an ASN?
+The `/whois` command allows you to perform an RDAP/WHOIS lookup right in Discord for a given domain, IP or ASN.
+
+![whois command](assets/whois-command.png)
+
+### Examples
+
+![whois query: cloudflare.com](assets/whois-command-example-1.png)
+
+_`/whois query: cloudflare.com`_
+
+![whois query: 104.16.132.229](assets/whois-command-example-2.png)
+
+_`/whois query: 104.16.132.229`_
+
+![whois query: 2606:4700::6810:84e5](assets/whois-command-example-3.png)
+
+_`/whois query: 2606:4700::6810:84e5`_
+
+![whois query: 13335](assets/whois-command-example-4.png)
+
+_`/whois query: 13335`_
 
 ## Other commands
 
@@ -97,7 +126,8 @@ The bot also has a set of helper commands available to get more information abou
 
 The `/help` command provides in-Discord documentation about all the commands available in the 1.1.1.1 DNS over Discord bot.
 
-![help command](assets/help-command.png)\
+![help command](assets/help-command.png)
+
 _`/help`_
 
 ### privacy command
@@ -105,14 +135,16 @@ _`/help`_
 The `/privacy` command displays the privacy policy notice for using the 1.1.1.1 DNS over Discord bot.
 This notice can also be viewed at [https://dns-over-discord.v4.wtf/privacy](https://dns-over-discord.v4.wtf/privacy).
 
-![privacy command](assets/privacy-command.png)\
+![privacy command](assets/privacy-command.png)
+
 _`/privacy`_
 
 ### github command
 
 The DNS over Discord bot is open-source (here), and the `/github` command provides a quick link to access this GitHub repository.
 
-![github command](assets/github-command.png)\
+![github command](assets/github-command.png)
+
 _`/github`_
 
 ### invite command
@@ -120,7 +152,8 @@ _`/github`_
 The `/invite` command provides the user with a quick link to invite the 1.1.1.1 DNS over Discord bot to another Discord server.
 The bot can be invited at any time with [https://dns-over-discord.v4.wtf/invite](https://dns-over-discord.v4.wtf/invite).
 
-![invite command](assets/invite-command.png)\
+![invite command](assets/invite-command.png)
+
 _`/invite`_
 
 ---
