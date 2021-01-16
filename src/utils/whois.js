@@ -1,7 +1,7 @@
-module.exports.rdapLookup = async host => {
-    const resp = await fetch(`https://rdap.cloud/api/v1/${host}`);
+const rdapLookup = module.exports.rdapLookup = async query => {
+    const resp = await fetch(`https://rdap.cloud/api/v1/${query}`);
     const rawData = await resp.json().catch(() => false);
-    const data = rawData?.results?.[host];
+    const data = rawData?.results?.[query];
 
     // Ensure the data is there
     if (!data || !data.success || !data.data)
@@ -13,12 +13,18 @@ module.exports.rdapLookup = async host => {
             ?.vcardArray?.[1].find(card => card[0] === 'fn')?.[3];
     const findEvent = name =>
         data.data?.events?.find(event => event.eventAction.trim().toLowerCase() === name)?.eventDate;
+    const formatCidr = cidr => cidr && (cidr.v4prefix || cidr.v6prefix) && cidr.length
+        ? (cidr.v4prefix || cidr.v6prefix) + '/' + cidr.length.toString()
+        : undefined;
 
     // Find the useful information for us
     const registrar = findEntity('registrar');
     const registrant = findEntity('registrant');
     const registration = findEvent('registration');
     const expiration = findEvent('expiration');
+    const name = data.data?.name;
+    const asn = (data.data?.arin_originas0_originautnums || []).map(asn => asn.toString()).join(', ');
+    const cidr = (data.data?.cidr0_cidrs || []).map(formatCidr).filter(cidr => cidr !== undefined).join(', ');
 
     // If we found nothing, abort
     if (!registrar && !registrant && !registration && !expiration)
@@ -30,6 +36,9 @@ module.exports.rdapLookup = async host => {
         registrant,
         registration: registration ? new Date(registration) : undefined,
         expiration: expiration ? new Date(expiration) : undefined,
+        name,
+        asn: asn || undefined,
+        cidr: cidr || undefined,
     };
 };
 
@@ -72,10 +81,10 @@ const parseWhois = text => {
 
     // Return the final parsed data
     return matches;
-}
+};
 
-module.exports.whoisLookup = async host => {
-    const resp = await fetch(`https://whoisjs.com/api/v1/${host}`);
+const whoisLookup = module.exports.whoisLookup = async query => {
+    const resp = await fetch(`https://whoisjs.com/api/v1/${query}`);
     const rawData = await resp.json().catch(() => false);
 
     // Ensure the data is there
@@ -110,6 +119,11 @@ module.exports.whoisLookup = async host => {
     };
 };
 
-module.exports.performLookup = async host => {
-    // TODO: Do rdap lookup, fallback to whois
+module.exports.performLookup = async query => {
+    // Do the rdap lookup
+    const rdap = await rdapLookup(query);
+    if (rdap) return rdap;
+
+    // If rdap fails, try whois
+    return await whoisLookup(query);
 };
