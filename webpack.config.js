@@ -5,4 +5,11 @@ module.exports = {
     plugins: [
         { apply: compiler => compiler.hooks.beforeRun.tapPromise('PrepareBuildBeforeWebpack', build) },
     ],
+    module: {
+        rules: [
+            {
+                test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader',
+            },
+        ],
+    },
 };
