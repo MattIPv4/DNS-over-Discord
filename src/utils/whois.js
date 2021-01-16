@@ -71,8 +71,8 @@ const parseWhois = text => {
     const regExpSplitLine = new RegExp(reSplitLine);
 
     // Find the matches in the string
-    const singleLineMatches = text.match(regExpSingleLineGm);
-    const splitLineMatches = text.match(regExpSplitLineGm);
+    const singleLineMatches = text.match(regExpSingleLineGm) || [];
+    const splitLineMatches = text.match(regExpSplitLineGm) || [];
     const matches = [];
 
     // All single line matches are valid
