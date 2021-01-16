@@ -27,7 +27,7 @@ module.exports = {
             required: false,
         },
     ],
-    execute: async (interaction, respond) => {
+    execute: async ({ interaction, env, response, wait }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
@@ -44,6 +44,6 @@ module.exports = {
         if (!types.length) types.push('A');
 
         // Go!
-        await handleDig(interaction, respond, domain, types, rawShort);
+        return await handleDig({ interaction, env, response, wait, domain, types, short: rawShort });
     },
 };

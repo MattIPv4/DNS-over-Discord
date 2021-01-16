@@ -127,7 +127,23 @@ _`/invite`_
 
 ## Development
 
-TODO
+1. Create your test Discord application at https://discord.com/developers/applications (this does not need a bot account, just the application).
+2. Create your `development.env` file. Copy `development.env.sample` and fill out the information from your Discord application, plus the ID of your test server/guild.
+3. Authenticate with Wrangler by running `wrangler login`.
+4. Update `wrangler.toml` for your account. Use `wrangler whoami` to get your account ID, update the value in `wranglar.toml` to match.
+5. Develop with the worker by running `npm run dev`.
+
+## Deployments
+
+`wrangler.toml` and this repository is currently designed for a staging deployment and a production deployment.
+
+Ensure that you've created and configured `staging.env` and `production.env` appropriately (`staging.env` has a test server/guild by default, but this can be removed to stage global commands).
+
+Ensure that the staging/production environments in `wrangler.toml` have been updated with your zone IDs and routes for the workers.
+
+Run `npm run publish:staging` to deploy to staging, and `npm run publish:production` to deploy to the production environment.
+
+Live logs for both environments can be accessed with `npm run logs:staging` and `npm run logs:production` as needed.
 
 <!-- Contributing -->
 ## Contributing

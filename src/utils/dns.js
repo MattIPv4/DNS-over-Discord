@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const chunkStr = require('./chunk-str');
 
 const DNS_RCODES = Object.freeze({

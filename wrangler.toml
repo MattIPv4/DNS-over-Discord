@@ -1,0 +1,13 @@
+name = "dns-over-discord"
+type = "webpack"
+account_id = "fb1f542488f2441acf88ca15f3a8390d"
+workers_dev = true
+webpack_config = "webpack.config.js"
+
+[env.staging]
+zone_id = "63feb9b9ee057b117f7c833928b0d21f"
+route = "dns-over-discord-staging.v4.wtf/*"
+
+[env.production]
+zone_id = "63feb9b9ee057b117f7c833928b0d21f"
+route = "dns-over-discord.v4.wtf/*"

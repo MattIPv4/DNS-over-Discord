@@ -5,9 +5,9 @@ const Privacy = require('../utils/privacy');
 module.exports = {
     name: 'privacy',
     description: 'View the privacy policy for DNS over Discord',
-    execute: async (interaction, respond) => {
+    execute: async ({ response }) => {
         // Respond
-        respond({
+        return response({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
                 embeds: [createEmbed('Privacy Policy', Privacy)],
