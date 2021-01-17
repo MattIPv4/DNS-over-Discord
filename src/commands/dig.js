@@ -30,7 +30,7 @@ module.exports = {
             required: false,
         },
     ],
-    execute: async ({ interaction, env, response, wait }) => {
+    execute: async ({ interaction, response, wait }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawType = ((interaction.data.options.find(opt => opt.name === 'type') || {}).value || '').trim();
@@ -44,6 +44,6 @@ module.exports = {
         const type = VALID_TYPES.includes(rawType) ? rawType : 'A';
 
         // Go!
-        return await handleDig({ interaction, env, response, wait, domain, types: [type], short: rawShort });
+        return await handleDig({ interaction, response, wait, domain, types: [type], short: rawShort });
     },
 };

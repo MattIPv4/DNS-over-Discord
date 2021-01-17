@@ -22,13 +22,16 @@
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
     "discord-interactions": "^1.4.1",
-    "slash-commands": "^1.2.2"
+    "slash-commands": "^1.2.2",
+    "toucan-js": "^2.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
     "@babel/plugin-proposal-optional-chaining": "^7.12.7",
+    "@sentry/webpack-plugin": "^1.14.0",
     "babel-loader": "^8.2.2",
     "dotenv": "^8.2.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "webpack": "^4.46.0"
   }
 }
