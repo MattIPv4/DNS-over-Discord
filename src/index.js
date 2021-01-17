@@ -31,7 +31,7 @@ const handleInteraction = async ({ request, wait, sentry }) => {
     // Get the body as a buffer
     const bodyBuffer = await request.arrayBuffer();
 
-    // Verification a legitimate request
+    // Verify a legitimate request
     if (!handleInteractionVerification(request, bodyBuffer))
         return new Response(null, { status: 401 });
 
@@ -96,7 +96,7 @@ const handleRequest = async ({ request, wait, sentry }) => {
                 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
                 'Expires': '0',
                 'Surrogate-Control': 'no-store',
-            }
+            },
         });
 
     // Privacy notice route
@@ -104,7 +104,7 @@ const handleRequest = async ({ request, wait, sentry }) => {
         return new Response(Privacy, {
             headers: {
                 'Content-Type': 'text/plain',
-            }
+            },
         });
 
     // Invite redirect
