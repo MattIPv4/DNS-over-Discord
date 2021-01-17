@@ -6,14 +6,7 @@ const build = require('./src/build');
 
 module.exports = {
     entry: './src/index.js',
-    target: 'webworker',
     devtool: 'source-map',
-    output: {
-        path: path.join(__dirname, 'dist'),
-        publicPath: 'dist',
-        filename: 'worker.js',
-        sourceMapFilename: 'worker.js.map',
-    },
     plugins: [
         // Hook in the commands build process before each webpack run
         { apply: compiler => compiler.hooks.beforeRun.tapPromise('PrepareBuildBeforeWebpack', build) },
