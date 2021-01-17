@@ -34,7 +34,7 @@ module.exports.initSentry = (event, opts = {}) => {
     // Define the user making the req based on IP + UA + colo
     const ipAddress = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for');
     const userAgent = request.headers.get('user-agent') || '';
-    sentry.setUser({ ip: ipAddress, userAgent: userAgent, colo: colo });
+    sentry.setUser({ ip: ipAddress, userAgent, colo });
 
     // Done, start using Sentry!
     return sentry;
