@@ -1,14 +1,17 @@
 const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
+const { initSentry } = require('./utils/sentry');
 const Privacy = require('./utils/privacy');
 const commands = require('./build/data/commands.json');
 const env = require('./build/data/environment.json');
 
+// Util to send a JSON response
 const jsonResponse = obj => new Response(JSON.stringify(obj), {
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
+// Util to send a perm redirect response
 const redirectResponse = url => new Response(null, {
     status: 301,
     headers: {
@@ -16,6 +19,7 @@ const redirectResponse = url => new Response(null, {
     },
 });
 
+// Util to verify a Discord interaction is legitimate
 const handleInteractionVerification = (request, bodyBuffer) => {
     const timestamp = request.headers.get('X-Signature-Timestamp') || '';
     const signature = request.headers.get('X-Signature-Ed25519') || '';
@@ -23,7 +27,8 @@ const handleInteractionVerification = (request, bodyBuffer) => {
     return verifyKey(bodyBuffer, signature, timestamp, env.CLIENT_PUBLIC_KEY);
 };
 
-const handleInteraction = async ({ request, wait }) => {
+// Process a Discord interaction POST request
+const handleInteraction = async ({ request, wait, sentry }) => {
     // Get the body as a buffer
     const bodyBuffer = await request.arrayBuffer();
 
@@ -59,6 +64,7 @@ const handleInteraction = async ({ request, wait }) => {
         // Catch & log any errors
         console.log(body);
         console.error(err);
+        sentry.captureException(err);
 
         // Send an ephemeral message to the user
         return jsonResponse({
@@ -71,12 +77,13 @@ const handleInteraction = async ({ request, wait }) => {
     }
 };
 
-const handleRequest = async ({ request, wait }) => {
+// Process all requests to the worker
+const handleRequest = async ({ request, wait, sentry }) => {
     const url = new URL(request.url);
 
     // Send interactions off to their own handler
     if (request.method === 'POST' && url.pathname === '/interactions')
-        return await handleInteraction({ request, wait });
+        return await handleInteraction({ request, wait, sentry });
 
     // Otherwise, we only care for GET requests
     if (request.method !== 'GET')
@@ -122,5 +129,18 @@ const handleRequest = async ({ request, wait }) => {
 };
 
 // Register the worker listener
-addEventListener('fetch', event =>
-    event.respondWith(handleRequest({ request: event.request, wait: event.waitUntil.bind(event) })));
+addEventListener('fetch', event => {
+    // Start Sentry (pass in the release injected by Webpack plugin)
+    const sentry = initSentry(event, env, { release: SENTRY_RELEASE.id });
+
+    // Process the event
+    try {
+        return event.respondWith(handleRequest({ request: event.request, wait: event.waitUntil.bind(event), sentry }));
+    } catch (err) {
+        // Log & re-throw any errors
+        console.error(err);
+        sentry.captureException(err);
+        throw err;
+    }
+});
+
