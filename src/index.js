@@ -2,7 +2,6 @@ const { InteractionType, InteractionResponseType, verifyKey } = require('discord
 const { initSentry } = require('./utils/sentry');
 const Privacy = require('./utils/privacy');
 const commands = require('./build/data/commands.json');
-const env = require('./build/data/environment.json');
 
 // Util to send a JSON response
 const jsonResponse = obj => new Response(JSON.stringify(obj), {
@@ -24,7 +23,7 @@ const handleInteractionVerification = (request, bodyBuffer) => {
     const timestamp = request.headers.get('X-Signature-Timestamp') || '';
     const signature = request.headers.get('X-Signature-Ed25519') || '';
 
-    return verifyKey(bodyBuffer, signature, timestamp, env.CLIENT_PUBLIC_KEY);
+    return verifyKey(bodyBuffer, signature, timestamp, process.env.CLIENT_PUBLIC_KEY);
 };
 
 // Process a Discord interaction POST request
@@ -59,7 +58,7 @@ const handleInteraction = async ({ request, wait, sentry }) => {
         const command = require(`./commands/${commandData.file}`);
 
         // Execute
-        return await command.execute({ interaction: body, env, response: jsonResponse, wait });
+        return await command.execute({ interaction: body, response: jsonResponse, wait });
     } catch (err) {
         // Catch & log any errors
         console.log(body);
@@ -110,7 +109,7 @@ const handleRequest = async ({ request, wait, sentry }) => {
 
     // Invite redirect
     if (url.pathname === '/invite')
-        return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${env.CLIENT_ID}&scope=applications.commands`);
+        return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=applications.commands`);
 
     // Discord redirect
     if (url.pathname === '/server')
@@ -131,7 +130,7 @@ const handleRequest = async ({ request, wait, sentry }) => {
 // Register the worker listener
 addEventListener('fetch', event => {
     // Start Sentry (pass in the release injected by Webpack plugin)
-    const sentry = initSentry(event, env, { release: SENTRY_RELEASE.id });
+    const sentry = initSentry(event, { release: SENTRY_RELEASE.id });
 
     // Process the event
     try {

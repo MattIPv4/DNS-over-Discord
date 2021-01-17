@@ -4,7 +4,7 @@ const { presentTable } = require('./table');
 const { sendFollowup } = require('./follow-up');
 const { createEmbed } = require('./embed');
 
-module.exports.handleDig = async ({ interaction, env, response, wait, domain, types, short }) => {
+module.exports.handleDig = async ({ interaction, response, wait, domain, types, short }) => {
     // Make the DNS queries
     const results = [];
     for (const type of types)
@@ -66,7 +66,7 @@ module.exports.handleDig = async ({ interaction, env, response, wait, domain, ty
 
         // Send the embeds
         while (embeds.length) {
-            await sendFollowup(interaction, env, {
+            await sendFollowup(interaction, {
                 embeds: embeds.splice(0, 10),
             });
         }

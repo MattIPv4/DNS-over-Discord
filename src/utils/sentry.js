@@ -1,10 +1,10 @@
 const { default: Toucan } = require('toucan-js');
 
 // Thanks @cloudflare/worker-sentry for the base of this
-module.exports.initSentry = (event, env, opts = {}) => {
+module.exports.initSentry = (event, opts = {}) => {
     // Use Toucan to interact with Sentry
     const sentry = new Toucan({
-        dsn: env.SENTRY_DSN,
+        dsn: process.env.SENTRY_DSN,
         event: event,
         allowedHeaders: [
             'user-agent',

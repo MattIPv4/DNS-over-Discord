@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs').promises;
-const env = require('dotenv').config({ path: path.join(__dirname, '..', '..', `${process.env.NODE_ENV}.env`) });
 
 const { getCommands, registerCommands } = require('./commands');
 
@@ -9,9 +8,6 @@ const mkdirSafe = path => fs.access(path).catch(() => fs.mkdir(path, { recursive
 module.exports = async () => {
     // Create the output directory
     await mkdirSafe(path.join(__dirname, 'data'));
-
-    // Export the environment as JSON
-    await fs.writeFile(path.join(__dirname, 'data', 'environment.json'), JSON.stringify(env.parsed, null, 2));
 
     // Export empty commands as JSON
     // This is so the help command doesn't error
@@ -32,5 +28,5 @@ module.exports = async () => {
     await fs.writeFile(path.join(__dirname, 'data', 'commands.json'), JSON.stringify(discordCommandsObj, null, 2));
 
     // Done
-    console.log('Commands & environment data ready to go!');
+    console.log('Commands data ready to go!');
 };
