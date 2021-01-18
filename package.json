@@ -8,7 +8,11 @@
     "publish:production": "NODE_ENV=production wrangler publish -e production",
     "publish:staging": "NODE_ENV=staging wrangler publish -e staging",
     "logs:production": "wrangler tail -e production",
-    "logs:staging": "wrangler tail -e staging"
+    "logs:staging": "wrangler tail -e staging",
+    "test:eslint": "npx eslint src/",
+    "test:eslint:fix": "npx eslint src/ --fix",
+    "test": "npm run test:eslint",
+    "test:fix": "npm run test:eslint:fix"
   },
   "repository": {
     "type": "git",
