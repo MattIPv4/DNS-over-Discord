@@ -5,7 +5,7 @@ module.exports.initSentry = (event, opts = {}) => {
     // Use Toucan to interact with Sentry
     const sentry = new Toucan({
         dsn: process.env.SENTRY_DSN,
-        event: event,
+        event,
         allowedHeaders: [
             'user-agent',
             'cf-challenge',
@@ -25,15 +25,19 @@ module.exports.initSentry = (event, opts = {}) => {
     });
 
     // Get the request
-    const request = event.request;
+    const { request } = event;
 
     // Determine with Cloudflare colo the req went to
-    const colo = request.cf && request.cf.colo ? request.cf.colo : 'UNKNOWN';
+    const colo = request.cf && request.cf.colo
+        ? request.cf.colo
+        : 'UNKNOWN';
+
     sentry.setTag('colo', colo);
 
     // Define the user making the req based on IP + UA + colo
     const ipAddress = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for');
     const userAgent = request.headers.get('user-agent') || '';
+
     sentry.setUser({ ip: ipAddress, userAgent, colo });
 
     // Done, start using Sentry!

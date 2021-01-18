@@ -6,7 +6,7 @@ const commands = require('../build/data/commands.json');
 module.exports = {
     name: 'help',
     description: 'Find out more about using DNS over Discord',
-    execute: async ({ response }) => {
+    execute: ({ response }) => {
         // Create the base embed and fetch commands
         const embed = createEmbed('Help');
 

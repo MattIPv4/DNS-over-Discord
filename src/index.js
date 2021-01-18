@@ -1,4 +1,5 @@
 const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
+const { Response } = require('http');
 const { initSentry } = require('./utils/sentry');
 const Privacy = require('./utils/privacy');
 const commands = require('./build/data/commands.json');
@@ -32,26 +33,31 @@ const handleInteraction = async ({ request, wait, sentry }) => {
     const bodyBuffer = await request.arrayBuffer();
 
     // Verify a legitimate request
-    if (!handleInteractionVerification(request, bodyBuffer))
+    if (!handleInteractionVerification(request, bodyBuffer)) {
         return new Response(null, { status: 401 });
+    }
 
     // Work with JSON body going forward
-    const body = JSON.parse((new TextDecoder('utf-8')).decode(bodyBuffer)) || {};
+    const body = JSON.parse(new TextDecoder('utf-8').decode(bodyBuffer)) || {};
 
     // Handle a PING
-    if (body.type === InteractionType.PING)
+    if (body.type === InteractionType.PING) {
         return jsonResponse({
             type: InteractionResponseType.PONG,
         });
+    }
 
     // Otherwise, we only care for commands
-    if (body.type !== InteractionType.COMMAND)
+    if (body.type !== InteractionType.COMMAND) {
         return new Response(null, { status: 501 });
+    }
 
     // Locate the command data
     const commandData = commands[body.data.id];
-    if (!commandData)
+
+    if (!commandData) {
         return new Response(null, { status: 404 });
+    }
 
     try {
         // Load in the command
@@ -77,19 +83,21 @@ const handleInteraction = async ({ request, wait, sentry }) => {
 };
 
 // Process all requests to the worker
-const handleRequest = async ({ request, wait, sentry }) => {
+const handleRequest = ({ request, wait, sentry }) => {
     const url = new URL(request.url);
 
     // Send interactions off to their own handler
-    if (request.method === 'POST' && url.pathname === '/interactions')
-        return await handleInteraction({ request, wait, sentry });
+    if (request.method === 'POST' && url.pathname === '/interactions') {
+        return handleInteraction({ request, wait, sentry });
+    }
 
     // Otherwise, we only care for GET requests
-    if (request.method !== 'GET')
+    if (request.method !== 'GET') {
         return new Response(null, { status: 404 });
+    }
 
     // Health check route
-    if (url.pathname === '/health')
+    if (url.pathname === '/health') {
         return new Response('OK', {
             headers: {
                 'Content-Type': 'text/plain',
@@ -98,38 +106,50 @@ const handleRequest = async ({ request, wait, sentry }) => {
                 'Surrogate-Control': 'no-store',
             },
         });
+    }
 
     // Privacy notice route
-    if (url.pathname === '/privacy')
+    if (url.pathname === '/privacy') {
         return new Response(Privacy, {
             headers: {
                 'Content-Type': 'text/plain',
             },
         });
+    }
 
     // Invite redirect
-    if (url.pathname === '/invite')
+    if (url.pathname === '/invite') {
         return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=applications.commands`);
+    }
 
     // Discord redirect
-    if (url.pathname === '/server')
+    if (url.pathname === '/server') {
         return redirectResponse('https://discord.gg/JgxVfGn');
+    }
 
     // GitHub redirect
-    if (url.pathname === '/github')
+    if (url.pathname === '/github') {
         return redirectResponse('https://github.com/MattIPv4/DNS-over-Discord/');
+    }
 
     // Docs redirect
-    if (url.pathname === '/')
+    if (url.pathname === '/') {
         return redirectResponse('https://developers.cloudflare.com/1.1.1.1/fun-stuff/dns-over-discord');
+    }
 
     // Not found
     return new Response(null, { status: 404 });
 };
 
 // Register the worker listener
+// eslint-disable-next-line no-undef
 addEventListener('fetch', event => {
-    // Start Sentry (pass in the release injected by Webpack plugin)
+
+    /*
+     * Start Sentry (pass in the release injected by Webpack plugin)
+     * The following rule is disabled due to the variable being injected (?)
+     */
+    // eslint-disable-next-line no-undef
     const sentry = initSentry(event, { release: SENTRY_RELEASE.id });
 
     // Process the event

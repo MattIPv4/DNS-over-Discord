@@ -1,29 +1,28 @@
-const rdapLookup = module.exports.rdapLookup = async query => {
+const { fetch } = require('node-fetch');
+
+const rdapLookup = async query => {
     const resp = await fetch(`https://rdap.cloud/api/v1/${query}`);
     const rawData = await resp.json().catch(() => false);
     const data = rawData?.results?.[query];
 
     // Ensure the data is there
-    if (!data || !data.success || !data.data)
+    if (!data || !data.success || !data.data) {
         return false;
+    }
 
     // Utils to find the data
     const uniqueCommaSep = arr => [...new Set(arr)].join(', ');
 
-    const findEntities = name => data.data?.entities?.filter(entity =>
-        entity.roles.map(role => role.trim().toLowerCase()).includes(name));
+    const findEntities = name => data.data?.entities?.filter(entity => entity.roles.map(role => role.trim().toLowerCase()).includes(name));
 
-    const findEntityName = name => uniqueCommaSep(findEntities(name).map(entity =>
-        entity?.vcardArray?.[1].find(card => card[0] === 'fn')?.[3] || entity?.handle));
+    const findEntityName = name => uniqueCommaSep(findEntities(name).map(entity => entity?.vcardArray?.[1].find(card => card[0] === 'fn')?.[3] || entity?.handle));
 
-    const findEntityEmail = name => uniqueCommaSep(findEntities(name).map(entity =>
-        entity?.vcardArray?.[1].find(card => card[0] === 'email')?.[3]));
+    const findEntityEmail = name => uniqueCommaSep(findEntities(name).map(entity => entity?.vcardArray?.[1].find(card => card[0] === 'email')?.[3]));
 
-    const findEvent = name =>
-        data.data?.events?.find(event => event.eventAction.trim().toLowerCase() === name)?.eventDate;
+    const findEvent = name => data.data?.events?.find(event => event.eventAction.trim().toLowerCase() === name)?.eventDate;
 
     const formatCidr = cidr => cidr && (cidr.v4prefix || cidr.v6prefix) && cidr.length
-        ? (cidr.v4prefix || cidr.v6prefix) + '/' + cidr.length.toString()
+        ? `${cidr.v4prefix || cidr.v6prefix}/${cidr.length.toString()}`
         : undefined;
 
     // Find the useful information for us
@@ -33,12 +32,13 @@ const rdapLookup = module.exports.rdapLookup = async query => {
     const expiration = findEvent('expiration');
     const abuse = findEntityEmail('abuse');
     const name = data.data?.name;
-    const asn = uniqueCommaSep((data.data?.arin_originas0_originautnums || []).map(asn => asn.toString()));
-    const cidr = uniqueCommaSep((data.data?.cidr0_cidrs || []).map(formatCidr).filter(cidr => cidr !== undefined));
+    const asn = uniqueCommaSep((data.data?.arin_originas0_originautnums || []).map(e => e.toString()));
+    const cidr = uniqueCommaSep((data.data?.cidr0_cidrs || []).map(formatCidr).filter(e => e !== undefined));
 
     // If we found nothing, abort
-    if (!registrar && !registrant && !registration && !expiration && !name && !asn && !cidr)
+    if (!registrar && !registrant && !registration && !expiration && !name && !asn && !cidr) {
         return false;
+    }
 
     // Done
     return {
@@ -46,8 +46,12 @@ const rdapLookup = module.exports.rdapLookup = async query => {
         registrant: registrant || undefined,
         asn: asn || undefined,
         registrar: registrar || undefined,
-        registration: registration ? new Date(registration) : undefined,
-        expiration: expiration ? new Date(expiration) : undefined,
+        registration: registration
+            ? new Date(registration)
+            : undefined,
+        expiration: expiration
+            ? new Date(expiration)
+            : undefined,
         cidr: cidr || undefined,
         abuse: abuse || undefined,
     };
@@ -78,6 +82,7 @@ const parseWhois = text => {
     // All single line matches are valid
     for (const rawMatch of singleLineMatches) {
         const match = rawMatch.trim().match(regExpSingleLine);
+
         matches.push({
             key: match[1],
             value: match[2],
@@ -86,10 +91,12 @@ const parseWhois = text => {
 
     // Split line matches that don't include a single line match are valid
     for (const rawMatch of splitLineMatches) {
-        if (singleLineMatches.map(singleLineMatch => rawMatch.includes(singleLineMatch)).includes(true))
+        if (singleLineMatches.map(singleLineMatch => rawMatch.includes(singleLineMatch)).includes(true)) {
             continue;
+        }
 
         const match = rawMatch.trim().match(regExpSplitLine);
+
         matches.push({
             key: match[1],
             value: match[2],
@@ -100,18 +107,21 @@ const parseWhois = text => {
     return matches;
 };
 
-const whoisLookup = module.exports.whoisLookup = async query => {
+const whoisLookup = async query => {
     const resp = await fetch(`https://whoisjs.com/api/v1/${query}`);
     const rawData = await resp.json().catch(() => false);
 
     // Ensure the data is there
-    if (!rawData || !rawData.success || !rawData.raw)
+    if (!rawData || !rawData.success || !rawData.raw) {
         return false;
+    }
 
     // Parse ourselves
     const data = parseWhois(rawData.raw);
-    if (!data)
+
+    if (!data) {
         return false;
+    }
 
     // Util to find the data
     const findAttribute = name => data.find(entry => entry.key.trim().toLowerCase() === name)?.value?.trim();
@@ -123,23 +133,35 @@ const whoisLookup = module.exports.whoisLookup = async query => {
     const expiration = findAttribute('registry expiry date') || findAttribute('expiry date');
 
     // If we found nothing, abort
-    if (!registrar && !registrant && !registration && !expiration)
+    if (!registrar && !registrant && !registration && !expiration) {
         return false;
+    }
 
     // Done
     return {
         registrant,
         registrar,
-        registration: registration ? new Date(registration) : undefined,
-        expiration: expiration ? new Date(expiration) : undefined,
+        registration: registration
+            ? new Date(registration)
+            : undefined,
+        expiration: expiration
+            ? new Date(expiration)
+            : undefined,
     };
 };
 
-module.exports.performLookup = async query => {
+const performLookup = async query => {
     // Do the rdap lookup
     const rdap = await rdapLookup(query);
-    if (rdap) return rdap;
+
+    if (rdap) {
+        return rdap;
+    }
 
     // If rdap fails, try whois
-    return await whoisLookup(query);
+    return whoisLookup(query);
+};
+
+module.exports = {
+    performLookup, rdapLookup, whoisLookup
 };

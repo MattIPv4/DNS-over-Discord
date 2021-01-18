@@ -27,23 +27,29 @@ module.exports = {
             required: false,
         },
     ],
-    execute: async ({ interaction, response, wait }) => {
+    execute: ({ interaction, response, wait }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
         const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
 
-        // Parse domain input
-        // TODO: Validate domain
+        /*
+         * Parse domain input
+         * TODO: Validate domain
+         */
         const domain = rawDomain;
 
         // Parse types input, mapping '*' to all records and defaulting to 'A' if none given
         const types = rawTypes === '*'
             ? VALID_TYPES
-            : rawTypes.split(' ').map(x => x.trim().toUpperCase()).filter(x => VALID_TYPES.includes(x));
-        if (!types.length) types.push('A');
+            : rawTypes.split(' ').map(x => x.trim().toUpperCase()).
+                filter(x => VALID_TYPES.includes(x));
+
+        if (!types.length) {
+            types.push('A');
+        }
 
         // Go!
-        return await handleDig({ interaction, response, wait, domain, types, short: rawShort });
+        return handleDig({ interaction, response, wait, domain, types, short: rawShort });
     },
 };
