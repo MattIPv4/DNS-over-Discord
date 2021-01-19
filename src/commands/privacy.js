@@ -10,6 +10,5 @@ module.exports = {
         data: {
             embeds: [createEmbed('Privacy Policy', Privacy)],
         },
-    })
-    ,
+    }),
 };

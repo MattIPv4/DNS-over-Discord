@@ -15,7 +15,8 @@ module.exports = {
         {
             name: 'type',
             description: 'DNS record type to lookup',
-            help: `Supported types:\n${POPULAR_TYPES.map(type => `  ${type}`).join('\n')}\n\nDefaults to \`A\` records.`,
+            help: `Supported types:\n${POPULAR_TYPES.map(type => `  ${type}`)
+                .join('\n')}\n\nDefaults to \`A\` records.`,
             type: ApplicationCommandOptionType.STRING,
             required: false,
             choices: POPULAR_TYPES.map(type => ({
@@ -32,9 +33,14 @@ module.exports = {
     ],
     execute: ({ interaction, response, wait }) => {
         // Get the raw values from Discord
-        const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
-        const rawType = ((interaction.data.options.find(opt => opt.name === 'type') || {}).value || '').trim();
-        const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
+        const rawDomain = ((interaction.data.options
+            .find(opt => opt.name === 'domain') || {}).value || '')
+            .trim();
+        const rawType = ((interaction.data.options
+            .find(opt => opt.name === 'type') || {}).value || '')
+            .trim();
+        const rawShort = (interaction.data.options
+            .find(opt => opt.name === 'short') || {}).value || false;
 
         /*
          * Parse domain input

@@ -15,7 +15,8 @@ module.exports = {
         {
             name: 'types',
             description: 'Space-separated DNS record types to lookup, `*` for all types',
-            help: `Supported types:\n${VALID_TYPES.map(type => `  ${type}`).join('\n')}\n\nUse \`*\` to lookup all types.`,
+            help: `Supported types:\n${VALID_TYPES.map(type => `  ${type}`)
+                .join('\n')}\n\nUse \`*\` to lookup all types.`,
             type: ApplicationCommandOptionType.STRING,
             required: false,
             // TODO: https://github.com/discord/discord-api-docs/issues/2331
@@ -29,9 +30,14 @@ module.exports = {
     ],
     execute: ({ interaction, response, wait }) => {
         // Get the raw values from Discord
-        const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
-        const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
-        const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
+        const rawDomain = ((interaction.data.options
+            .find(opt => opt.name === 'domain') || {}).value || '')
+            .trim();
+        const rawTypes = ((interaction.data.options
+            .find(opt => opt.name === 'types') || {}).value || '')
+            .trim();
+        const rawShort = (interaction.data.options
+            .find(opt => opt.name === 'short') || {}).value || false;
 
         /*
          * Parse domain input
@@ -45,9 +51,8 @@ module.exports = {
             : rawTypes.split(' ').map(x => x.trim().toUpperCase()).
                 filter(x => VALID_TYPES.includes(x));
 
-        if (!types.length) {
-            types.push('A');
-        }
+        if (!types.length) types.push('A');
+
 
         // Go!
         return handleDig({ interaction, response, wait, domain, types, short: rawShort });

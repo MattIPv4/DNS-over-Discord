@@ -3,18 +3,15 @@ const chunkStr = (str, size) => {
     const ret = [];
     // TODO: Prefer to wrap at ', ' if possible
 
-    while (strArr.length) {
-        ret.push(strArr.splice(0, size).join(''));
-    }
+    while (strArr.length) ret.push(strArr.splice(0, size).join(''));
+
     return ret;
 };
 
 module.exports.presentTable = tableRows => {
     // Generate the column data
     const columns = tableRows.reduce((count, row) => Math.max(count, row.length), 0);
-    const columnPadding = idx => idx === 0 || idx === columns - 1
-        ? 1
-        : 2;
+    const columnPadding = idx => idx === 0 || idx === columns - 1 ? 1 : 2;
 
     /*
      * Define a max width for columns

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 module.exports = `
 By using DNS over Discord, whether you have read these notices or not, you agree to the following data being used as needed for DNS over Discord to operate and provide its functionality.
 

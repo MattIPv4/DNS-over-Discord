@@ -1,4 +1,3 @@
-// eslint-disable-nextline no-shadow
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -33,7 +32,8 @@ module.exports = async () => {
         return obj;
     }, {});
 
-    await fs.writeFile(path.join(__dirname, 'data', 'commands.json'), JSON.stringify(discordCommandsObj, null, 2));
+    await fs.writeFile(path
+        .join(__dirname, 'data', 'commands.json'), JSON.stringify(discordCommandsObj, null, 2));
 
     // Done
     console.log('Commands data ready to go!');

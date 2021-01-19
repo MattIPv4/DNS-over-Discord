@@ -8,26 +8,25 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
     // Make the DNS queries
     const results = [];
 
-    for (const type of types) {
-        results.push({
-            type,
-            // Following rule is disabled because the result of the statement after it is needed.
-            // eslint-disable-next-line no-await-in-loop
-            data: await performLookup(domain, type),
-        });
-    }
+    for (const type of types) results.push({
+        type,
+        // Following rule is disabled because the result of the statement after it is needed.
+        // eslint-disable-next-line no-await-in-loop
+        data: await performLookup(domain, type),
+    });
+
 
     // Define the presenter
     const present = data => {
         // No results
-        if (typeof data === 'undefined' || Array.isArray(data) && data.length === 0) {
-            return 'No records found';
-        }
+        if (typeof data === 'undefined' ||
+            Array.isArray(data) &&
+            data.length === 0) return 'No records found';
+
 
         // Error message
-        if (typeof data === 'object' && data.message) {
-            return data.message;
-        }
+        if (typeof data === 'object' && data.message) return data.message;
+
 
         // Map the data if short requested
         const sourceRows = short
@@ -39,15 +38,12 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
         const output = rows => {
             const trunc = sourceRows.length - rows.length;
             const truncStr = trunc
-                ? `\n...(${trunc.toLocaleString()} row${trunc === 1
-                    ? ''
-                    : 's'} truncated)`
-                : '';
+                ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
             const rowsStr = short
                 ? rows.join('\n')
                 : presentTable([
                     ['NAME', 'TTL', 'DATA'],
-                    ...rows.map(rowData => [rowData.name, `${rowData.TTL.toLocaleString()}s`, rowData.data]),
+                    ...rows.map(row => [row.name, `${row.TTL.toLocaleString()}s`, row.data]),
                 ]);
 
             return `\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
@@ -55,9 +51,8 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
 
         // Keep adding rows until we reach Discord 2048 char limit
         for (const row of sourceRows) {
-            if (output([...finalRows, row]).length > 2048) {
-                break;
-            }
+            if (output([...finalRows, row]).length > 2048) break;
+
             finalRows.push(row);
         }
 
@@ -66,17 +61,17 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
     };
 
     // Convert results to an embed
-    const embeds = results.map(({ type, data }) => createEmbed(`${type} records`, present(data), 'diggy diggy hole'));
+    const embeds = results
+        .map(({ type, data }) => createEmbed(`${type} records`, present(data), 'diggy diggy hole'));
 
     // If we have 10 or fewer embeds, we can respond with them directly
-    if (embeds.length <= 10) {
-        return response({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-                embeds: embeds.splice(0, 10),
-            },
-        });
-    }
+    if (embeds.length <= 10) return response({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+            embeds: embeds.splice(0, 10),
+        },
+    });
+
 
     /*
      * Otherwise, ack and then send followups for chunks of 10 embeds
@@ -87,14 +82,9 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
         await new Promise(resolve => setTimeout(resolve, 250));
 
         // Send the embeds
-        const EmbedPromises = [];
-
-        while (embeds.length) {
-            EmbedPromises.push(sendFollowup(interaction, {
-                embeds: embeds.splice(0, 10),
-            }));
-        }
-        Promise.all(EmbedPromises);
+        while (embeds.length) await sendFollowup(interaction, {
+            embeds: embeds.splice(0, 10),
+        });
 
     })());
     return response({ type: InteractionResponseType.ACK_WITH_SOURCE });

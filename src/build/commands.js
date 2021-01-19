@@ -13,18 +13,15 @@ module.exports.getCommands = () => {
     // Work through each file
     for (const commandFile of commandFiles) {
         // Load the file in if JS
-        if (!commandFile.endsWith('.js')) {
-            continue;
-        }
+        if (!commandFile.endsWith('.js')) continue;
+
         const commandData = require(path.join(commandDirectory, commandFile));
 
         // Validate it is a command
-        if (!('name' in commandData)) {
-            continue;
-        }
-        if (!('execute' in commandData)) {
-            continue;
-        }
+        if (!('name' in commandData)) continue;
+
+        if (!('execute' in commandData)) continue;
+
 
         // Remove execute for storing and add file
         Reflect.deleteProperty(commandData, 'execute');
@@ -53,16 +50,10 @@ module.exports.registerCommands = async commands => {
     const discordCommands = await interaction.getApplicationCommands(process.env.TEST_GUILD_ID);
 
     // Remove old commands
-    const ApplicationDeletePromises = [];
-
     for (const command of discordCommands) {
-        if (commands.find(cmd => cmd.name === command.name)) {
-            continue;
-        }
-        ApplicationDeletePromises.push(interaction.deleteApplicationCommand(command.id, process.env.TEST_GUILD_ID));
+        if (commands.find(cmd => cmd.name === command.name)) continue;
+        await interaction.deleteApplicationCommand(command.id, process.env.TEST_GUILD_ID);
     }
-
-    Promise.all(ApplicationDeletePromises);
 
     // Register or update the commands with Discord
     const commandData = [];
@@ -73,22 +64,15 @@ module.exports.registerCommands = async commands => {
 
         if (discordCommand) {
 
-            /*
-             * TODO: Compare discordCommand & command, only edit if needed
-             * Disable rule is used next line due to the result of the function being needed in the next statement.
-             */
-            // eslint-disable-next-line no-await-in-loop
-            const data = await interaction.editApplicationCommand(discordCommand.id, command, process.env.TEST_GUILD_ID);
+            // TODO: Compare discordCommand & command, only edit if needed
+            const data = await interaction
+                .editApplicationCommand(discordCommand.id, command, process.env.TEST_GUILD_ID);
 
             commandData.push({ ...command, ...data });
             continue;
         }
 
-        /*
-         * Register the new command
-         * Disable rule is used next line due to the result of the function being needed in the next statement.
-         */
-        // eslint-disable-next-line no-await-in-loop
+        // Register the new command
         const data = await interaction.createApplicationCommand(command, process.env.TEST_GUILD_ID);
 
         commandData.push({ ...command, ...data });

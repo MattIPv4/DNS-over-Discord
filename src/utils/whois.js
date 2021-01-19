@@ -1,25 +1,33 @@
-const { fetch } = require('node-fetch');
-
 const rdapLookup = async query => {
     const resp = await fetch(`https://rdap.cloud/api/v1/${query}`);
     const rawData = await resp.json().catch(() => false);
     const data = rawData?.results?.[query];
 
     // Ensure the data is there
-    if (!data || !data.success || !data.data) {
-        return false;
-    }
+    if (!data || !data.success || !data.data) return false;
+
 
     // Utils to find the data
     const uniqueCommaSep = arr => [...new Set(arr)].join(', ');
 
-    const findEntities = name => data.data?.entities?.filter(entity => entity.roles.map(role => role.trim().toLowerCase()).includes(name));
+    const findEntities = name => data.data?.entities?.filter(entity => entity.roles
+        .map(role => role
+            .trim()
+            .toLowerCase())
+        .includes(name));
 
-    const findEntityName = name => uniqueCommaSep(findEntities(name).map(entity => entity?.vcardArray?.[1].find(card => card[0] === 'fn')?.[3] || entity?.handle));
+    const findEntityName = name => uniqueCommaSep(findEntities(name)
+        .map(entity => entity?.vcardArray?.[1]
+            .find(card => card[0] === 'fn')?.[3] || entity?.handle));
 
-    const findEntityEmail = name => uniqueCommaSep(findEntities(name).map(entity => entity?.vcardArray?.[1].find(card => card[0] === 'email')?.[3]));
+    const findEntityEmail = name => uniqueCommaSep(findEntities(name)
+        .map(entity => entity?.vcardArray?.[1]
+            .find(card => card[0] === 'email')?.[3]));
 
-    const findEvent = name => data.data?.events?.find(event => event.eventAction.trim().toLowerCase() === name)?.eventDate;
+    const findEvent = name => data.data?.events?.find(event => event
+        .eventAction
+        .trim()
+        .toLowerCase() === name)?.eventDate;
 
     const formatCidr = cidr => cidr && (cidr.v4prefix || cidr.v6prefix) && cidr.length
         ? `${cidr.v4prefix || cidr.v6prefix}/${cidr.length.toString()}`
@@ -33,12 +41,14 @@ const rdapLookup = async query => {
     const abuse = findEntityEmail('abuse');
     const name = data.data?.name;
     const asn = uniqueCommaSep((data.data?.arin_originas0_originautnums || []).map(e => e.toString()));
-    const cidr = uniqueCommaSep((data.data?.cidr0_cidrs || []).map(formatCidr).filter(e => e !== undefined));
+    const cidr = uniqueCommaSep((data.data?.cidr0_cidrs || [])
+        .map(formatCidr)
+        .filter(e => e !== undefined));
 
     // If we found nothing, abort
-    if (!registrar && !registrant && !registration && !expiration && !name && !asn && !cidr) {
-        return false;
-    }
+    if (!registrar && !registrant && !registration &&
+        !expiration && !name && !asn && !cidr) return false;
+
 
     // Done
     return {
@@ -91,9 +101,11 @@ const parseWhois = text => {
 
     // Split line matches that don't include a single line match are valid
     for (const rawMatch of splitLineMatches) {
-        if (singleLineMatches.map(singleLineMatch => rawMatch.includes(singleLineMatch)).includes(true)) {
-            continue;
-        }
+        if (singleLineMatches
+            .map(singleLineMatch => rawMatch
+                .includes(singleLineMatch))
+            .includes(true)) continue;
+
 
         const match = rawMatch.trim().match(regExpSplitLine);
 
@@ -112,19 +124,20 @@ const whoisLookup = async query => {
     const rawData = await resp.json().catch(() => false);
 
     // Ensure the data is there
-    if (!rawData || !rawData.success || !rawData.raw) {
-        return false;
-    }
+    if (!rawData || !rawData.success || !rawData.raw) return false;
+
 
     // Parse ourselves
     const data = parseWhois(rawData.raw);
 
-    if (!data) {
-        return false;
-    }
+    if (!data) return false;
+
 
     // Util to find the data
-    const findAttribute = name => data.find(entry => entry.key.trim().toLowerCase() === name)?.value?.trim();
+    const findAttribute = name => data
+        .find(entry => entry.key
+            .trim()
+            .toLowerCase() === name)?.value?.trim();
 
     // Find the useful information for us
     const registrar = findAttribute('registrar');
@@ -133,9 +146,8 @@ const whoisLookup = async query => {
     const expiration = findAttribute('registry expiry date') || findAttribute('expiry date');
 
     // If we found nothing, abort
-    if (!registrar && !registrant && !registration && !expiration) {
-        return false;
-    }
+    if (!registrar && !registrant && !registration && !expiration) return false;
+
 
     // Done
     return {
@@ -154,9 +166,8 @@ const performLookup = async query => {
     // Do the rdap lookup
     const rdap = await rdapLookup(query);
 
-    if (rdap) {
-        return rdap;
-    }
+    if (rdap) return rdap;
+
 
     // If rdap fails, try whois
     return whoisLookup(query);

@@ -2,7 +2,11 @@
     "env": {
         "commonjs": true,
         "es2021": true,
-        "node": true
+        "node": true,
+        "browser": true
+    },
+    "globals": {
+        "SENTRY_RELEASE": "readonly"
     },
     "extends": "eslint:recommended",
     "parserOptions": {
@@ -55,12 +59,9 @@
         ],
         "consistent-return": "error",
         "consistent-this": "error",
-        "curly": "error",
         "default-case": "error",
         "default-case-last": "error",
         "default-param-last": "error",
-        "dot-location": "error",
-        "dot-notation": "error",
         "eol-last": "error",
         "eqeqeq": "error",
         "func-call-spacing": "error",
@@ -95,13 +96,13 @@
         "lines-between-class-members": "error",
         "max-classes-per-file": "error",
         "max-depth": "error",
-        "max-len": "off",
+        "max-len": ["error", {"code": 105}],
         "max-lines": "error",
         "max-nested-callbacks": "error",
         "max-params": "error",
         "max-statements-per-line": "error",
         "multiline-comment-style": "error",
-        "multiline-ternary": "error",
+        "curly": ["error", "multi"],
         "new-cap": "error",
         "new-parens": "error",
         "newline-after-var": [
@@ -112,7 +113,6 @@
         "newline-per-chained-call": "error",
         "no-alert": "error",
         "no-array-constructor": "error",
-        "no-await-in-loop": "error",
         "no-buffer-constructor": "error",
         "no-caller": "error",
         "no-catch-shadow": "error",
@@ -141,7 +141,6 @@
         "no-loss-of-precision": "error",
         "no-mixed-requires": "error",
         "no-multi-spaces": "error",
-        "no-multi-str": "error",
         "no-multiple-empty-lines": "error",
         "no-native-reassign": "error",
         "no-negated-condition": "error",
@@ -227,7 +226,6 @@
             "single"
         ],
         "radix": "error",
-        "require-atomic-updates": "error",
         "require-await": "error",
         "require-jsdoc": "error",
         "require-unicode-regexp": "off",
