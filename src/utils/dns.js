@@ -40,7 +40,7 @@ const performLookup = async (domain, type) => {
 
     // Return an error message for non-zero status
     if (Status !== 0) return {
-        message: DNS_RCODES[Status] || `An unexpected error occurred [${Status}]`
+        message: DNS_RCODES[Status] || `An unexpected error occurred [${Status}]`,
     };
 
 
@@ -48,17 +48,15 @@ const performLookup = async (domain, type) => {
     return Answer;
 };
 
-const VALID_TYPES = Object
-    .freeze([
-        'A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'DNSKEY', 'DS', 'LOC', 'MX', 'NAPTR',
-        'NS', 'PTR', 'SMIMEA', 'SPF', 'SRV', 'SSHFP', 'TLSA', 'TXT', 'URI'
-    ]);
+const VALID_TYPES = Object.freeze([
+    'A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'DNSKEY', 'DS', 'LOC', 'MX', 'NAPTR',
+    'NS', 'PTR', 'SMIMEA', 'SPF', 'SRV', 'SSHFP', 'TLSA', 'TXT', 'URI',
+]);
 
-const POPULAR_TYPES = Object
-    .freeze(['A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'MX', 'NS', 'SPF', 'SRV', 'TXT']);
+const POPULAR_TYPES = Object.freeze(['A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'MX', 'NS', 'SPF', 'SRV', 'TXT' ]);
 
 module.exports = {
     performLookup,
     VALID_TYPES,
-    POPULAR_TYPES
+    POPULAR_TYPES,
 };

@@ -13,7 +13,7 @@ module.exports.grantToken = async () => {
             method: 'POST',
             body: params,
             headers: { Authorization: `Basic ${auth}` },
-        },
+        }
     );
 
     return res.json();

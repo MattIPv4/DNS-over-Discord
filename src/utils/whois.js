@@ -8,12 +8,10 @@ const rdapLookup = async query => {
 
 
     // Utils to find the data
-    const uniqueCommaSep = arr => [...new Set(arr)].join(', ');
+    const uniqueCommaSep = arr => [...new Set(arr) ].join(', ');
 
     const findEntities = name => data.data?.entities?.filter(entity => entity.roles
-        .map(role => role
-            .trim()
-            .toLowerCase())
+        .map(role => role.trim().toLowerCase())
         .includes(name));
 
     const findEntityName = name => uniqueCommaSep(findEntities(name)
@@ -24,8 +22,7 @@ const rdapLookup = async query => {
         .map(entity => entity?.vcardArray?.[1]
             .find(card => card[0] === 'email')?.[3]));
 
-    const findEvent = name => data.data?.events?.find(event => event
-        .eventAction
+    const findEvent = name => data.data?.events?.find(event => event.eventAction
         .trim()
         .toLowerCase() === name)?.eventDate;
 
@@ -134,10 +131,7 @@ const whoisLookup = async query => {
 
 
     // Util to find the data
-    const findAttribute = name => data
-        .find(entry => entry.key
-            .trim()
-            .toLowerCase() === name)?.value?.trim();
+    const findAttribute = name => data.find(entry => entry.key.trim().toLowerCase() === name)?.value?.trim();
 
     // Find the useful information for us
     const registrar = findAttribute('registrar');
@@ -174,5 +168,5 @@ const performLookup = async query => {
 };
 
 module.exports = {
-    performLookup, rdapLookup, whoisLookup
+    performLookup, rdapLookup, whoisLookup,
 };

@@ -11,7 +11,7 @@ module.exports = {
                 createEmbed(
                     'Invite',
                     'Invite DNS over Discord to your server with https://dns-over-discord.v4.wtf/invite'
-                )
+                ),
             ],
         },
     }),

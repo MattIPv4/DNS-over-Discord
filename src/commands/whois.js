@@ -39,7 +39,7 @@ module.exports = {
                         'WHOIS',
                         'The query does not appear to be a valid domain name, \
                         IP address or ASN, or no results could be found'
-                    )
+                    ),
                 ],
             },
         });
@@ -48,7 +48,7 @@ module.exports = {
         // Generate the fields
         const fields = Object.entries(data).filter(entry => entry[1] !== undefined)
             .map(([ name, value ]) => [
-                ['asn', 'cidr'].includes(name)
+                ['asn', 'cidr' ].includes(name)
                     ? name.toUpperCase()
                     : name[0].toUpperCase() + name.slice(1).toLowerCase(),
                 value instanceof Date
@@ -58,7 +58,7 @@ module.exports = {
 
         // Generate the table
         const table = presentTable([
-            ['', ''],
+            ['', '' ],
             ...fields,
         ]).split('\n')
             .slice(1)
@@ -71,7 +71,7 @@ module.exports = {
         return response({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
-                embeds: [createEmbed('WHOIS', `\`\`\`\n${title}\n${table}\n\`\`\``)],
+                embeds: [createEmbed('WHOIS', `\`\`\`\n${title}\n${table}\n\`\`\``) ],
             },
         });
     },

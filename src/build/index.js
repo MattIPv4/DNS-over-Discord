@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const { getCommands, registerCommands } = require('./commands');
 
 const mkdirSafe = dirPath => fs.access(dirPath).catch(() => fs.mkdir(dirPath, {
-    recursive: true
+    recursive: true,
 }));
 
 module.exports = async () => {
@@ -32,8 +32,7 @@ module.exports = async () => {
         return obj;
     }, {});
 
-    await fs.writeFile(path
-        .join(__dirname, 'data', 'commands.json'), JSON.stringify(discordCommandsObj, null, 2));
+    await fs.writeFile(path.join(__dirname, 'data', 'commands.json'), JSON.stringify(discordCommandsObj, null, 2));
 
     // Done
     console.log('Commands data ready to go!');

@@ -5,7 +5,7 @@ module.exports.sendFollowup = async (interaction, data) => {
             method: 'POST',
             body: JSON.stringify(data),
             headers: { 'Content-Type': 'application/json' },
-        },
+        }
     );
 
     return res.json();

@@ -83,7 +83,7 @@ const handleRequest = ({ request, wait, sentry }) => {
 
     // Send interactions off to their own handler
     if (request.method === 'POST' && url.pathname === '/interactions') return handleInteraction({
-        request, wait, sentry
+        request, wait, sentry,
     });
 
 
@@ -142,7 +142,7 @@ addEventListener('fetch', event => {
     // Process the event
     try {
         return event.respondWith(handleRequest({
-            request: event.request, wait: event.waitUntil.bind(event), sentry
+            request: event.request, wait: event.waitUntil.bind(event), sentry,
         }));
     } catch (err) {
         // Log & re-throw any errors

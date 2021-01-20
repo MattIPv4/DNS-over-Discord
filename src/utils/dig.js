@@ -37,13 +37,12 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
         // Render the rows and truncated count
         const output = rows => {
             const trunc = sourceRows.length - rows.length;
-            const truncStr = trunc
-                ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
+            const truncStr = trunc ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
             const rowsStr = short
                 ? rows.join('\n')
                 : presentTable([
-                    ['NAME', 'TTL', 'DATA'],
-                    ...rows.map(row => [row.name, `${row.TTL.toLocaleString()}s`, row.data]),
+                    ['NAME', 'TTL', 'DATA' ],
+                    ...rows.map(row => [row.name, `${row.TTL.toLocaleString()}s`, row.data ]),
                 ]);
 
             return `\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
@@ -51,7 +50,7 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
 
         // Keep adding rows until we reach Discord 2048 char limit
         for (const row of sourceRows) {
-            if (output([...finalRows, row]).length > 2048) break;
+            if (output([...finalRows, row ]).length > 2048) break;
 
             finalRows.push(row);
         }

@@ -37,8 +37,8 @@ module.exports.presentTable = tableRows => {
                 columnWidth,
                 Math.max(
                     widths[idx],
-                    val.length + columnPadding(idx),
-                ),
+                    val.length + columnPadding(idx)
+                )
             );
 
             // Track the used width for subsequent columns

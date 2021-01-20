@@ -15,8 +15,7 @@ module.exports = {
         {
             name: 'type',
             description: 'DNS record type to lookup',
-            help: `Supported types:\n${POPULAR_TYPES.map(type => `  ${type}`)
-                .join('\n')}\n\nDefaults to \`A\` records.`,
+            help: `Supported types:\n${POPULAR_TYPES.map(type => `${type}`).join('\n')}\n\nDefaults to \`A\` records.`,
             type: ApplicationCommandOptionType.STRING,
             required: false,
             choices: POPULAR_TYPES.map(type => ({
@@ -54,6 +53,6 @@ module.exports = {
             : 'A';
 
         // Go!
-        return handleDig({ interaction, response, wait, domain, types: [type], short: rawShort });
+        return handleDig({ interaction, response, wait, domain, types: [type ], short: rawShort });
     },
 };

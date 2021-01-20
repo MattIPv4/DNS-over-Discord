@@ -8,7 +8,7 @@ module.exports = {
     execute: ({ response }) => response({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-            embeds: [createEmbed('Privacy Policy', Privacy)],
+            embeds: [createEmbed('Privacy Policy', Privacy) ],
         },
     }),
 };

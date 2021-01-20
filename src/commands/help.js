@@ -20,7 +20,7 @@ module.exports = {
         return response({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
-                embeds: [embed],
+                embeds: [embed ],
             },
         });
     },

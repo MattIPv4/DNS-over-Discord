@@ -1,6 +1,7 @@
 const { ApplicationCommandOptionType } = require('slash-commands');
 const { VALID_TYPES } = require('../utils/dns');
 const { handleDig } = require('../utils/dig');
+const supportedTypes = VALID_TYPES.map(type => `${type}`).join('\n');
 
 module.exports = {
     name: 'multi-dig',
@@ -15,8 +16,7 @@ module.exports = {
         {
             name: 'types',
             description: 'Space-separated DNS record types to lookup, `*` for all types',
-            help: `Supported types:\n${VALID_TYPES.map(type => `  ${type}`)
-                .join('\n')}\n\nUse \`*\` to lookup all types.`,
+            help: `Supported types:\n${supportedTypes}\n\nUse \`*\` to lookup all types.`,
             type: ApplicationCommandOptionType.STRING,
             required: false,
             // TODO: https://github.com/discord/discord-api-docs/issues/2331
@@ -48,8 +48,8 @@ module.exports = {
         // Parse types input, mapping '*' to all records and defaulting to 'A' if none given
         const types = rawTypes === '*'
             ? VALID_TYPES
-            : rawTypes.split(' ').map(x => x.trim().toUpperCase()).
-                filter(x => VALID_TYPES.includes(x));
+            : rawTypes.split(' ').map(x => x.trim().toUpperCase())
+                .filter(x => VALID_TYPES.includes(x));
 
         if (!types.length) types.push('A');
 
