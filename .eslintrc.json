@@ -40,7 +40,6 @@
             "always"
         ],
         "class-methods-use-this": "error",
-        "comma-dangle": "off",
         "comma-spacing": [
             "error",
             {
@@ -96,11 +95,15 @@
         "lines-between-class-members": "error",
         "max-classes-per-file": "error",
         "max-depth": "error",
-        "max-len": ["error", {"code": 105}],
+        "max-len": ["error", {"code": 120}],
         "max-lines": "error",
         "max-nested-callbacks": "error",
         "max-params": "error",
         "max-statements-per-line": "error",
+        "comma-dangle": ["error", {
+            "arrays": "always-multiline",
+            "objects": "always-multiline"
+        }],
         "multiline-comment-style": "error",
         "curly": ["error", "multi"],
         "new-cap": "error",
