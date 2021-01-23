@@ -98,7 +98,7 @@ module.exports.registerCommands = async commands => {
             }
 
             // Store the existing command, nothing changed
-            commandData.push({ ...command });
+            commandData.push({ ...discordCommand, ...command });
             continue;
         }
 
