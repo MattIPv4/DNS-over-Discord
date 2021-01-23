@@ -1,7 +1,34 @@
 const fs = require('fs');
 const path = require('path');
+const equal = require('deep-equal');
 const { DiscordInteractions } = require('slash-commands');
 const { grantToken } = require('./token');
+
+const consistentCommandOption = obj => ({
+    type: obj.type,
+    name: obj.name,
+    description: obj.description,
+    default: !!obj.default,
+    required: !!obj.required,
+    choices: obj.choices || [],
+    options: obj.options || [],
+});
+
+const updatedCommandProps = (oldCmd, newCmd) => ({
+    name: oldCmd.name !== newCmd.name,
+    description: oldCmd.description !== newCmd.description,
+    options: !equal(
+        oldCmd.options && oldCmd.options.map(consistentCommandOption),
+        newCmd.options && newCmd.options.map(consistentCommandOption),
+    ),
+});
+
+const updatedCommandPatch = (cmd, diff) => Object.keys(cmd)
+    .filter(key => key in diff && diff[key])
+    .reduce((obj, key) => {
+        obj[key] = cmd[key];
+        return obj;
+    }, {});
 
 module.exports.getCommands = () => {
     const commands = [];
@@ -58,9 +85,20 @@ module.exports.registerCommands = async commands => {
         // This command already exists in Discord
         const discordCommand = discordCommands.find(cmd => cmd.name === command.name);
         if (discordCommand) {
-            // TODO: Compare discordCommand & command, only edit if needed
-            const data = await interaction.editApplicationCommand(discordCommand.id, command, process.env.TEST_GUILD_ID);
-            commandData.push({ ...command, ...data });
+            // Get which props have changed
+            const cmdDiff = updatedCommandProps(discordCommand, command);
+
+            // Only patch if a prop has changed
+            if (Object.values(cmdDiff).includes(true)) {
+                // Get the props to patch and do the update
+                const cmdPatch = updatedCommandPatch(command, cmdDiff);
+                const data = await interaction.editApplicationCommand(discordCommand.id, cmdPatch, process.env.TEST_GUILD_ID);
+                commandData.push({ ...command, ...data });
+                continue;
+            }
+
+            // Store the existing command, nothing changed
+            commandData.push({ ...command });
             continue;
         }
 
