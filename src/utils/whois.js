@@ -117,7 +117,7 @@ const whoisLookup = module.exports.whoisLookup = async query => {
     const findAttribute = name => data.find(entry => entry.key.trim().toLowerCase() === name)?.value?.trim();
 
     // Find the useful information for us
-    const registrar = findAttribute('registrar');
+    const registrar = findAttribute('registrar') || findAttribute('organisation');
     const registrant = findAttribute('registrant');
     const registration = findAttribute('creation date') || findAttribute('registered on');
     const expiration = findAttribute('registry expiry date') || findAttribute('expiry date');
