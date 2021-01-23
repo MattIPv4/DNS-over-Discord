@@ -1,5 +1,5 @@
 const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
-const { initSentry } = require('./utils/sentry');
+const WorkersSentry = require('workers-sentry/worker');
 const Privacy = require('./utils/privacy');
 const commands = require('./build/data/commands.json');
 
@@ -129,8 +129,8 @@ const handleRequest = async ({ request, wait, sentry }) => {
 
 // Register the worker listener
 addEventListener('fetch', event => {
-    // Start Sentry (pass in the release injected by Webpack plugin)
-    const sentry = initSentry(event, { release: SENTRY_RELEASE.id });
+    // Start Sentry
+    const sentry = new WorkersSentry(event, process.env.SENTRY_DSN);
 
     // Process the event
     try {
