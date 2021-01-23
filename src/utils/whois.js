@@ -13,11 +13,11 @@ const rdapLookup = module.exports.rdapLookup = async query => {
     const findEntities = name => data.data?.entities?.filter(entity =>
         entity.roles.map(role => role.trim().toLowerCase()).includes(name));
 
-    const findEntityName = name => uniqueCommaSep(findEntities(name).map(entity =>
-        entity?.vcardArray?.[1].find(card => card[0] === 'fn')?.[3] || entity?.handle));
+    const findEntityName = name => uniqueCommaSep(findEntities(name)?.map(entity =>
+        entity?.vcardArray?.[1].find(card => card[0] === 'fn')?.[3] || entity?.handle) || []);
 
-    const findEntityEmail = name => uniqueCommaSep(findEntities(name).map(entity =>
-        entity?.vcardArray?.[1].find(card => card[0] === 'email')?.[3]));
+    const findEntityEmail = name => uniqueCommaSep(findEntities(name)?.map(entity =>
+        entity?.vcardArray?.[1].find(card => card[0] === 'email')?.[3]) || []);
 
     const findEvent = name =>
         data.data?.events?.find(event => event.eventAction.trim().toLowerCase() === name)?.eventDate;
