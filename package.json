@@ -23,6 +23,7 @@
   "dependencies": {
     "discord-interactions": "^1.4.1",
     "slash-commands": "^1.2.2",
+    "web-whois": "0.0.1",
     "workers-sentry": "0.0.5"
   },
   "devDependencies": {

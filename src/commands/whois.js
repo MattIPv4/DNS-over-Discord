@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType, InteractionResponseType } = require('slash-commands');
+const whois = require('web-whois');
 const { createEmbed } = require('../utils/embed');
-const { performLookup } = require('../utils/whois');
 const { presentTable } = require('../utils/table');
 
 module.exports = {
@@ -24,7 +24,7 @@ module.exports = {
         // TODO: Try to validate as domain/IPv4/IPv6/ASN before running lookup
 
         // Do the rdap/whois lookup
-        const data = await performLookup(query);
+        const data = await whois(query, true);
 
         // If no result, send back simple message
         if (!data)
