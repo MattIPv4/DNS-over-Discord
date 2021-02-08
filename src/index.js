@@ -23,20 +23,32 @@ const handleInteractionVerification = (request, bodyBuffer) => {
     const timestamp = request.headers.get('X-Signature-Timestamp') || '';
     const signature = request.headers.get('X-Signature-Ed25519') || '';
 
-    return verifyKey(bodyBuffer, signature, timestamp, process.env.CLIENT_PUBLIC_KEY);
+    let res = false;
+    try {
+        res = verifyKey(bodyBuffer, signature, timestamp, process.env.CLIENT_PUBLIC_KEY);
+    } catch (_) {
+        // Do nothing, res is false
+    }
+
+    return res;
 };
 
 // Process a Discord interaction POST request
 const handleInteraction = async ({ request, wait, sentry }) => {
-    // Get the body as a buffer
+    // Get the body as a buffer and as text
     const bodyBuffer = await request.arrayBuffer();
+    const bodyText = (new TextDecoder('utf-8')).decode(bodyBuffer);
+
+    // Store the request body in Sentry if something goes wrong
+    sentry.setRequestBody(bodyText);
 
     // Verify a legitimate request
     if (!handleInteractionVerification(request, bodyBuffer))
         return new Response(null, { status: 401 });
 
     // Work with JSON body going forward
-    const body = JSON.parse((new TextDecoder('utf-8')).decode(bodyBuffer)) || {};
+    const body = JSON.parse(bodyText);
+    sentry.setRequestBody(body);
 
     // Handle a PING
     if (body.type === InteractionType.PING)
@@ -133,13 +145,15 @@ addEventListener('fetch', event => {
     const sentry = new WorkersSentry(event, process.env.SENTRY_DSN);
 
     // Process the event
-    try {
-        return event.respondWith(handleRequest({ request: event.request, wait: event.waitUntil.bind(event), sentry }));
-    } catch (err) {
+    return event.respondWith(handleRequest({
+        request: event.request,
+        wait: event.waitUntil.bind(event),
+        sentry,
+    }).catch(err => {
         // Log & re-throw any errors
         console.error(err);
         sentry.captureException(err);
         throw err;
-    }
+    }));
 });
 
