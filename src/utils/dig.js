@@ -1,8 +1,32 @@
 const { InteractionResponseType } = require('slash-commands');
+const isValidDomain = require('is-valid-domain');
 const { performLookup } = require('./dns');
 const { presentTable } = require('./table');
 const { sendFollowup } = require('./follow-up');
 const { createEmbed } = require('./embed');
+
+module.exports.validateDomain = (input, response) => {
+    // Clean the input
+    const cleaned = input
+        .trim()
+        .toLowerCase()
+        .replace(/^[a-z][a-z0-9+.-]+:\/\/(.+)$/i, '$1'); // Remove scheme from a URI
+
+    // Validate
+    const valid = isValidDomain(cleaned, { subdomain: true });
+
+    // Return the input with an optional error
+    return {
+        domain: cleaned,
+        error: valid ? null : response({
+            type: InteractionResponseType.CHANNEL_MESSAGE,
+            data: {
+                content: 'A domain name could not be parsed from the given input.',
+                flags: 1 << 6,
+            },
+        }),
+    };
+};
 
 module.exports.handleDig = async ({ interaction, response, wait, domain, types, short }) => {
     // Make the DNS queries

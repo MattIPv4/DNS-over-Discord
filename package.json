@@ -22,8 +22,9 @@
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
     "discord-interactions": "^1.4.1",
+    "is-valid-domain": "0.0.17",
     "slash-commands": "^1.2.2",
-    "web-whois": "0.0.3",
+    "web-whois": "0.0.4",
     "workers-sentry": "0.0.5"
   },
   "devDependencies": {

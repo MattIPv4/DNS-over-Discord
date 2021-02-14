@@ -1,6 +1,6 @@
-const { ApplicationCommandOptionType } = require('slash-commands');
+const { ApplicationCommandOptionType, } = require('slash-commands');
 const { VALID_TYPES, POPULAR_TYPES } = require('../utils/dns');
-const { handleDig } = require('../utils/dig');
+const { validateDomain, handleDig } = require('../utils/dig');
 
 module.exports = {
     name: 'dig',
@@ -36,9 +36,9 @@ module.exports = {
         const rawType = ((interaction.data.options.find(opt => opt.name === 'type') || {}).value || '').trim();
         const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
 
-        // Parse domain input
-        // TODO: Validate domain
-        const domain = rawDomain;
+        // Parse domain input, return any error response
+        const { domain, error } = validateDomain(rawDomain, response);
+        if (error) return await error;
 
         // Validate type, fallback to 'A'
         const type = VALID_TYPES.includes(rawType) ? rawType : 'A';

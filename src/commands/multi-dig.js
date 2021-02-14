@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType } = require('slash-commands');
 const { VALID_TYPES } = require('../utils/dns');
-const { handleDig } = require('../utils/dig');
+const { validateDomain, handleDig } = require('../utils/dig');
 
 module.exports = {
     name: 'multi-dig',
@@ -33,9 +33,9 @@ module.exports = {
         const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
         const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
 
-        // Parse domain input
-        // TODO: Validate domain
-        const domain = rawDomain;
+        // Parse domain input, return any error response
+        const { domain, error } = validateDomain(rawDomain, response);
+        if (error) return await error;
 
         // Parse types input, mapping '*' to all records and defaulting to 'A' if none given
         const types = rawTypes === '*'
