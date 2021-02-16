@@ -44,7 +44,6 @@ module.exports.performLookup = async (domain, type) => {
     return Answer;
 };
 
-module.exports.VALID_TYPES = Object.freeze(['A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'DNSKEY', 'DS', 'LOC', 'MX', 'NAPTR',
-    'NS', 'PTR', 'SMIMEA', 'SPF', 'SRV', 'SSHFP', 'TLSA', 'TXT', 'URI']);
-
-module.exports.POPULAR_TYPES = Object.freeze(['A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'MX', 'NS', 'SPF', 'SRV', 'TXT']);
+// Ordered by "popularity", dig command offers the first 25, multi-dig supports all
+module.exports.VALID_TYPES = Object.freeze(['A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'MX', 'NS', 'SPF', 'SRV', 'TXT',
+    'DNSKEY', 'DS', 'LOC', 'URI', 'HTTPS', 'NAPTR', 'PTR', 'SMIMEA', 'SOA', 'SSHFP', 'SVCB', 'TLSA']);

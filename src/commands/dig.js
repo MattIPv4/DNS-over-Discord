@@ -1,6 +1,8 @@
 const { ApplicationCommandOptionType, } = require('slash-commands');
-const { VALID_TYPES, POPULAR_TYPES } = require('../utils/dns');
+const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
+
+const optionTypes = VALID_TYPES.slice(0, 25); // Discord has a limit of 25 options
 
 module.exports = {
     name: 'dig',
@@ -15,10 +17,10 @@ module.exports = {
         {
             name: 'type',
             description: 'DNS record type to lookup',
-            help: `Supported types:\n${POPULAR_TYPES.map(type => `  ${type}`).join('\n')}\n\nDefaults to \`A\` records.`,
+            help: `Supported types:\n${optionTypes.map(type => `  ${type}`).join('\n')}\n\nDefaults to \`A\` records.`,
             type: ApplicationCommandOptionType.STRING,
             required: false,
-            choices: POPULAR_TYPES.map(type => ({
+            choices: optionTypes.map(type => ({
                 name: `${type} records`,
                 value: type,
             })),

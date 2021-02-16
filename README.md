@@ -15,7 +15,7 @@ To start using the DNS over Discord bot, invite it to your Discord server using 
 Once the bot is in your server, type `/dig` to begin using the bot's main command -- performing DNS lookups.
 This will provide a native interface within Discord that allows you to specify the domain to lookup, an optional DNS record type and an optional flag for a short result.
 
-Due to limitations in Discord, the `/dig` command can only offer 10 different DNS record types, and will default to 'A' records if none is specified.
+If only a domain is given for the command, the bot will default to looking 'A' DNS records, and will return the full format result, not the short form.
 
 ![dig command](assets/dig-command.png)
 
@@ -33,8 +33,20 @@ Due to limitations in Discord, the `/dig` command can only offer 10 different DN
 *   SPF
 *   SRV
 *   TXT
+*   DNSKEY
+*   DS
+*   LOC
+*   URI
+*   HTTPS
+*   NAPTR
+*   PTR
+*   SMIMEA
+*   SOA
+*   SSHFP
+*   SVCB
+*   TLSA
 
-*For all DNS record types, use the `/multi-dig` command.*
+*To query multiple record types at once , use the `/multi-dig` command.*
 
 ### Examples
 
@@ -48,7 +60,7 @@ _`/dig domain: cloudflare.com type: AAAA short: True`_
 
 ## multi-dig command
 
-Want to lookup multiple DNS record types at once, or record types not available in `/dig`?
+Want to lookup multiple DNS record types at once?
 The `/multi-dig` command allows you to specify any supported DNS record type, and multiple types separated by a space.
 
 When providing DNS record types for the `/multi-dig` command, Discord will not prompt you with options.
@@ -66,20 +78,23 @@ Please provide a space-separated list of valid DNS record types to lookup, any i
 *   CAA
 *   CERT
 *   CNAME
+*   MX
+*   NS
+*   SPF
+*   SRV
+*   TXT
 *   DNSKEY
 *   DS
 *   LOC
-*   MX
+*   URI
+*   HTTPS
 *   NAPTR
-*   NS
 *   PTR
 *   SMIMEA
-*   SPF
-*   SRV
+*   SOA
 *   SSHFP
+*   SVCB
 *   TLSA
-*   TXT
-*   URI
 
 *Use '\*' (asterisk) in place of a record type to get DNS results for all supported types.*
 
