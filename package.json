@@ -21,15 +21,15 @@
   },
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
-    "discord-interactions": "^1.4.1",
+    "discord-interactions": "^1.5.2",
     "is-valid-domain": "0.0.17",
-    "slash-commands": "^1.2.2",
-    "web-whois": "0.0.4",
+    "slash-commands": "^1.3.1",
+    "web-whois": "0.0.5",
     "workers-sentry": "0.0.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.10",
-    "@babel/plugin-proposal-optional-chaining": "^7.12.7",
+    "@babel/core": "^7.13.8",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.8",
     "babel-loader": "^8.2.2",
     "deep-equal": "^2.0.5",
     "dotenv": "^8.2.0",
