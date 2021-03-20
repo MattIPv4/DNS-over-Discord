@@ -8,7 +8,7 @@ module.exports = {
         return response({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
-                embeds: [createEmbed('Invite',
+                embeds: [createEmbed('GitHub',
                     'View the DNS over Discord source code on GitHub at https://dns-over-discord.v4.wtf/github')],
             },
         });
