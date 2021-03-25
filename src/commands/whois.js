@@ -1,4 +1,5 @@
-const { ApplicationCommandOptionType, InteractionResponseType } = require('slash-commands');
+const { ApplicationCommandOptionType } = require('slash-commands');
+const { InteractionResponseType } = require('discord-interactions');
 const whois = require('web-whois');
 const { editDeferred, } = require('../utils/follow-up');
 const { createEmbed } = require('../utils/embed');
@@ -34,8 +35,12 @@ module.exports = {
                 return response({
                     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                     data: {
-                        embeds: [createEmbed('WHOIS',
-                            'The query does not appear to be a valid domain name, IP address or ASN, or no results could be found')],
+                        embeds: [
+                            createEmbed(
+                                'WHOIS',
+                                'The query does not appear to be a valid domain name, IP address or ASN, or no results could be found',
+                            ),
+                        ],
                     },
                 });
 

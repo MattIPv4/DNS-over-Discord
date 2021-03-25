@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType, } = require('slash-commands');
+const { ApplicationCommandOptionType } = require('slash-commands');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
 

@@ -1,4 +1,4 @@
-const { InteractionResponseType } = require('slash-commands');
+const { InteractionResponseType, InteractionResponseFlags } = require('discord-interactions');
 const isValidDomain = require('is-valid-domain');
 const { performLookup } = require('./dns');
 const { presentTable } = require('./table');
@@ -22,7 +22,7 @@ module.exports.validateDomain = (input, response) => {
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
                 content: 'A domain name could not be parsed from the given input.',
-                flags: 1 << 6,
+                flags: InteractionResponseFlags.EPHEMERAL,
             },
         }),
     };
