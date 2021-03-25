@@ -1,8 +1,8 @@
-const { InteractionResponseType } = require('slash-commands');
+const { InteractionResponseType, InteractionResponseFlags } = require('discord-interactions');
 const isValidDomain = require('is-valid-domain');
 const { performLookup } = require('./dns');
 const { presentTable } = require('./table');
-const { sendFollowup } = require('./follow-up');
+const { editDeferred, sendFollowup } = require('./follow-up');
 const { createEmbed } = require('./embed');
 
 module.exports.validateDomain = (input, response) => {
@@ -19,16 +19,16 @@ module.exports.validateDomain = (input, response) => {
     return {
         domain: cleaned,
         error: valid ? null : response({
-            type: InteractionResponseType.CHANNEL_MESSAGE,
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
                 content: 'A domain name could not be parsed from the given input.',
-                flags: 1 << 6,
+                flags: InteractionResponseFlags.EPHEMERAL,
             },
         }),
     };
 };
 
-module.exports.handleDig = async ({ interaction, response, wait, domain, types, short }) => {
+module.exports.handleDig = async ({ interaction, response, wait, domain, types, short, sentry }) => {
     // Make the DNS queries
     const results = [];
     for (const type of types)
@@ -88,12 +88,22 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
         // Give Discord time to process the ACK response
         await new Promise(resolve => setTimeout(resolve, 250));
 
-        // Send the embeds
+        // Edit our deferred message with the first 10 embeds
+        await editDeferred(interaction, {
+            embeds: embeds.splice(0, 10),
+        });
+
+        // Send the remaining embeds as follow-ups
         while (embeds.length) {
             await sendFollowup(interaction, {
                 embeds: embeds.splice(0, 10),
             });
         }
-    })());
-    return response({ type: InteractionResponseType.ACK_WITH_SOURCE });
+    })().catch(err => {
+        // Log & re-throw any errors
+        console.error(err);
+        sentry.captureException(err);
+        throw err;
+    }));
+    return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
 };

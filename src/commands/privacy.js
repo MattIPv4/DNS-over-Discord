@@ -1,17 +1,14 @@
-const { InteractionResponseType } = require('slash-commands');
+const { InteractionResponseType } = require('discord-interactions');
 const { createEmbed } = require('../utils/embed');
 const Privacy = require('../utils/privacy');
 
 module.exports = {
     name: 'privacy',
     description: 'View the privacy policy for DNS over Discord',
-    execute: async ({ response }) => {
-        // Respond
-        return response({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-                embeds: [createEmbed('Privacy Policy', Privacy)],
-            },
-        });
-    },
+    execute: async ({ response }) => response({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+            embeds: [createEmbed('Privacy Policy', Privacy)],
+        },
+    }),
 };

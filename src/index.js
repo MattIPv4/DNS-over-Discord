@@ -1,4 +1,4 @@
-const { InteractionType, InteractionResponseType, verifyKey } = require('discord-interactions');
+const { InteractionType, InteractionResponseType, InteractionResponseFlags, verifyKey } = require('discord-interactions');
 const WorkersSentry = require('workers-sentry/worker');
 const Privacy = require('./utils/privacy');
 const commands = require('./build/data/commands.json');
@@ -22,15 +22,7 @@ const redirectResponse = url => new Response(null, {
 const handleInteractionVerification = (request, bodyBuffer) => {
     const timestamp = request.headers.get('X-Signature-Timestamp') || '';
     const signature = request.headers.get('X-Signature-Ed25519') || '';
-
-    let res = false;
-    try {
-        res = verifyKey(bodyBuffer, signature, timestamp, process.env.CLIENT_PUBLIC_KEY);
-    } catch (_) {
-        // Do nothing, res is false
-    }
-
-    return res;
+    return verifyKey(bodyBuffer, signature, timestamp, process.env.CLIENT_PUBLIC_KEY);
 };
 
 // Process a Discord interaction POST request
@@ -57,7 +49,7 @@ const handleInteraction = async ({ request, wait, sentry }) => {
         });
 
     // Otherwise, we only care for commands
-    if (body.type !== InteractionType.COMMAND)
+    if (body.type !== InteractionType.APPLICATION_COMMAND)
         return new Response(null, { status: 501 });
 
     // Locate the command data
@@ -70,7 +62,7 @@ const handleInteraction = async ({ request, wait, sentry }) => {
         const command = require(`./commands/${commandData.file}`);
 
         // Execute
-        return await command.execute({ interaction: body, response: jsonResponse, wait });
+        return await command.execute({ interaction: body, response: jsonResponse, wait, sentry });
     } catch (err) {
         // Catch & log any errors
         console.log(body);
@@ -79,10 +71,10 @@ const handleInteraction = async ({ request, wait, sentry }) => {
 
         // Send an ephemeral message to the user
         return jsonResponse({
-            type: InteractionResponseType.CHANNEL_MESSAGE,
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
                 content: 'An unexpected error occurred when executing the command.',
-                flags: 1 << 6,
+                flags: InteractionResponseFlags.EPHEMERAL,
             },
         });
     }

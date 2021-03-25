@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType, } = require('slash-commands');
+const { ApplicationCommandOptionType } = require('slash-commands');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
 
@@ -32,7 +32,7 @@ module.exports = {
             required: false,
         },
     ],
-    execute: async ({ interaction, response, wait }) => {
+    execute: async ({ interaction, response, wait, sentry }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawType = ((interaction.data.options.find(opt => opt.name === 'type') || {}).value || '').trim();
@@ -46,6 +46,6 @@ module.exports = {
         const type = VALID_TYPES.includes(rawType) ? rawType : 'A';
 
         // Go!
-        return await handleDig({ interaction, response, wait, domain, types: [type], short: rawShort });
+        return await handleDig({ interaction, response, wait, domain, types: [type], short: rawShort, sentry });
     },
 };

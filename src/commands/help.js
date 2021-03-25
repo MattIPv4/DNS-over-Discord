@@ -1,4 +1,4 @@
-const { InteractionResponseType } = require('slash-commands');
+const { InteractionResponseType } = require('discord-interactions');
 const { createEmbed } = require('../utils/embed');
 const { cmdExplainer } = require('../utils/commands');
 const commands = require('../build/data/commands.json');
