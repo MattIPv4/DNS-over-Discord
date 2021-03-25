@@ -62,7 +62,7 @@ const handleInteraction = async ({ request, wait, sentry }) => {
         const command = require(`./commands/${commandData.file}`);
 
         // Execute
-        return await command.execute({ interaction: body, response: jsonResponse, wait });
+        return await command.execute({ interaction: body, response: jsonResponse, wait, sentry });
     } catch (err) {
         // Catch & log any errors
         console.log(body);

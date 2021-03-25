@@ -28,7 +28,7 @@ module.exports.validateDomain = (input, response) => {
     };
 };
 
-module.exports.handleDig = async ({ interaction, response, wait, domain, types, short }) => {
+module.exports.handleDig = async ({ interaction, response, wait, domain, types, short, sentry }) => {
     // Make the DNS queries
     const results = [];
     for (const type of types)
@@ -99,6 +99,11 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
                 embeds: embeds.splice(0, 10),
             });
         }
-    })());
+    })().catch(err => {
+        // Log & re-throw any errors
+        console.error(err);
+        sentry.captureException(err);
+        throw err;
+    }));
     return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
 };

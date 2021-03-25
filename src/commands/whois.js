@@ -15,7 +15,7 @@ module.exports = {
             required: true,
         },
     ],
-    execute: async ({ interaction, response, wait }) => {
+    execute: async ({ interaction, response, wait, sentry }) => {
         // Do the processing after acknowledging the Discord command
         wait((async () => {
             // Get the raw values from Discord
@@ -62,7 +62,12 @@ module.exports = {
             await editDeferred(interaction, {
                 embeds: [createEmbed('WHOIS', `\`\`\`\n${title}\n${table}\n\`\`\``)],
             });
-        })());
+        })().catch(err => {
+            // Log & re-throw any errors
+            console.error(err);
+            sentry.captureException(err);
+            throw err;
+        }));
         return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
     },
 };
