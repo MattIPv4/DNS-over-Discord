@@ -2,7 +2,7 @@ const { InteractionResponseType, InteractionResponseFlags } = require('discord-i
 const isValidDomain = require('is-valid-domain');
 const { performLookup } = require('./dns');
 const { presentTable } = require('./table');
-const { editDeferred, sendFollowup } = require('./follow-up');
+const { sendFollowup } = require('./follow-up');
 const { createEmbed } = require('./embed');
 
 module.exports.validateDomain = (input, response) => {
@@ -30,12 +30,7 @@ module.exports.validateDomain = (input, response) => {
 
 module.exports.handleDig = async ({ interaction, response, wait, domain, types, short, sentry }) => {
     // Make the DNS queries
-    const results = [];
-    for (const type of types)
-        results.push({
-            type,
-            data: await performLookup(domain, type),
-        });
+    const results = await Promise.all(types.map(type => performLookup(domain, type).then(data => ({ type, data }))));
 
     // Define the presenter
     const present = data => {
@@ -73,37 +68,27 @@ module.exports.handleDig = async ({ interaction, response, wait, domain, types, 
     // Convert results to an embed
     const embeds = results.map(({ type, data }) => createEmbed(`${type} records`, present(data), 'diggy diggy hole'));
 
-    // If we have 10 or fewer embeds, we can respond with them directly
-    if (embeds.length <= 10)
-        return response({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-                embeds: embeds.splice(0, 10),
-            },
-        });
+    // If we have more than 10 embeds, the extras need to be sent as followups
+    if (embeds.length > 10) {
+        const followupEmbeds = embeds.slice(10);
+        wait((async () => {
+            while (followupEmbeds.length)
+                await sendFollowup(interaction, {
+                    embeds: followupEmbeds.splice(0, 10),
+                });
+        })().catch(err => {
+            // Log & re-throw any errors
+            console.error(err);
+            sentry.captureException(err);
+            throw err;
+        }));
+    }
 
-    // Otherwise, ack and then send followups for chunks of 10 embeds
-    //  This ensures the embeds arrive in the correct order
-    wait((async () => {
-        // Give Discord time to process the ACK response
-        await new Promise(resolve => setTimeout(resolve, 250));
-
-        // Edit our deferred message with the first 10 embeds
-        await editDeferred(interaction, {
-            embeds: embeds.splice(0, 10),
-        });
-
-        // Send the remaining embeds as follow-ups
-        while (embeds.length) {
-            await sendFollowup(interaction, {
-                embeds: embeds.splice(0, 10),
-            });
-        }
-    })().catch(err => {
-        // Log & re-throw any errors
-        console.error(err);
-        sentry.captureException(err);
-        throw err;
-    }));
-    return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
+    // Respond with the first 10 embeds
+    return response({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+            embeds: embeds.slice(0, 10),
+        },
+    });
 };
