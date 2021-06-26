@@ -11,7 +11,7 @@
     "logs:staging": "wrangler tail -e staging",
     "lint": "eslint {src/**/*,*}.js",
     "lint:fix": "npm run lint -- --fix",
-    "test":  "npm run lint"
+    "test": "npm run lint"
   },
   "repository": {
     "type": "git",
@@ -24,18 +24,19 @@
   },
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
-    "discord-interactions": "^2.0.2",
-    "is-valid-domain": "0.0.17",
+    "discord-interactions": "^2.3.0",
+    "is-valid-domain": "0.0.20",
     "slash-commands": "^1.4.0",
-    "web-whois": "0.0.5",
+    "web-whois": "0.0.6",
     "workers-sentry": "0.0.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.13.8",
-    "@babel/plugin-proposal-optional-chaining": "^7.13.8",
+    "@babel/core": "^7.14.6",
+    "@babel/plugin-proposal-optional-chaining": "^7.14.5",
+    "@cloudflare/wrangler": "^1.17.0",
     "babel-loader": "^8.2.2",
     "deep-equal": "^2.0.5",
-    "dotenv": "^8.2.0",
+    "dotenv": "^10.0.0",
     "eslint": "^7.29.0",
     "node-fetch": "^2.6.1",
     "webpack": "^4.46.0"
