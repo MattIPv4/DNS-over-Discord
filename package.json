@@ -1,7 +1,7 @@
 {
   "name": "dns-over-discord",
   "version": "1.0.0",
-  "description": "",
+  "description": "A 1.1.1.1 DNS resolver built for Discord",
   "main": "src/index.js",
   "scripts": {
     "dev": "NODE_ENV=development wrangler dev",
