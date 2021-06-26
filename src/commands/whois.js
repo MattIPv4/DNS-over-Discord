@@ -1,7 +1,7 @@
 const { ApplicationCommandOptionType } = require('slash-commands');
 const { InteractionResponseType } = require('discord-interactions');
 const whois = require('web-whois');
-const { editDeferred, } = require('../utils/follow-up');
+const { editDeferred } = require('../utils/follow-up');
 const { createEmbed } = require('../utils/embed');
 const { presentTable } = require('../utils/table');
 

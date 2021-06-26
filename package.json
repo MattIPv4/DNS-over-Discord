@@ -8,7 +8,10 @@
     "publish:production": "NODE_ENV=production wrangler publish -e production",
     "publish:staging": "NODE_ENV=staging wrangler publish -e staging",
     "logs:production": "wrangler tail -e production",
-    "logs:staging": "wrangler tail -e staging"
+    "logs:staging": "wrangler tail -e staging",
+    "lint": "eslint {src/**/*,*}.js",
+    "lint:fix": "npm run lint -- --fix",
+    "test":  "npm run lint"
   },
   "repository": {
     "type": "git",
@@ -33,6 +36,7 @@
     "babel-loader": "^8.2.2",
     "deep-equal": "^2.0.5",
     "dotenv": "^8.2.0",
+    "eslint": "^7.29.0",
     "node-fetch": "^2.6.1",
     "webpack": "^4.46.0"
   }
