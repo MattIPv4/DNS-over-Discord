@@ -9,7 +9,7 @@
     "publish:staging": "NODE_ENV=staging wrangler publish -e staging",
     "logs:production": "wrangler tail -e production",
     "logs:staging": "wrangler tail -e staging",
-    "lint": "eslint {src/**/*,*}.js",
+    "lint": "eslint \"{src/**/*,*}.js\"",
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run lint"
   },

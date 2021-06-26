@@ -14,7 +14,7 @@ const jsonResponse = obj => new Response(JSON.stringify(obj), {
 const redirectResponse = url => new Response(null, {
     status: 301,
     headers: {
-        'Location': url,
+        Location: url,
     },
 });
 
@@ -98,7 +98,7 @@ const handleRequest = async ({ request, wait, sentry }) => {
             headers: {
                 'Content-Type': 'text/plain',
                 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-                'Expires': '0',
+                Expires: '0',
                 'Surrogate-Control': 'no-store',
             },
         });
