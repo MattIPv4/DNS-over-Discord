@@ -2,10 +2,11 @@ const { InteractionResponseType } = require('discord-interactions');
 const { VALID_TYPES } = require('../utils/dns');
 const { handleDig, parseEmbed } = require('../utils/dig');
 const { editDeferred } = require('../utils/follow-up');
+const { MessageComponentType, MessageComponentButtonStyle } = require('../utils/components');
 
 const component = {
-    type: 2,
-    style: 2,
+    type: MessageComponentType.BUTTON,
+    style: MessageComponentButtonStyle.SECONDARY,
     label: 'Refresh',
     id: 'dig-refresh',
 };
@@ -36,7 +37,7 @@ module.exports = {
                 embeds: updatedEmbeds,
                 components: [
                     {
-                        type: 1,
+                        type: MessageComponentType.ACTION_ROW,
                         components: [ component ],
                     },
                 ],

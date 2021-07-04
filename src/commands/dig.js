@@ -3,6 +3,7 @@ const { ApplicationCommandOptionType } = require('slash-commands');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
 const { editDeferred } = require('../utils/follow-up');
+const { MessageComponentType } = require('../utils/components');
 const { component } = require('../components/dig-refresh');
 
 const optionTypes = VALID_TYPES.slice(0, 25); // Discord has a limit of 25 options
@@ -58,7 +59,7 @@ module.exports = {
                 embeds: [ embed ],
                 components: [
                     {
-                        type: 1,
+                        type: MessageComponentType.ACTION_ROW,
                         components: [ component ],
                     },
                 ],

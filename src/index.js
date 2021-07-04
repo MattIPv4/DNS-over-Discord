@@ -63,6 +63,10 @@ const handleComponentInteraction = async ({ body, wait, sentry }) => {
         // Execute
         return await component.execute({ interaction: body, response: jsonResponse, wait, sentry });
     } catch (err) {
+        // Handle a non-existent component
+        if (err.code === 'MODULE_NOT_FOUND')
+            return new Response(null, { status: 404 });
+
         // Catch & log any errors
         console.log(body);
         console.error(err);
