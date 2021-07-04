@@ -32,12 +32,17 @@ module.exports.handleDig = async ({ domain, types, short }) => {
     const results = await Promise.all(types.map(type => performLookup(domain, type).then(data => ({ type, data }))));
 
     // Define the presenter
-    const present = data => {
-        // No results
-        if (typeof data === 'undefined' || (Array.isArray(data) && data.length === 0)) return 'No records found';
+    const present = (type, data) => {
+        // Generate the dig command equivalent
+        const digCmd = `\`${data.name} ${type} @1.1.1.1 +noall +answer${short ? ' +short' : ''}\`\n`;
 
         // Error message
-        if (typeof data === 'object' && data.message) return data.message;
+        if (typeof data === 'object' && data.message)
+            return `${digCmd}\n${data.message}`;
+
+        // No results
+        if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
+            return `${digCmd}\nNo records found`;
 
         // Map the data if short requested
         const sourceRows = short ? data.answer.map(x => x.data) : data.answer;
@@ -51,7 +56,7 @@ module.exports.handleDig = async ({ domain, types, short }) => {
                 ['NAME', 'TTL', 'DATA'],
                 ...rows.map(rowData => [rowData.name, `${rowData.TTL.toLocaleString()}s`, rowData.data]),
             ]);
-            return `\`${data.name}\`\n\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
+            return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
 
         // Keep adding rows until we reach Discord 4096 char limit
@@ -65,25 +70,18 @@ module.exports.handleDig = async ({ domain, types, short }) => {
     };
 
     // Convert results to an embed
-    return results.map(({ type, data }) => createEmbed(`${type} records`, present(data), 'diggy diggy hole'));
+    return results.map(({ type, data }) => createEmbed(`${type} records`, present(type, data), 'diggy diggy hole'));
 };
 
 module.exports.parseEmbed = embed => {
-    // Match the record type from the title
-    const typeMatch = embed.title.match(/^DNS over Discord: (\S+) records$/);
-    if (!typeMatch) return null;
-
-    // Match the domain name requested from the description
-    const nameMatch = embed.description.match(/^`(.+?)`\n```\n.+\n```$/s);
-    if (!nameMatch) return null;
-
-    // Look for a table to determine if short form
-    const tableMatch = embed.description.match(/^`.+?`\n```\nNAME\s+\|\s+TTL\s+\|\s+DATA\s*\n.+\n```$/s);
+    // Match the domain name, type and if the short format was requested
+    const descMatch = embed.description.match(/^`(\S+) (\S+) @1\.1\.1\.1 \+noall \+answer( \+short)?`\n/);
+    if (!descMatch) return null;
 
     // Return the matched data
     return {
-        type: typeMatch[1],
-        name: nameMatch[1],
-        short: !tableMatch,
+        name: descMatch[1],
+        type: descMatch[2],
+        short: !!descMatch[3],
     };
 };
