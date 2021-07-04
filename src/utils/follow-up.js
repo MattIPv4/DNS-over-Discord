@@ -7,6 +7,12 @@ module.exports.sendFollowup = async (interaction, data) => {
             headers: { 'Content-Type': 'application/json' },
         },
     );
+
+    if (!res.ok) {
+        const data = await res.text();
+        throw new Error(`Received unexpected status code ${res.status} from webhooks POST - ${data}`);
+    }
+
     return await res.json();
 };
 
@@ -19,5 +25,11 @@ module.exports.editDeferred = async (interaction, data) => {
             headers: { 'Content-Type': 'application/json' },
         },
     );
+
+    if (!res.ok) {
+        const data = await res.text();
+        throw new Error(`Received unexpected status code ${res.status} from webhooks PATCH - ${data}`);
+    }
+
     return await res.json();
 };

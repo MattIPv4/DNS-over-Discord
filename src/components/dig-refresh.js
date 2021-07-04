@@ -8,7 +8,7 @@ const component = {
     type: MessageComponentType.BUTTON,
     style: MessageComponentButtonStyle.SECONDARY,
     label: 'Refresh',
-    id: 'dig-refresh',
+    custom_id: 'dig-refresh',
 };
 
 module.exports = {
@@ -49,7 +49,23 @@ module.exports = {
             throw err;
         }));
 
-        // Let Discord know we're working on the response
-        return response({ type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE });
+        // Disable the button, letting Discord and the user know we're working on an update
+        return response({
+            type: InteractionResponseType.UPDATE_MESSAGE,
+            data: {
+                embeds: interaction.message.embeds,
+                components: [
+                    {
+                        type: MessageComponentType.ACTION_ROW,
+                        components: [
+                            {
+                                ...component,
+                                disabled: true,
+                            },
+                        ],
+                    },
+                ],
+            },
+        });
     },
 };
