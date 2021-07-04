@@ -25,33 +25,8 @@ const handleInteractionVerification = (request, bodyBuffer) => {
     return verifyKey(bodyBuffer, signature, timestamp, process.env.CLIENT_PUBLIC_KEY);
 };
 
-// Process a Discord interaction POST request
-const handleInteraction = async ({ request, wait, sentry }) => {
-    // Get the body as a buffer and as text
-    const bodyBuffer = await request.arrayBuffer();
-    const bodyText = (new TextDecoder('utf-8')).decode(bodyBuffer);
-
-    // Store the request body in Sentry if something goes wrong
-    sentry.setRequestBody(bodyText);
-
-    // Verify a legitimate request
-    if (!handleInteractionVerification(request, bodyBuffer))
-        return new Response(null, { status: 401 });
-
-    // Work with JSON body going forward
-    const body = JSON.parse(bodyText);
-    sentry.setRequestBody(body);
-
-    // Handle a PING
-    if (body.type === InteractionType.PING)
-        return jsonResponse({
-            type: InteractionResponseType.PONG,
-        });
-
-    // Otherwise, we only care for commands
-    if (body.type !== InteractionType.APPLICATION_COMMAND)
-        return new Response(null, { status: 501 });
-
+// Process a Discord command interaction
+const handleCommandInteraction = async ({ body, wait, sentry }) => {
     // Locate the command data
     const commandData = commands[body.data.id];
     if (!commandData)
@@ -77,6 +52,63 @@ const handleInteraction = async ({ request, wait, sentry }) => {
                 flags: InteractionResponseFlags.EPHEMERAL,
             },
         });
+    }
+};
+// Process a Discord component interaction
+const handleComponentInteraction = async ({ body, wait, sentry }) => {
+    try {
+        // Load in the component handler
+        const component = require(`./components/${body.data.custom_id}.js`);
+
+        // Execute
+        return await component.execute({ interaction: body, response: jsonResponse, wait, sentry });
+    } catch (err) {
+        // Catch & log any errors
+        console.log(body);
+        console.error(err);
+        sentry.captureException(err);
+
+        // Send a 500
+        return new Response(null, { status: 500 });
+    }
+};
+
+// Process a Discord interaction POST request
+const handleInteraction = async ({ request, wait, sentry }) => {
+    // Get the body as a buffer and as text
+    const bodyBuffer = await request.arrayBuffer();
+    const bodyText = (new TextDecoder('utf-8')).decode(bodyBuffer);
+
+    // Store the request body in Sentry if something goes wrong
+    sentry.setRequestBody(bodyText);
+
+    // Verify a legitimate request
+    if (!handleInteractionVerification(request, bodyBuffer))
+        return new Response(null, { status: 401 });
+
+    // Work with JSON body going forward
+    const body = JSON.parse(bodyText);
+    sentry.setRequestBody(body);
+
+    // Handle different interaction types
+    switch (body.type) {
+        // Handle a PING
+        case InteractionType.PING:
+            return jsonResponse({
+                type: InteractionResponseType.PONG,
+            });
+
+        // Handle a command
+        case InteractionType.APPLICATION_COMMAND:
+            return handleCommandInteraction({ body, wait, sentry });
+
+        // Handle a component
+        case InteractionType.MESSAGE_COMPONENT:
+            return handleComponentInteraction({ body, wait, sentry });
+
+        // Unknown
+        default:
+            return new Response(null, { status: 501 });
     }
 };
 

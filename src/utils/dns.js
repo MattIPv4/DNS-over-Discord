@@ -35,13 +35,13 @@ module.exports.performLookup = async (domain, type) => {
     });
 
     // Parse the response
-    const { Status, Answer } = await res.json();
+    const { Status, Question, Answer } = await res.json();
 
     // Return an error message for non-zero status
     if (Status !== 0) return { message: DNS_RCODES[Status] || `An unexpected error occurred [${Status}]` };
 
     // Valid answer
-    return Answer;
+    return { name: Question[0].name, answer: Answer };
 };
 
 // Ordered by "popularity", dig command offers the first 25, multi-dig supports all
