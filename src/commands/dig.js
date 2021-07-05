@@ -1,6 +1,10 @@
+const { InteractionResponseType } = require('discord-interactions');
 const { ApplicationCommandOptionType } = require('slash-commands');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
+const { editDeferred } = require('../utils/follow-up');
+const { MessageComponentType } = require('../utils/components');
+const { component } = require('../components/dig-refresh');
 
 const optionTypes = VALID_TYPES.slice(0, 25); // Discord has a limit of 25 options
 
@@ -45,7 +49,29 @@ module.exports = {
         // Validate type, fallback to 'A'
         const type = VALID_TYPES.includes(rawType) ? rawType : 'A';
 
-        // Go!
-        return await handleDig({ interaction, response, wait, domain, types: [type], short: rawShort, sentry });
+        // Do the processing after acknowledging the Discord command
+        wait((async () => {
+            // Run dig and get the embeds
+            const [ embed ] = await handleDig({ domain, types: [ type ], short: rawShort });
+
+            // Edit the original deferred response
+            await editDeferred(interaction, {
+                embeds: [ embed ],
+                components: [
+                    {
+                        type: MessageComponentType.ACTION_ROW,
+                        components: [ component ],
+                    },
+                ],
+            });
+        })().catch(err => {
+            // Log & re-throw any errors
+            console.error(err);
+            sentry.captureException(err);
+            throw err;
+        }));
+
+        // Let Discord know we're working on the response
+        return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
     },
 };

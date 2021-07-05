@@ -2,7 +2,6 @@ const { InteractionResponseType, InteractionResponseFlags } = require('discord-i
 const isValidDomain = require('is-valid-domain');
 const { performLookup } = require('./dns');
 const { presentTable } = require('./table');
-const { sendFollowup, editDeferred } = require('./follow-up');
 const { createEmbed } = require('./embed');
 
 module.exports.validateDomain = (input, response) => {
@@ -28,63 +27,61 @@ module.exports.validateDomain = (input, response) => {
     };
 };
 
-module.exports.handleDig = async ({ interaction, response, wait, domain, types, short, sentry }) => {
-    // Do the processing after acknowledging the Discord command
-    wait((async () => {
-        // Make the DNS queries
-        const results = await Promise.all(types.map(type => performLookup(domain, type).then(data => ({ type, data }))));
+module.exports.handleDig = async ({ domain, types, short }) => {
+    // Make the DNS queries
+    const results = await Promise.all(types.map(type => performLookup(domain, type).then(data => ({ type, data }))));
 
-        // Define the presenter
-        const present = data => {
-            // No results
-            if (typeof data === 'undefined' || (Array.isArray(data) && data.length === 0)) return 'No records found';
+    // Define the presenter
+    const present = (type, data) => {
+        // Generate the dig command equivalent
+        const digCmd = `\`${data.name} ${type} @1.1.1.1 +noall +answer${short ? ' +short' : ''}\`\n`;
 
-            // Error message
-            if (typeof data === 'object' && data.message) return data.message;
+        // Error message
+        if (typeof data === 'object' && data.message)
+            return `${digCmd}\n${data.message}`;
 
-            // Map the data if short requested
-            const sourceRows = short ? data.map(x => x.data) : data;
-            const finalRows = [];
+        // No results
+        if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
+            return `${digCmd}\nNo records found`;
 
-            // Render the rows and truncated count
-            const output = rows => {
-                const trunc = sourceRows.length - rows.length;
-                const truncStr = trunc ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
-                const rowsStr = short ? rows.join('\n') : presentTable([
-                    ['NAME', 'TTL', 'DATA'],
-                    ...rows.map(rowData => [rowData.name, `${rowData.TTL.toLocaleString()}s`, rowData.data]),
-                ]);
-                return `\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
-            };
+        // Map the data if short requested
+        const sourceRows = short ? data.answer.map(x => x.data) : data.answer;
+        const finalRows = [];
 
-            // Keep adding rows until we reach Discord 2048 char limit
-            for (const row of sourceRows) {
-                if (output([...finalRows, row]).length > 2048) break;
-                finalRows.push(row);
-            }
-
-            // Render and return final rows
-            return output(finalRows);
+        // Render the rows and truncated count
+        const output = rows => {
+            const trunc = sourceRows.length - rows.length;
+            const truncStr = trunc ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
+            const rowsStr = short ? rows.join('\n') : presentTable([
+                ['NAME', 'TTL', 'DATA'],
+                ...rows.map(rowData => [rowData.name, `${rowData.TTL.toLocaleString()}s`, rowData.data]),
+            ]);
+            return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
 
-        // Convert results to an embed
-        const embeds = results.map(({ type, data }) => createEmbed(`${type} records`, present(data), 'diggy diggy hole'));
+        // Keep adding rows until we reach Discord 4096 char limit
+        for (const row of sourceRows) {
+            if (output([...finalRows, row]).length > 4096) break;
+            finalRows.push(row);
+        }
 
-        // Edit the original deferred response with the first 10 embeds
-        await editDeferred(interaction, {
-            embeds: embeds.splice(0, 10),
-        });
+        // Render and return final rows
+        return output(finalRows);
+    };
 
-        // If we have more than 10 embeds, the extras need to be sent as followups
-        while (embeds.length)
-            await sendFollowup(interaction, {
-                embeds: embeds.splice(0, 10),
-            });
-    })().catch(err => {
-        // Log & re-throw any errors
-        console.error(err);
-        sentry.captureException(err);
-        throw err;
-    }));
-    return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
+    // Convert results to an embed
+    return results.map(({ type, data }) => createEmbed(`${type} records`, present(type, data), 'diggy diggy hole'));
+};
+
+module.exports.parseEmbed = embed => {
+    // Match the domain name, type and if the short format was requested
+    const descMatch = embed.description.match(/^`(\S+) (\S+) @1\.1\.1\.1 \+noall \+answer( \+short)?`\n/);
+    if (!descMatch) return null;
+
+    // Return the matched data
+    return {
+        name: descMatch[1],
+        type: descMatch[2],
+        short: !!descMatch[3],
+    };
 };

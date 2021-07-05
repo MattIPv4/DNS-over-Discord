@@ -1,6 +1,10 @@
+const { InteractionResponseType } = require('discord-interactions');
 const { ApplicationCommandOptionType } = require('slash-commands');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
+const { sendFollowup, editDeferred } = require('../utils/follow-up');
+const { MessageComponentType } = require('../utils/components');
+const { component } = require('../components/dig-refresh');
 
 module.exports = {
     name: 'multi-dig',
@@ -43,7 +47,41 @@ module.exports = {
             : rawTypes.split(' ').map(x => x.trim().toUpperCase()).filter(x => VALID_TYPES.includes(x));
         if (!types.length) types.push('A');
 
-        // Go!
-        return await handleDig({ interaction, response, wait, domain, types, short: rawShort, sentry });
+        // Do the processing after acknowledging the Discord command
+        wait((async () => {
+            // Run dig and get the embeds
+            const embeds = await handleDig({ domain, types, short: rawShort });
+
+            // Edit the original deferred response with the first 10 embeds
+            await editDeferred(interaction, {
+                embeds: embeds.splice(0, 10),
+                components: [
+                    {
+                        type: MessageComponentType.ACTION_ROW,
+                        components: [ component ],
+                    },
+                ],
+            });
+
+            // If we have more than 10 embeds, the extras need to be sent as followups
+            while (embeds.length)
+                await sendFollowup(interaction, {
+                    embeds: embeds.splice(0, 10),
+                    components: [
+                        {
+                            type: MessageComponentType.ACTION_ROW,
+                            components: [ component ],
+                        },
+                    ],
+                });
+        })().catch(err => {
+            // Log & re-throw any errors
+            console.error(err);
+            sentry.captureException(err);
+            throw err;
+        }));
+
+        // Let Discord know we're working on the response
+        return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
     },
 };
