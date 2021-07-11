@@ -9,7 +9,7 @@
     "publish:staging": "NODE_ENV=staging wrangler publish -e staging",
     "logs:production": "wrangler tail -e production",
     "logs:staging": "wrangler tail -e staging",
-    "lint": "eslint \"{src/**/*,*}.js\"",
+    "lint": "eslint \"{src/**/*,test/**/*,*}.js\"",
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run lint && npm run test:build && npm run test:ava",
     "test:build": "node src/build/test.js && NODE_ENV=test wrangler build",
@@ -30,7 +30,7 @@
     "is-valid-domain": "0.0.20",
     "slash-commands": "^1.4.0",
     "web-whois": "0.0.6",
-    "workers-sentry": "0.0.5"
+    "workers-sentry": "0.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
