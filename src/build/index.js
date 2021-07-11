@@ -16,8 +16,10 @@ module.exports = async () => {
     // Get all our local commands
     const commands = getCommands();
 
-    // Register the commands with Discord
-    const discordCommands = await registerCommands(commands);
+    // Register the commands with Discord (or generate fake Discord data for testing)
+    const discordCommands = process.env.NODE_ENV === 'test'
+        ? await require('./test').testCommands(commands)
+        : await registerCommands(commands);
 
     // Export the Discord commands as JSON
     // Mapped to be keyed by their API ID

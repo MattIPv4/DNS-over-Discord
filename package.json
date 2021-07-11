@@ -11,7 +11,9 @@
     "logs:staging": "wrangler tail -e staging",
     "lint": "eslint \"{src/**/*,*}.js\"",
     "lint:fix": "npm run lint -- --fix",
-    "test": "npm run lint"
+    "test": "npm run lint && npm run test:build && npm run test:ava",
+    "test:build": "node src/build/test.js && NODE_ENV=test wrangler build",
+    "test:ava": "ava --verbose test/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -34,11 +36,14 @@
     "@babel/core": "^7.14.6",
     "@babel/plugin-proposal-optional-chaining": "^7.14.5",
     "@cloudflare/wrangler": "^1.17.0",
+    "ava": "^3.15.0",
     "babel-loader": "^8.2.2",
     "deep-equal": "^2.0.5",
     "dotenv": "^10.0.0",
     "eslint": "^7.29.0",
+    "miniflare": "^1.2.0",
     "node-fetch": "^2.6.1",
+    "snowflakey": "^0.2.0",
     "webpack": "^4.46.0"
   }
 }
