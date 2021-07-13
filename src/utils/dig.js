@@ -12,7 +12,7 @@ module.exports.validateDomain = (input, response) => {
         .replace(/^[a-z][a-z0-9+.-]+:\/\/(.+)$/i, '$1'); // Remove scheme from a URI
 
     // Validate
-    const valid = isValidDomain(cleaned, { subdomain: true });
+    const valid = isValidDomain(cleaned, { subdomain: true, topLevel: true });
 
     // Return the input with an optional error
     return {
