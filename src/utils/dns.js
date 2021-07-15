@@ -23,37 +23,39 @@ const DNS_RCODES = Object.freeze({
 
 const processAnswer = (type, answer) => {
     // Handle hex rdata
-    for (const entry of answer) {
-        if (entry.data.startsWith('\\#')) {
-            const words = entry.data.split(' ');
-            const length = words.length > 1 ? Number(words[1]) : 0;
+    if (Array.isArray(answer)) {
+        for (const entry of answer) {
+            if (entry.data.startsWith('\\#')) {
+                const words = entry.data.split(' ');
+                const length = words.length > 1 ? Number(words[1]) : 0;
 
-            // Drop the # and length, and any extra bytes beyond the declared length
-            words.splice(0, 2);
-            words.splice(length);
-
-            // CAA
-            if (type === 'CAA' && words.length > 1) {
-                const flags = Number(words[0]);
-                const tagLength = Number(words[1]);
+                // Drop the # and length, and any extra bytes beyond the declared length
                 words.splice(0, 2);
+                words.splice(length);
 
-                // Get the tag, dropping any non alpha-numeric bytes per
-                //  https://tools.ietf.org/html/rfc6844#section-5.1
-                const tag = words.splice(0, tagLength)
-                    .map(part => String.fromCharCode(parseInt(part, 16))).join('').trim()
-                    .replace(/[^a-z0-9]/gi, '');
+                // CAA
+                if (type === 'CAA' && words.length > 1) {
+                    const flags = Number(words[0]);
+                    const tagLength = Number(words[1]);
+                    words.splice(0, 2);
 
-                // Get the value
-                const value = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
+                    // Get the tag, dropping any non alpha-numeric bytes per
+                    //  https://tools.ietf.org/html/rfc6844#section-5.1
+                    const tag = words.splice(0, tagLength)
+                        .map(part => String.fromCharCode(parseInt(part, 16))).join('').trim()
+                        .replace(/[^a-z0-9]/gi, '');
 
-                // Combine and output
-                entry.data = `${flags} ${tag} "${value}"`;
-                continue;
+                    // Get the value
+                    const value = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
+
+                    // Combine and output
+                    entry.data = `${flags} ${tag} "${value}"`;
+                    continue;
+                }
+
+                // Normal hex data
+                entry.data = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
             }
-
-            // Normal hex data
-            entry.data = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
         }
     }
 
