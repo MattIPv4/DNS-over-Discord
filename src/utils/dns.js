@@ -21,6 +21,45 @@ const DNS_RCODES = Object.freeze({
     23: 'Bad/missing Server Cookie',
 });
 
+const processAnswer = (type, answer) => {
+    // Handle hex rdata
+    for (const entry of answer) {
+        if (entry.data.startsWith('\\#')) {
+            const words = entry.data.split(' ');
+            const length = words.length > 1 ? Number(words[1]) : 0;
+
+            // Drop the # and length, and any extra bytes beyond the declared length
+            words.splice(0, 2);
+            words.splice(length);
+
+            // CAA
+            if (type === 'CAA' && words.length > 1) {
+                const flags = Number(words[0]);
+                const tagLength = Number(words[1]);
+                words.splice(0, 2);
+
+                // Get the tag, dropping any non alpha-numeric bytes per
+                //  https://tools.ietf.org/html/rfc6844#section-5.1
+                const tag = words.splice(0, tagLength)
+                    .map(part => String.fromCharCode(parseInt(part, 16))).join('').trim()
+                    .replace(/[^a-z0-9]/gi, '');
+
+                // Get the value
+                const value = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
+
+                // Combine and output
+                entry.data = `${flags} ${tag} "${value}"`;
+                continue;
+            }
+
+            // Normal hex data
+            entry.data = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
+        }
+    }
+
+    return answer;
+};
+
 module.exports.performLookup = async (domain, type) => {
     // Build the query URL
     const query = new URL('https://cloudflare-dns.com/dns-query');
@@ -47,7 +86,7 @@ module.exports.performLookup = async (domain, type) => {
     // Valid answer
     return {
         name: Question[0].name,
-        answer: Answer,
+        answer: processAnswer(type, Answer),
     };
 };
 
