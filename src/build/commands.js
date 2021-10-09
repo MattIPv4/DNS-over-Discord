@@ -1,8 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const equal = require('deep-equal');
-const { DiscordInteractions } = require('slash-commands');
-const { grantToken } = require('./token');
+const { grantToken, getCommands, registerCommand, updateCommand, removeCommand } = require('../utils/discord');
 
 const consistentCommandOption = obj => ({
     type: obj.type,
@@ -62,21 +61,14 @@ module.exports.registerCommands = async commands => {
     // Get a token to talk to Discord
     const token = await grantToken();
 
-    // Define the builder
-    const interaction = new DiscordInteractions({
-        applicationId: process.env.CLIENT_ID,
-        authToken: token.access_token,
-        tokenPrefix: token.token_type,
-        publicKey: process.env.CLIENT_PUBLIC_KEY,
-    });
-
     // Define the commands and get what Discord currently has
-    const discordCommands = await interaction.getApplicationCommands(process.env.TEST_GUILD_ID);
+    const discordCommands = await getCommands(process.env.CLIENT_ID, token.access_token, token.token_type, process.env.TEST_GUILD_ID);
 
     // Remove old commands
     for (const command of discordCommands) {
         if (commands.find(cmd => cmd.name === command.name)) continue;
-        await interaction.deleteApplicationCommand(command.id, process.env.TEST_GUILD_ID);
+        await removeCommand(process.env.CLIENT_ID, token.access_token, token.token_type, command.id, process.env.TEST_GUILD_ID);
+        await new Promise(resolve => setTimeout(resolve, 250));
     }
 
     // Register or update the commands with Discord
@@ -92,7 +84,8 @@ module.exports.registerCommands = async commands => {
             if (Object.values(cmdDiff).includes(true)) {
                 // Get the props to patch and do the update
                 const cmdPatch = updatedCommandPatch(command, cmdDiff);
-                const data = await interaction.editApplicationCommand(discordCommand.id, cmdPatch, process.env.TEST_GUILD_ID);
+                const data = await updateCommand(process.env.CLIENT_ID, token.access_token, token.token_type, discordCommand.id, cmdPatch, process.env.TEST_GUILD_ID);
+                await new Promise(resolve => setTimeout(resolve, 250));
                 commandData.push({ ...command, ...data });
                 continue;
             }
@@ -103,7 +96,8 @@ module.exports.registerCommands = async commands => {
         }
 
         // Register the new command
-        const data = await interaction.createApplicationCommand(command, process.env.TEST_GUILD_ID);
+        const data = await registerCommand(process.env.CLIENT_ID, token.access_token, token.token_type, command, process.env.TEST_GUILD_ID);
+        await new Promise(resolve => setTimeout(resolve, 250));
         commandData.push({ ...command, ...data });
     }
 

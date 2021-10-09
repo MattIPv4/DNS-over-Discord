@@ -1,7 +1,7 @@
 const { InteractionResponseType, ComponentType, ButtonStyle } = require('discord-api-types/payloads');
 const { VALID_TYPES } = require('../utils/dns');
 const { handleDig, parseEmbed } = require('../utils/dig');
-const { editDeferred } = require('../utils/follow-up');
+const { editDeferred } = require('../utils/discord');
 
 const component = {
     type: ComponentType.Button,

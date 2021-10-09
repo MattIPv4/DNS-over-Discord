@@ -1,6 +1,6 @@
 const { InteractionResponseType, ApplicationCommandOptionType } = require('discord-api-types/payloads');
 const { performLookupWithCache } = require('../utils/whois');
-const { editDeferred } = require('../utils/follow-up');
+const { editDeferred } = require('../utils/discord');
 const { createEmbed } = require('../utils/embed');
 const { presentTable } = require('../utils/table');
 

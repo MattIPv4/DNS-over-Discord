@@ -1,7 +1,7 @@
 const { InteractionResponseType, ApplicationCommandOptionType, ComponentType } = require('discord-api-types/payloads');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
-const { sendFollowup, editDeferred } = require('../utils/follow-up');
+const { sendFollowup, editDeferred } = require('../utils/discord');
 const { component } = require('../components/dig-refresh');
 
 module.exports = {

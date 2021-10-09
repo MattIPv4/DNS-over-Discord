@@ -1,7 +1,7 @@
 const { InteractionResponseType, ApplicationCommandOptionType, ComponentType } = require('discord-api-types/payloads');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
-const { editDeferred } = require('../utils/follow-up');
+const { editDeferred } = require('../utils/discord');
 const { component } = require('../components/dig-refresh');
 
 const optionTypes = VALID_TYPES.slice(0, 25); // Discord has a limit of 25 options

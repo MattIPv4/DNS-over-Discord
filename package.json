@@ -26,7 +26,6 @@
   "dependencies": {
     "discord-api-types": "^0.23.1",
     "is-valid-domain": "^0.1.0",
-    "slash-commands": "^1.4.0",
     "web-whois": "0.0.6",
     "workers-sentry": "0.0.6"
   },
