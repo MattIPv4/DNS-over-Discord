@@ -32,16 +32,13 @@ module.exports = {
 
             // If no result, send back simple message
             if (!data)
-                return response({
-                    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-                    data: {
-                        embeds: [
-                            createEmbed(
-                                'WHOIS',
-                                'The query does not appear to be a valid domain name, IP address or ASN, or no results could be found',
-                            ),
-                        ],
-                    },
+                return editDeferred(interaction, {
+                    embeds: [
+                        createEmbed(
+                            'WHOIS',
+                            'The query does not appear to be a valid domain name, IP address or ASN, or no results could be found',
+                        ),
+                    ],
                 });
 
             // Generate the fields
@@ -68,11 +65,20 @@ module.exports = {
                 embeds: [createEmbed('WHOIS', `\`\`\`\n${title}\n${table}\n\`\`\``)],
             });
         })().catch(err => {
-            // Log & re-throw any errors
+            // Log any error
             console.error(err);
             sentry.captureException(err);
+
+            // Tell the user it errored
+            editDeferred(interaction, {
+                content: 'Sorry, something went wrong when processing your WHOIS query',
+            }).catch(() => {}); // Ignore any further errors
+
+            // Re-throw the error for Cf
             throw err;
         }));
+
+        // Let Discord know we're working on the response
         return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
     },
 };
