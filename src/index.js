@@ -1,5 +1,6 @@
-const { InteractionType, InteractionResponseType, InteractionResponseFlags, verifyKey } = require('discord-interactions');
+const { InteractionType, InteractionResponseType, InteractionResponseFlags } = require('discord-interactions');
 const WorkersSentry = require('workers-sentry/worker');
+const verify = require('./utils/verify');
 const Privacy = require('./utils/privacy');
 const commands = require('./build/data/commands.json');
 
@@ -17,13 +18,6 @@ const redirectResponse = url => new Response(null, {
         Location: url,
     },
 });
-
-// Util to verify a Discord interaction is legitimate
-const handleInteractionVerification = (request, bodyBuffer) => {
-    const timestamp = request.headers.get('X-Signature-Timestamp') || '';
-    const signature = request.headers.get('X-Signature-Ed25519') || '';
-    return verifyKey(bodyBuffer, signature, timestamp, process.env.CLIENT_PUBLIC_KEY);
-};
 
 // Process a Discord command interaction
 const handleCommandInteraction = async ({ body, wait, sentry }) => {
@@ -79,15 +73,12 @@ const handleComponentInteraction = async ({ body, wait, sentry }) => {
 
 // Process a Discord interaction POST request
 const handleInteraction = async ({ request, wait, sentry }) => {
-    // Get the body as a buffer and as text
-    const bodyBuffer = await request.arrayBuffer();
-    const bodyText = (new TextDecoder('utf-8')).decode(bodyBuffer);
-
-    // Store the request body in Sentry if something goes wrong
+    // Get the body as text
+    const bodyText = await request.text();
     sentry.setRequestBody(bodyText);
 
     // Verify a legitimate request
-    if (!handleInteractionVerification(request, bodyBuffer))
+    if (!await verify(request, bodyText))
         return new Response(null, { status: 401 });
 
     // Work with JSON body going forward
