@@ -65,9 +65,16 @@ module.exports = {
                 ],
             });
         })().catch(err => {
-            // Log & re-throw any errors
+            // Log any error
             console.error(err);
             sentry.captureException(err);
+
+            // Tell the user it errored
+            editDeferred(interaction, {
+                content: 'Sorry, something went wrong when processing your DNS query',
+            }).catch(() => {}); // Ignore any further errors
+
+            // Re-throw the error for Cf
             throw err;
         }));
 
