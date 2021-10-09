@@ -1,138 +1,51 @@
 const fetch = require('node-fetch');
-const { URLSearchParams } = require('url');
 
-module.exports.grantToken = async () => {
-    const params = new URLSearchParams();
-    params.append('grant_type', 'client_credentials');
-    params.append('scope', 'applications.commands.update');
+const api = async (endpoint, method, token = undefined, tokenType = undefined, data = undefined) => {
+    const res = await fetch(
+        `https://discord.com/api/v8${endpoint}`,
+        {
+            method,
+            body: data ? JSON.stringify(data) : undefined,
+            headers: {
+                Authorization: token && tokenType ? `${tokenType} ${token}` : undefined,
+                'Content-Type': data ? 'application/json' : undefined,
+            },
+        },
+    );
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Received unexpected status code ${res.status} from ${endpoint} ${method} - ${text}`);
+    }
+
+    return res;
+};
+
+module.exports.grantToken = () => {
     const auth = Buffer.from(process.env.CLIENT_ID + ':' + process.env.CLIENT_SECRET).toString('base64');
-    const res = await fetch(
-        'https://discord.com/api/v8/oauth2/token',
-        {
-            method: 'POST',
-            body: params,
-            headers: { Authorization: `Basic ${auth}` },
-        },
-    );
-
-    if (!res.ok) {
-        const data = await res.text();
-        throw new Error(`Received unexpected status code ${res.status} from token POST - ${data}`);
-    }
-
-    return await res.json();
+    return api('/oauth2/token?grant_type=client_credentials&scope=applications.commands.update', 'POST', auth, 'Basic')
+        .then(res => res.json());
 };
 
-module.exports.getCommands = async (applicationId, token, tokenType, guildId = undefined) => {
-    const res = await fetch(
-        `https://discord.com/api/v8/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands`,
-        {
-            method: 'GET',
-            headers: {
-                Authorization: `${tokenType} ${token}`,
-            },
-        },
-    );
+module.exports.getCommands = async (applicationId, token, tokenType, guildId = undefined) =>
+    api(`/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands`, 'GET', token, tokenType)
+        .then(res => res.json());
 
-    if (!res.ok) {
-        const data = await res.text();
-        throw new Error(`Received unexpected status code ${res.status} from commands GET - ${data}`);
-    }
+module.exports.registerCommand = async (applicationId, token, tokenType, data, guildId = undefined) =>
+    api(`/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands`, 'POST', token, tokenType, data)
+        .then(res => res.json());
 
-    return await res.json();
-};
+module.exports.updateCommand = async (applicationId, token, tokenType, commandId, data, guildId = undefined) =>
+    api(`/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands/${commandId}`, 'PATCH', token, tokenType, data)
+        .then(res => res.json());
 
-module.exports.registerCommand = async (applicationId, token, tokenType, data, guildId = undefined) => {
-    const res = await fetch(
-        `https://discord.com/api/v8/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands`,
-        {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-                Authorization: `${tokenType} ${token}`,
-                'Content-Type': 'application/json',
-            },
-        },
-    );
+module.exports.removeCommand = async (applicationId, token, tokenType, commandId, guildId = undefined) =>
+    api(`/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands/${commandId}`, 'DELETE', token, tokenType);
 
-    if (!res.ok) {
-        const data = await res.text();
-        throw new Error(`Received unexpected status code ${res.status} from commands POST - ${data}`);
-    }
+module.exports.sendFollowup = async (interaction, data) =>
+    api(`/webhooks/${process.env.CLIENT_ID}/${interaction.token}?wait=true`, 'POST', null, null, data)
+        .then(res => res.json());
 
-    return await res.json();
-};
-
-module.exports.updateCommand = async (applicationId, token, tokenType, commandId, data, guildId = undefined) => {
-    const res = await fetch(
-        `https://discord.com/api/v8/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands/${commandId}`,
-        {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-            headers: {
-                Authorization: `${tokenType} ${token}`,
-                'Content-Type': 'application/json',
-            },
-        },
-    );
-
-    if (!res.ok) {
-        const data = await res.text();
-        throw new Error(`Received unexpected status code ${res.status} from commands PATCH - ${data}`);
-    }
-
-    return await res.json();
-};
-
-module.exports.removeCommand = async (applicationId, token, tokenType, commandId, guildId = undefined) => {
-    const res = await fetch(
-        `https://discord.com/api/v8/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands/${commandId}`,
-        {
-            method: 'DELETE',
-            headers: {
-                Authorization: `${tokenType} ${token}`,
-            },
-        },
-    );
-
-    if (!res.ok) {
-        const data = await res.text();
-        throw new Error(`Received unexpected status code ${res.status} from commands DELETE - ${data}`);
-    }
-};
-
-module.exports.sendFollowup = async (interaction, data) => {
-    const res = await fetch(
-        `https://discord.com/api/v8/webhooks/${process.env.CLIENT_ID}/${interaction.token}?wait=true`,
-        {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' },
-        },
-    );
-
-    if (!res.ok) {
-        const data = await res.text();
-        throw new Error(`Received unexpected status code ${res.status} from webhooks POST - ${data}`);
-    }
-
-    return await res.json();
-};
-
-module.exports.editDeferred = async (interaction, data) => {
-    const res = await fetch(
-        `https://discord.com/api/v8/webhooks/${process.env.CLIENT_ID}/${interaction.token}/messages/${(interaction.message && interaction.message.id) || '@original'}?wait=true`,
-        {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' },
-        },
-    );
-
-    if (!res.ok) {
-        const data = await res.text();
-        throw new Error(`Received unexpected status code ${res.status} from webhooks PATCH - ${data}`);
-    }
-
-    return await res.json();
-};
+module.exports.editDeferred = async (interaction, data) =>
+    api(`/webhooks/${process.env.CLIENT_ID}/${interaction.token}/messages/${(interaction.message && interaction.message.id) || '@original'}?wait=true`, 'PATCH', null, null, data)
+        .then(res => res.json());
