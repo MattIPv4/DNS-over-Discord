@@ -1,4 +1,4 @@
-const { InteractionType, InteractionResponseType, InteractionResponseFlags } = require('discord-interactions');
+const { InteractionType, InteractionResponseType, MessageFlags } = require('discord-api-types/payloads');
 const WorkersSentry = require('workers-sentry/worker');
 const verify = require('./utils/verify');
 const Privacy = require('./utils/privacy');
@@ -40,10 +40,10 @@ const handleCommandInteraction = async ({ body, wait, sentry }) => {
 
         // Send an ephemeral message to the user
         return jsonResponse({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            type: InteractionResponseType.ChannelMessageWithSource,
             data: {
                 content: 'An unexpected error occurred when executing the command.',
-                flags: InteractionResponseFlags.EPHEMERAL,
+                flags: MessageFlags.Ephemeral,
             },
         });
     }
@@ -88,17 +88,17 @@ const handleInteraction = async ({ request, wait, sentry }) => {
     // Handle different interaction types
     switch (body.type) {
         // Handle a PING
-        case InteractionType.PING:
+        case InteractionType.Ping:
             return jsonResponse({
-                type: InteractionResponseType.PONG,
+                type: InteractionResponseType.Pong,
             });
 
         // Handle a command
-        case InteractionType.APPLICATION_COMMAND:
+        case InteractionType.ApplicationCommand:
             return handleCommandInteraction({ body, wait, sentry });
 
         // Handle a component
-        case InteractionType.MESSAGE_COMPONENT:
+        case InteractionType.MessageComponent:
             return handleComponentInteraction({ body, wait, sentry });
 
         // Unknown

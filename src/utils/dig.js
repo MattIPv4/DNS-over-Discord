@@ -1,4 +1,4 @@
-const { InteractionResponseType, InteractionResponseFlags } = require('discord-interactions');
+const { InteractionResponseType, MessageFlags } = require('discord-api-types/payloads');
 const isValidDomain = require('is-valid-domain');
 const { performLookupWithCache } = require('./dns');
 const { presentTable } = require('./table');
@@ -18,10 +18,10 @@ module.exports.validateDomain = (input, response) => {
     return {
         domain: cleaned,
         error: valid ? null : response({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            type: InteractionResponseType.ChannelMessageWithSource,
             data: {
                 content: 'A domain name could not be parsed from the given input.',
-                flags: InteractionResponseFlags.EPHEMERAL,
+                flags: MessageFlags.Ephemeral,
             },
         }),
     };

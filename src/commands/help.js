@@ -1,4 +1,4 @@
-const { InteractionResponseType } = require('discord-interactions');
+const { InteractionResponseType } = require('discord-api-types/payloads');
 const { createEmbed } = require('../utils/embed');
 const { cmdExplainer } = require('../utils/commands');
 const commands = require('../build/data/commands.json');
@@ -18,7 +18,7 @@ module.exports = {
 
         // Respond
         return response({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            type: InteractionResponseType.ChannelMessageWithSource,
             data: {
                 embeds: [embed],
             },

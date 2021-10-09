@@ -24,16 +24,16 @@
   },
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
-    "discord-interactions": "^2.3.0",
+    "discord-api-types": "^0.23.1",
     "is-valid-domain": "^0.1.0",
     "slash-commands": "^1.4.0",
     "web-whois": "0.0.6",
     "workers-sentry": "0.0.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.6",
+    "@babel/core": "^7.15.8",
     "@babel/plugin-proposal-optional-chaining": "^7.14.5",
-    "@cloudflare/wrangler": "^1.17.0",
+    "@cloudflare/wrangler": "^1.19.3",
     "babel-loader": "^8.2.2",
     "deep-equal": "^2.0.5",
     "dotenv": "^10.0.0",
