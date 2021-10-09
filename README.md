@@ -255,7 +255,9 @@ types.map(type => `*   ${type}`).join('\n');
 1. Create your test Discord application at https://discord.com/developers/applications (this does not need a bot account, just the application).
 2. Create your `development.env` file. Copy `development.env.sample` and fill out the information from your Discord application, plus the ID of your test server/guild.
 3. Authenticate with Wrangler by running `wrangler login`.
-4. Update `wrangler.toml` for your account. Use `wrangler whoami` to get your account ID, update the value in `wranglar.toml` to match.
+4. Update `wrangler.toml` for your account.
+   - Use `wrangler whoami` to get your account ID, update the value in `wrangler.toml` to match.
+   - Use `wrangler kv:namespace create "CACHE"` to create the KV namespace, update the `id` and `preview_id` in `wrangler.toml` to match.
 5. Develop with the worker by running `npm run dev`.
 
 ## Deployments
@@ -265,6 +267,9 @@ types.map(type => `*   ${type}`).join('\n');
 Ensure that you've created and configured `staging.env` and `production.env` appropriately (`staging.env` has a test server/guild by default, but this can be removed to stage global commands).
 
 Ensure that the staging/production environments in `wrangler.toml` have been updated with your zone IDs and routes for the workers.
+
+Ensure that the KV namespaces are created for staging/production environments and are configured in `wrangler.toml`.
+Use `wrangler kv:namespace create "CACHE" --env <staging/production>`.
 
 Run `npm run publish:staging` to deploy to staging, and `npm run publish:production` to deploy to the production environment.
 

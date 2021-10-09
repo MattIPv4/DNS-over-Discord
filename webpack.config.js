@@ -5,6 +5,7 @@ const WorkersSentryWebpackPlugin = require('workers-sentry/webpack');
 const build = require('./src/build');
 
 module.exports = {
+    target: 'webworker',
     entry: './src/index.js',
     plugins: [
         // Hook in the commands build process before each webpack run

@@ -1,11 +1,11 @@
-const { InteractionResponseType } = require('discord-interactions');
+const { InteractionResponseType } = require('discord-api-types/payloads');
 const { createEmbed } = require('../utils/embed');
 
 module.exports = {
     name: 'github',
     description: 'Get a link to the open-source GitHub repository for DNS over Discord',
     execute: async ({ response }) => response({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        type: InteractionResponseType.ChannelMessageWithSource,
         data: {
             embeds: [
                 createEmbed(

@@ -1,9 +1,7 @@
-const { InteractionResponseType } = require('discord-interactions');
-const { ApplicationCommandOptionType } = require('slash-commands');
+const { InteractionResponseType, ApplicationCommandOptionType, ComponentType } = require('discord-api-types/payloads');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
-const { editDeferred } = require('../utils/follow-up');
-const { MessageComponentType } = require('../utils/components');
+const { editDeferred } = require('../utils/discord');
 const { component } = require('../components/dig-refresh');
 
 const optionTypes = VALID_TYPES.slice(0, 25); // Discord has a limit of 25 options
@@ -15,14 +13,14 @@ module.exports = {
         {
             name: 'domain',
             description: 'The domain to lookup',
-            type: ApplicationCommandOptionType.STRING,
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: 'type',
             description: 'DNS record type to lookup',
             help: `Supported types:\n${optionTypes.map(type => `  ${type}`).join('\n')}\n\nDefaults to \`A\` records.`,
-            type: ApplicationCommandOptionType.STRING,
+            type: ApplicationCommandOptionType.String,
             required: false,
             choices: optionTypes.map(type => ({
                 name: `${type} records`,
@@ -32,7 +30,7 @@ module.exports = {
         {
             name: 'short',
             description: 'Display the results in short form',
-            type: ApplicationCommandOptionType.BOOLEAN,
+            type: ApplicationCommandOptionType.Boolean,
             required: false,
         },
     ],
@@ -44,7 +42,7 @@ module.exports = {
 
         // Parse domain input, return any error response
         const { domain, error } = validateDomain(rawDomain, response);
-        if (error) return await error;
+        if (error) return error;
 
         // Validate type, fallback to 'A'
         const type = VALID_TYPES.includes(rawType) ? rawType : 'A';
@@ -59,7 +57,7 @@ module.exports = {
                 embeds: [ embed ],
                 components: [
                     {
-                        type: MessageComponentType.ACTION_ROW,
+                        type: ComponentType.ActionRow,
                         components: [ component ],
                     },
                 ],
@@ -79,6 +77,6 @@ module.exports = {
         }));
 
         // Let Discord know we're working on the response
-        return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
+        return response({ type: InteractionResponseType.DeferredChannelMessageWithSource });
     },
 };

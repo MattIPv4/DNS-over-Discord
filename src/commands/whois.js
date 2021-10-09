@@ -1,7 +1,6 @@
-const { ApplicationCommandOptionType } = require('slash-commands');
-const { InteractionResponseType } = require('discord-interactions');
+const { InteractionResponseType, ApplicationCommandOptionType } = require('discord-api-types/payloads');
 const { performLookupWithCache } = require('../utils/whois');
-const { editDeferred } = require('../utils/follow-up');
+const { editDeferred } = require('../utils/discord');
 const { createEmbed } = require('../utils/embed');
 const { presentTable } = require('../utils/table');
 
@@ -12,7 +11,7 @@ module.exports = {
         {
             name: 'query',
             description: 'The domain name, IP address or ASN to lookup',
-            type: ApplicationCommandOptionType.STRING,
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
     ],
@@ -79,6 +78,6 @@ module.exports = {
         }));
 
         // Let Discord know we're working on the response
-        return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
+        return response({ type: InteractionResponseType.DeferredChannelMessageWithSource });
     },
 };

@@ -1,9 +1,7 @@
-const { InteractionResponseType } = require('discord-interactions');
-const { ApplicationCommandOptionType } = require('slash-commands');
+const { InteractionResponseType, ApplicationCommandOptionType, ComponentType } = require('discord-api-types/payloads');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
-const { sendFollowup, editDeferred } = require('../utils/follow-up');
-const { MessageComponentType } = require('../utils/components');
+const { sendFollowup, editDeferred } = require('../utils/discord');
 const { component } = require('../components/dig-refresh');
 
 module.exports = {
@@ -13,21 +11,21 @@ module.exports = {
         {
             name: 'domain',
             description: 'The domain to lookup',
-            type: ApplicationCommandOptionType.STRING,
+            type: ApplicationCommandOptionType.String,
             required: true,
         },
         {
             name: 'types',
             description: 'Space-separated DNS record types to lookup, `*` for all types',
             help: `Supported types:\n${VALID_TYPES.slice(0).sort().map(type => `  ${type}`).join('\n')}\n\nUse \`*\` to lookup all types.`,
-            type: ApplicationCommandOptionType.STRING,
+            type: ApplicationCommandOptionType.String,
             required: false,
             // TODO: https://github.com/discord/discord-api-docs/issues/2331
         },
         {
             name: 'short',
             description: 'Display the results in short form',
-            type: ApplicationCommandOptionType.BOOLEAN,
+            type: ApplicationCommandOptionType.Boolean,
             required: false,
         },
     ],
@@ -60,7 +58,7 @@ module.exports = {
                 embeds: embeds.splice(0, 10),
                 components: [
                     {
-                        type: MessageComponentType.ACTION_ROW,
+                        type: ComponentType.ActionRow,
                         components: [ component ],
                     },
                 ],
@@ -75,7 +73,7 @@ module.exports = {
                     embeds: embeds.splice(0, 10),
                     components: [
                         {
-                            type: MessageComponentType.ACTION_ROW,
+                            type: ComponentType.ActionRow,
                             components: [ component ],
                         },
                     ],
@@ -95,6 +93,6 @@ module.exports = {
         }));
 
         // Let Discord know we're working on the response
-        return response({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE });
+        return response({ type: InteractionResponseType.DeferredChannelMessageWithSource });
     },
 };

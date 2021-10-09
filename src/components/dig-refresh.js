@@ -1,12 +1,11 @@
-const { InteractionResponseType } = require('discord-interactions');
+const { InteractionResponseType, ComponentType, ButtonStyle } = require('discord-api-types/payloads');
 const { VALID_TYPES } = require('../utils/dns');
 const { handleDig, parseEmbed } = require('../utils/dig');
-const { editDeferred } = require('../utils/follow-up');
-const { MessageComponentType, MessageComponentButtonStyle } = require('../utils/components');
+const { editDeferred } = require('../utils/discord');
 
 const component = {
-    type: MessageComponentType.BUTTON,
-    style: MessageComponentButtonStyle.SECONDARY,
+    type: ComponentType.Button,
+    style: ButtonStyle.Secondary,
     label: 'Refresh',
     custom_id: 'dig-refresh',
 };
@@ -37,7 +36,7 @@ module.exports = {
                 embeds: updatedEmbeds,
                 components: [
                     {
-                        type: MessageComponentType.ACTION_ROW,
+                        type: ComponentType.ActionRow,
                         components: [ component ],
                     },
                 ],
@@ -51,12 +50,12 @@ module.exports = {
 
         // Disable the button, letting Discord and the user know we're working on an update
         return response({
-            type: InteractionResponseType.UPDATE_MESSAGE,
+            type: InteractionResponseType.UpdateMessage,
             data: {
                 embeds: interaction.message.embeds,
                 components: [
                     {
-                        type: MessageComponentType.ACTION_ROW,
+                        type: ComponentType.ActionRow,
                         components: [
                             {
                                 ...component,
