@@ -39,13 +39,16 @@ module.exports = {
 
         // Parse domain input, return any error response
         const { domain, error } = validateDomain(rawDomain, response);
-        if (error) return await error;
+        if (error) return error;
 
         // Parse types input, mapping '*' to all records and defaulting to 'A' if none given
         const types = rawTypes === '*'
             ? VALID_TYPES
             : rawTypes.split(' ').map(x => x.trim().toUpperCase()).filter(x => VALID_TYPES.includes(x));
         if (!types.length) types.push('A');
+
+        // Track if we successfully edited the deferred message
+        let deferredEdited = false;
 
         // Do the processing after acknowledging the Discord command
         wait((async () => {
@@ -63,6 +66,9 @@ module.exports = {
                 ],
             });
 
+            // Track that the deferred message was edited for error handling
+            deferredEdited = true;
+
             // If we have more than 10 embeds, the extras need to be sent as followups
             while (embeds.length)
                 await sendFollowup(interaction, {
@@ -75,9 +81,16 @@ module.exports = {
                     ],
                 });
         })().catch(err => {
-            // Log & re-throw any errors
+            // Log any error
             console.error(err);
             sentry.captureException(err);
+
+            // Tell the user it errored (don't edit the deferred if we've already edited it)
+            (deferredEdited ? sendFollowup : editDeferred)(interaction, {
+                content: 'Sorry, something went wrong when processing your DNS query',
+            }).catch(() => {}); // Ignore any further errors
+
+            // Re-throw the error for Cf
             throw err;
         }));
 
