@@ -1,3 +1,5 @@
+const cache = require('./cache');
+
 const DNS_RCODES = Object.freeze({
     0: 'No error',
     1: 'A format error [1 - FormErr] occurred when looking up the domain',
@@ -62,7 +64,7 @@ const processAnswer = (type, answer) => {
     return answer;
 };
 
-module.exports.performLookup = async (domain, type) => {
+const performLookup = async (domain, type) => {
     // Build the query URL
     const query = new URL('https://cloudflare-dns.com/dns-query');
     query.searchParams.set('name', domain);
@@ -91,6 +93,9 @@ module.exports.performLookup = async (domain, type) => {
         answer: processAnswer(type, Answer),
     };
 };
+
+module.exports.performLookupWithCache = (domain, type) =>
+    cache(performLookup, [ domain, type ], `dns-${domain}-${type}`, Number(process.env.CACHE_DNS_TTL) || 10);
 
 // Ordered by "popularity", dig command offers the first 25, multi-dig supports all
 module.exports.VALID_TYPES = Object.freeze([

@@ -1,6 +1,6 @@
 const { InteractionResponseType, InteractionResponseFlags } = require('discord-interactions');
 const isValidDomain = require('is-valid-domain');
-const { performLookup } = require('./dns');
+const { performLookupWithCache } = require('./dns');
 const { presentTable } = require('./table');
 const { createEmbed } = require('./embed');
 
@@ -29,7 +29,7 @@ module.exports.validateDomain = (input, response) => {
 
 module.exports.handleDig = async ({ domain, types, short }) => {
     // Make the DNS queries
-    const results = await Promise.all(types.map(type => performLookup(domain, type).then(data => ({ type, data }))));
+    const results = await Promise.all(types.map(type => performLookupWithCache(domain, type).then(data => ({ type, data }))));
 
     // Define the presenter
     const present = (type, data) => {
