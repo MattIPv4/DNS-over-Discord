@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType } = require('slash-commands');
 const { InteractionResponseType } = require('discord-interactions');
-const whois = require('web-whois');
+const { performLookupWithCache } = require('../utils/whois');
 const { editDeferred } = require('../utils/follow-up');
 const { createEmbed } = require('../utils/embed');
 const { presentTable } = require('../utils/table');
@@ -28,7 +28,7 @@ module.exports = {
             // TODO: Try to validate as domain/IPv4/IPv6/ASN before running lookup
 
             // Do the rdap/whois lookup
-            const data = await whois(query, true);
+            const data = await performLookupWithCache(query);
 
             // If no result, send back simple message
             if (!data)
