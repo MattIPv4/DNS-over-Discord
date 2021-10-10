@@ -1,4 +1,4 @@
-const { InteractionResponseType, MessageFlags } = require('discord-api-types/payloads');
+const { InteractionResponseType, MessageFlags } = require('discord-api-types/payloads/v9');
 const isValidDomain = require('is-valid-domain');
 const { performLookupWithCache } = require('./dns');
 const { presentTable } = require('./table');
