@@ -5,7 +5,7 @@ on:
     branches:
       - production
 env:
-  NODE_ENV=production
+  NODE_ENV: production
 jobs:
   test:
     name: Test
