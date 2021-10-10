@@ -16,7 +16,7 @@ const api = async (endpoint, method, token = undefined, tokenType = undefined, d
 
     if (!res.ok) {
         const text = await res.text();
-        throw new Error(`Received unexpected status code ${res.status} from ${endpoint} ${method} - ${text}`);
+        throw new Error(`Received unexpected status code ${res.status} from ${method} ${endpoint} - ${text}`);
     }
 
     return res;
