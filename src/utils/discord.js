@@ -1,8 +1,9 @@
 const fetch = require('node-fetch');
+const { RouteBases, Routes } = require('discord-api-types/rest/v9');
 
 const api = async (endpoint, method, token = undefined, tokenType = undefined, data = undefined) => {
     const res = await fetch(
-        `https://discord.com/api/v8${endpoint}`,
+        `${RouteBases.api}${endpoint}`,
         {
             method,
             body: data ? JSON.stringify(data) : undefined,
@@ -23,29 +24,29 @@ const api = async (endpoint, method, token = undefined, tokenType = undefined, d
 
 module.exports.grantToken = () => {
     const auth = Buffer.from(process.env.CLIENT_ID + ':' + process.env.CLIENT_SECRET).toString('base64');
-    return api('/oauth2/token?grant_type=client_credentials&scope=applications.commands.update', 'POST', auth, 'Basic')
+    return api(`${Routes.oauth2TokenExchange()}?grant_type=client_credentials&scope=applications.commands.update`, 'POST', auth, 'Basic')
         .then(res => res.json());
 };
 
 module.exports.getCommands = async (applicationId, token, tokenType, guildId = undefined) =>
-    api(`/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands`, 'GET', token, tokenType)
+    api(guildId ? Routes.applicationGuildCommands(applicationId, guildId) : Routes.applicationCommands(applicationId), 'GET', token, tokenType)
         .then(res => res.json());
 
 module.exports.registerCommand = async (applicationId, token, tokenType, data, guildId = undefined) =>
-    api(`/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands`, 'POST', token, tokenType, data)
+    api(guildId ? Routes.applicationGuildCommands(applicationId, guildId) : Routes.applicationCommands(applicationId), 'POST', token, tokenType, data)
         .then(res => res.json());
 
 module.exports.updateCommand = async (applicationId, token, tokenType, commandId, data, guildId = undefined) =>
-    api(`/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands/${commandId}`, 'PATCH', token, tokenType, data)
+    api(guildId ? Routes.applicationGuildCommand(applicationId, guildId, commandId) : Routes.applicationCommand(applicationId, commandId), 'PATCH', token, tokenType, data)
         .then(res => res.json());
 
 module.exports.removeCommand = async (applicationId, token, tokenType, commandId, guildId = undefined) =>
-    api(`/applications/${applicationId}${guildId ? `/guilds/${guildId}` : ''}/commands/${commandId}`, 'DELETE', token, tokenType);
+    api(guildId ? Routes.applicationGuildCommand(applicationId, guildId, commandId) : Routes.applicationCommand(applicationId, commandId), 'DELETE', token, tokenType);
 
 module.exports.sendFollowup = async (interaction, data) =>
-    api(`/webhooks/${process.env.CLIENT_ID}/${interaction.token}?wait=true`, 'POST', null, null, data)
+    api(`${Routes.webhook(process.env.CLIENT_ID, interaction.token)}?wait=true`, 'POST', null, null, data)
         .then(res => res.json());
 
 module.exports.editDeferred = async (interaction, data) =>
-    api(`/webhooks/${process.env.CLIENT_ID}/${interaction.token}/messages/${(interaction.message && interaction.message.id) || '@original'}?wait=true`, 'PATCH', null, null, data)
+    api(`${Routes.webhookMessage(process.env.CLIENT_ID, interaction.token, interaction.message?.id || '@original')}?wait=true`, 'PATCH', null, null, data)
         .then(res => res.json());

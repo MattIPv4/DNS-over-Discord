@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
-    "discord-api-types": "^0.23.1",
+    "discord-api-types": "^0.24.0-next.9dd3446.1633827859",
     "is-valid-domain": "^0.1.0",
     "web-whois": "0.0.6",
     "workers-sentry": "0.0.6"

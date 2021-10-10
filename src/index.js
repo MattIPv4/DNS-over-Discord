@@ -48,6 +48,7 @@ const handleCommandInteraction = async ({ body, wait, sentry }) => {
         });
     }
 };
+
 // Process a Discord component interaction
 const handleComponentInteraction = async ({ body, wait, sentry }) => {
     try {
