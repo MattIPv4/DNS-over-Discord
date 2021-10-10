@@ -1,4 +1,4 @@
-const { InteractionResponseType } = require('discord-api-types/payloads');
+const { InteractionResponseType } = require('discord-api-types/payloads/v9');
 const { createEmbed } = require('../utils/embed');
 const { cmdExplainer } = require('../utils/commands');
 const commands = require('../build/data/commands.json');

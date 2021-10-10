@@ -1,4 +1,4 @@
-const { InteractionType, InteractionResponseType, MessageFlags } = require('discord-api-types/payloads');
+const { InteractionType, InteractionResponseType, MessageFlags } = require('discord-api-types/payloads/v9');
 const WorkersSentry = require('workers-sentry/worker');
 const verify = require('./utils/verify');
 const Privacy = require('./utils/privacy');

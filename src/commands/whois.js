@@ -1,4 +1,4 @@
-const { InteractionResponseType, ApplicationCommandOptionType } = require('discord-api-types/payloads');
+const { InteractionResponseType, ApplicationCommandOptionType } = require('discord-api-types/payloads/v9');
 const { performLookupWithCache } = require('../utils/whois');
 const { editDeferred } = require('../utils/discord');
 const { createEmbed } = require('../utils/embed');
