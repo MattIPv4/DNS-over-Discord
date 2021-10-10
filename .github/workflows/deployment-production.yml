@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - production
-env:
-  NODE_ENV: production
+
 jobs:
   test:
     name: Test
@@ -33,7 +32,8 @@ jobs:
     name: Deploy
     needs: test
     runs-on: ubuntu-latest
-
+    env:
+      NODE_ENV: production
     steps:
       - uses: actions/checkout@v1
 
