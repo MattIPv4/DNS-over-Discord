@@ -1,9 +1,9 @@
-name: Deploy to Production
+name: Deploy to Staging
 
 on:
   push:
     branches:
-      - production
+      - staging
 
 jobs:
   test:
@@ -68,18 +68,19 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Generate production.env
+      - name: Generate staging.env
         env:
-          CLIENT_ID: ${{ secrets.PRODUCTION_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.PRODUCTION_CLIENT_SECRET }}
-          CLIENT_PUBLIC_KEY: ${{ secrets.PRODUCTION_CLIENT_PUBLIC_KEY }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.PRODUCTION_SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.PRODUCTION_SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.PRODUCTION_SENTRY_PROJECT }}
-          SENTRY_DSN: ${{ secrets.PRODUCTION_SENTRY_DSN }}
-        run: envsubst < production.env.sample > production.env
+          CLIENT_ID: ${{ secrets.STAGING_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.STAGING_CLIENT_SECRET }}
+          CLIENT_PUBLIC_KEY: ${{ secrets.STAGING_CLIENT_PUBLIC_KEY }}
+          TEST_GUILD_ID: ${{ secrets.STAGING_TEST_GUILD_ID }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.STAGING_SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.STAGING_SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.STAGING_SENTRY_PROJECT }}
+          SENTRY_DSN: ${{ secrets.STAGING_SENTRY_DSN }}
+        run: envsubst < staging.env.sample > staging.env
 
-      - name: Publish to Production
-        run: npm run publish:production
+      - name: Publish to Staging
+        run: npm run publish:staging
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
