@@ -10,23 +10,26 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
 
+    env:
+      NODE_OPTIONS: --unhandled-rejections=strict
+
     steps:
-    - uses: actions/checkout@v1
+      - uses: actions/checkout@v1
 
-    - name: Read .nvmrc
-      run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-      id: nvm
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
 
-    - name: Use Node.js (.nvmrc)
-      uses: actions/setup-node@v1
-      with:
-        node-version: "${{ steps.nvm.outputs.NVMRC }}"
+      - name: Use Node.js (.nvmrc)
+        uses: actions/setup-node@v1
+        with:
+          node-version: "${{ steps.nvm.outputs.NVMRC }}"
 
-    - name: Install Dependencies
-      run: npm ci
+      - name: Install Dependencies
+        run: npm ci
 
-    - name: Run Tests
-      run: npm test
+      - name: Run Tests
+        run: npm test
 
   deploy:
     name: Deploy
@@ -34,12 +37,24 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      NODE_ENV: staging
+      NODE_OPTIONS: --unhandled-rejections=strict
 
     steps:
       - uses: actions/checkout@v1
 
-      - name: Render .env
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Use Node.js (.nvmrc)
+        uses: actions/setup-node@v1
+        with:
+          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate staging.env
         env:
           CLIENT_ID: ${{ secrets.STAGING_CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.STAGING_CLIENT_SECRET }}
@@ -51,7 +66,7 @@ jobs:
           SENTRY_DSN: ${{ secrets.STAGING_SENTRY_DSN }}
         run: envsubst < staging.env.sample > staging.env
 
-      - uses: cloudflare/wrangler-action@1.3.0
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          environment: 'staging'
+      - name: Publish to Staging
+        run: npm run publish:staging
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
