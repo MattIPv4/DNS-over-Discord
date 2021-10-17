@@ -8,6 +8,7 @@ const build = require('./src/build');
 console.log(`Using ${NODE_ENV} environment for build...`);
 
 module.exports = {
+    mode: 'none',
     target: 'webworker',
     entry: './src/index.js',
     output: {
