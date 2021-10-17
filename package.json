@@ -2,8 +2,9 @@
   "name": "dns-over-discord",
   "version": "1.0.0",
   "description": "A 1.1.1.1 DNS resolver built for Discord",
-  "main": "src/index.js",
+  "main": "dist/worker.js",
   "scripts": {
+    "build": "webpack",
     "dev": "NODE_ENV=development wrangler dev",
     "publish:production": "NODE_ENV=production wrangler publish -e production",
     "publish:staging": "NODE_ENV=staging wrangler publish -e staging",
@@ -38,6 +39,7 @@
     "dotenv": "^10.0.0",
     "eslint": "^8.0.1",
     "node-fetch": "^2.6.5",
-    "webpack": "^4.46.0"
+    "webpack": "^4.46.0",
+    "webpack-cli": "^4.9.0"
   }
 }
