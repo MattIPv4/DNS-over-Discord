@@ -2,6 +2,7 @@ name = "dns-over-discord"
 type = "javascript"
 account_id = "fb1f542488f2441acf88ca15f3a8390d"
 workers_dev = true
+compatibility_date = "2021-10-17"
 kv_namespaces = [
     { binding = "CACHE", id = "49442b14c2cb482ea086750526022d3e", preview_id = "49442b14c2cb482ea086750526022d3e" }
 ]
