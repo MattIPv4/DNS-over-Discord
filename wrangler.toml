@@ -1,11 +1,17 @@
 name = "dns-over-discord"
-type = "webpack"
+type = "javascript"
 account_id = "fb1f542488f2441acf88ca15f3a8390d"
 workers_dev = true
-webpack_config = "webpack.config.js"
+compatibility_date = "2021-10-17"
 kv_namespaces = [
     { binding = "CACHE", id = "49442b14c2cb482ea086750526022d3e", preview_id = "49442b14c2cb482ea086750526022d3e" }
 ]
+
+[build]
+command = "npm run build"
+
+[build.upload]
+format = "service-worker"
 
 [env.staging]
 zone_id = "63feb9b9ee057b117f7c833928b0d21f"
