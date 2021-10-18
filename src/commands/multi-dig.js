@@ -1,4 +1,4 @@
-const { InteractionResponseType, ApplicationCommandOptionType, ComponentType } = require('discord-api-types/payloads/v9');
+const { InteractionResponseType, ApplicationCommandOptionType, ComponentType, MessageFlags } = require('discord-api-types/payloads/v9');
 const { VALID_TYPES } = require('../utils/dns');
 const { validateDomain, handleDig } = require('../utils/dig');
 const { sendFollowup, editDeferred } = require('../utils/discord');
@@ -17,7 +17,7 @@ module.exports = {
         {
             name: 'types',
             description: 'Space-separated DNS record types to lookup, `*` for all types',
-            help: `Supported types:\n${VALID_TYPES.slice(0).sort().map(type => `  ${type}`).join('\n')}\n\nUse \`*\` to lookup all types.`,
+            help: `Supported types:\n  ${VALID_TYPES.slice(0).sort().join(', ')}\n\nUse \`*\` to lookup all types.`,
             type: ApplicationCommandOptionType.String,
             required: false,
             // TODO: https://github.com/discord/discord-api-docs/issues/2331
@@ -45,6 +45,9 @@ module.exports = {
             : rawTypes.split(' ').map(x => x.trim().toUpperCase()).filter(x => VALID_TYPES.includes(x));
         if (!types.length) types.push('A');
 
+        // Make messages ephemeral if more than 5 types
+        const flags = types.length > 5 ? MessageFlags.Ephemeral : undefined;
+
         // Track if we successfully edited the deferred message
         let deferredEdited = false;
 
@@ -62,6 +65,7 @@ module.exports = {
                         components: [ component ],
                     },
                 ],
+                flags,
             });
 
             // Track that the deferred message was edited for error handling
@@ -77,6 +81,7 @@ module.exports = {
                             components: [ component ],
                         },
                     ],
+                    flags,
                 });
         })().catch(err => {
             // Log any error
@@ -86,6 +91,7 @@ module.exports = {
             // Tell the user it errored (don't edit the deferred if we've already edited it)
             (deferredEdited ? sendFollowup : editDeferred)(interaction, {
                 content: 'Sorry, something went wrong when processing your DNS query',
+                flags,
             }).catch(() => {}); // Ignore any further errors
 
             // Re-throw the error for Cf
@@ -93,6 +99,6 @@ module.exports = {
         }));
 
         // Let Discord know we're working on the response
-        return response({ type: InteractionResponseType.DeferredChannelMessageWithSource });
+        return response({ type: InteractionResponseType.DeferredChannelMessageWithSource, data: { flags } });
     },
 };

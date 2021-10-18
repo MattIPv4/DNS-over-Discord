@@ -2,7 +2,7 @@
 
 **A 1.1.1.1 DNS resolver built for Discord**
 
-*For the latest docs, please see [developers.cloudflare.com/1.1.1.1/fun-stuff/dns-over-discord](https://developers.cloudflare.com/1.1.1.1/fun-stuff/dns-over-discord)*
+*For the latest docs, please see [developers.cloudflare.com/1.1.1.1/other-ways-to-use-1.1.1.1/dns-over-discord](https://developers.cloudflare.com/1.1.1.1/other-ways-to-use-1.1.1.1/dns-over-discord)*
 
 ---
 

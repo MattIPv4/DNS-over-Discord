@@ -1,7 +1,9 @@
-const { InteractionResponseType } = require('discord-api-types/payloads/v9');
+const { InteractionResponseType, MessageFlags, ComponentType } = require('discord-api-types/payloads/v9');
+const { component: docsComponent } = require('../components/docs');
+const { component: inviteComponent } = require('../components/invite');
 const { createEmbed } = require('../utils/embed');
 const { cmdExplainer } = require('../utils/commands');
-const commands = require('../build/data/commands.json');
+const commands = require('../../tmp/commands.json');
 
 module.exports = {
     name: 'help',
@@ -21,6 +23,13 @@ module.exports = {
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
                 embeds: [embed],
+                components: [
+                    {
+                        type: ComponentType.ActionRow,
+                        components: [ docsComponent, inviteComponent ],
+                    },
+                ],
+                flags: MessageFlags.Ephemeral,
             },
         });
     },

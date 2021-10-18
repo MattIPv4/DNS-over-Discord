@@ -2,7 +2,7 @@ const { InteractionType, InteractionResponseType, MessageFlags } = require('disc
 const WorkersSentry = require('workers-sentry/worker');
 const verify = require('./utils/verify');
 const Privacy = require('./utils/privacy');
-const commands = require('./build/data/commands.json');
+const commands = require('../tmp/commands.json');
 
 // Util to send a JSON response
 const jsonResponse = obj => new Response(JSON.stringify(obj), {
@@ -149,11 +149,11 @@ const handleRequest = async ({ request, wait, sentry }) => {
 
     // GitHub redirect
     if (url.pathname === '/github')
-        return redirectResponse('https://github.com/MattIPv4/DNS-over-Discord/');
+        return redirectResponse('https://github.com/MattIPv4/DNS-over-Discord');
 
     // Docs redirect
     if (url.pathname === '/')
-        return redirectResponse('https://developers.cloudflare.com/1.1.1.1/fun-stuff/dns-over-discord');
+        return redirectResponse('https://developers.cloudflare.com/1.1.1.1/other-ways-to-use-1.1.1.1/dns-over-discord');
 
     // Not found
     return new Response(null, { status: 404 });
