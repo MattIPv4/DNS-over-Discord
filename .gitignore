@@ -1,6 +1,6 @@
 .idea/
 node_modules/
 .DS_Store
-src/build/data/
+tmp/
 dist/
 *.env

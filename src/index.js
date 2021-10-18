@@ -2,7 +2,7 @@ const { InteractionType, InteractionResponseType, MessageFlags } = require('disc
 const WorkersSentry = require('workers-sentry/worker');
 const verify = require('./utils/verify');
 const Privacy = require('./utils/privacy');
-const commands = require('./build/data/commands.json');
+const commands = require('../tmp/commands.json');
 
 // Util to send a JSON response
 const jsonResponse = obj => new Response(JSON.stringify(obj), {

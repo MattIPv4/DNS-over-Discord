@@ -7,11 +7,12 @@ const mkdirSafe = path => fs.access(path).catch(() => fs.mkdir(path, { recursive
 
 module.exports = async () => {
     // Create the output directory
-    await mkdirSafe(path.join(__dirname, 'data'));
+    const tmp = path.join(__dirname, '..', '..', 'tmp');
+    await mkdirSafe(tmp);
 
     // Export empty commands as JSON
     // This is so the help command doesn't error
-    await fs.writeFile(path.join(__dirname, 'data', 'commands.json'), JSON.stringify({}, null, 2));
+    await fs.writeFile(path.join(tmp, 'commands.json'), JSON.stringify({}, null, 2));
 
     // Get all our local commands
     const commands = getCommands();
@@ -25,7 +26,7 @@ module.exports = async () => {
         obj[cmd.id] = cmd;
         return obj;
     }, {});
-    await fs.writeFile(path.join(__dirname, 'data', 'commands.json'), JSON.stringify(discordCommandsObj, null, 2));
+    await fs.writeFile(path.join(tmp, 'commands.json'), JSON.stringify(discordCommandsObj, null, 2));
 
     // Done
     console.log('Commands data ready to go!');
