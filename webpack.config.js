@@ -27,6 +27,9 @@ export default {
             return obj;
         }, { 'process.env.NODE_ENV': JSON.stringify(NODE_ENV) })),
 
+        // Ensure single chunk
+        new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
+
         // Publish source maps to Sentry on each build
         new WorkersSentryWebpackPlugin(
             process.env.SENTRY_AUTH_TOKEN,
