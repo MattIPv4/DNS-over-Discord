@@ -37,4 +37,8 @@ export default {
             process.env.SENTRY_PROJECT,
         ),
     ],
+    externals: {
+        // Don't webpack node-fetch, rely on fetch global
+        'node-fetch': 'fetch',
+    },
 };

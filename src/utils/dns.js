@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import cache from './cache.js';
 
 const DNS_RCODES = Object.freeze({
