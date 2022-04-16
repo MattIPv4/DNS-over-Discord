@@ -1,4 +1,4 @@
-module.exports.createEmbed = (title, description, footer = '') => ({
+export const createEmbed = (title, description, footer = '') => ({
     title: `DNS over Discord: ${title}`,
     description: description,
     color: 0xf48120,

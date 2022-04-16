@@ -1,4 +1,5 @@
-const cache = require('./cache');
+import fetch from 'node-fetch';
+import cache from './cache.js';
 
 const DNS_RCODES = Object.freeze({
     0: 'No error',
@@ -94,11 +95,11 @@ const performLookup = async (domain, type) => {
     };
 };
 
-module.exports.performLookupWithCache = (domain, type) =>
+export const performLookupWithCache = (domain, type) =>
     cache(performLookup, [ domain, type ], `dns-${domain}-${type}`, Number(process.env.CACHE_DNS_TTL) || 10);
 
 // Ordered by "popularity", dig command offers the first 25, multi-dig supports all
-module.exports.VALID_TYPES = Object.freeze([
+export const VALID_TYPES = Object.freeze([
     // Most common record types
     'A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'MX', 'NS', 'SPF', 'SRV', 'TXT', 'DNSKEY', 'DS', 'LOC', 'URI', 'HTTPS',
     'NAPTR', 'PTR', 'SMIMEA', 'SOA', 'SSHFP', 'SVCB', 'TLSA', 'HINFO', 'CDS', 'CDNSKEY',

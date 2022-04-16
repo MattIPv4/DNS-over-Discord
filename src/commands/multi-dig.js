@@ -1,10 +1,10 @@
-const { InteractionResponseType, ApplicationCommandOptionType, ComponentType, MessageFlags } = require('discord-api-types/payloads/v9');
-const { VALID_TYPES } = require('../utils/dns');
-const { validateDomain, handleDig } = require('../utils/dig');
-const { sendFollowup, editDeferred } = require('../utils/discord');
-const { component } = require('../components/dig-refresh');
+import { InteractionResponseType, ApplicationCommandOptionType, ComponentType, MessageFlags } from 'discord-api-types/payloads/v9';
+import { VALID_TYPES } from '../utils/dns.js';
+import { validateDomain, handleDig } from '../utils/dig.js';
+import { sendFollowup, editDeferred } from '../utils/discord.js';
+import digRefresh from '../components/dig-refresh.js';
 
-module.exports = {
+export default {
     name: 'multi-dig',
     description: 'Perform a DNS over Discord lookup with multiple record types',
     options: [
@@ -62,7 +62,7 @@ module.exports = {
                 components: [
                     {
                         type: ComponentType.ActionRow,
-                        components: [ component ],
+                        components: [ digRefresh.component ],
                     },
                 ],
                 flags,
@@ -78,7 +78,7 @@ module.exports = {
                     components: [
                         {
                             type: ComponentType.ActionRow,
-                            components: [ component ],
+                            components: [ digRefresh.component ],
                         },
                     ],
                     flags,

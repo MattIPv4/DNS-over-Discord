@@ -22,7 +22,7 @@ const PUBLIC_KEY = crypto.subtle.importKey(
 
 const encoder = new TextEncoder();
 
-module.exports = async (request, bodyText) => {
+export default async (request, bodyText) => {
     const timestamp = request.headers.get('X-Signature-Timestamp') || '';
     const signature = hex2bin(request.headers.get('X-Signature-Ed25519'));
     return crypto.subtle.verify(

@@ -1,8 +1,8 @@
-const { InteractionType, InteractionResponseType, MessageFlags } = require('discord-api-types/payloads/v9');
-const WorkersSentry = require('workers-sentry/worker');
-const verify = require('./utils/verify');
-const Privacy = require('./utils/privacy');
-const commands = require('../tmp/commands.json');
+import { InteractionType, InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
+import WorkersSentry from 'workers-sentry/worker.js';
+import verify from './utils/verify.js';
+import Privacy from './utils/privacy.js';
+import commands from '../tmp/commands.json' assert { type: 'json' };
 
 // Util to send a JSON response
 const jsonResponse = obj => new Response(JSON.stringify(obj), {
@@ -28,7 +28,7 @@ const handleCommandInteraction = async ({ body, wait, sentry }) => {
 
     try {
         // Load in the command
-        const command = require(`./commands/${commandData.file}`);
+        const { default: command } = await import(`./commands/${commandData.file}`);
 
         // Execute
         return await command.execute({ interaction: body, response: jsonResponse, wait, sentry });
@@ -53,7 +53,7 @@ const handleCommandInteraction = async ({ body, wait, sentry }) => {
 const handleComponentInteraction = async ({ body, wait, sentry }) => {
     try {
         // Load in the component handler
-        const component = require(`./components/${body.data.custom_id}.js`);
+        const { default: component } = await import(`./components/${body.data.custom_id}.js`);
 
         // Execute
         return await component.execute({ interaction: body, response: jsonResponse, wait, sentry });

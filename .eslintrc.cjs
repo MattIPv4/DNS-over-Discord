@@ -1,14 +1,23 @@
 module.exports = {
     env: {
         browser: true,
-        commonjs: true,
-        es2021: true,
         node: true,
+        es2022: true,
     },
+    parser: '@babel/eslint-parser',
     parserOptions: {
-        ecmaVersion: 12,
+        babelOptions: {
+            plugins: [
+                '@babel/plugin-syntax-import-assertions',
+            ],
+        },
+        requireConfigFile: false,
+        sourceType: 'module',
     },
-    extends: 'eslint:recommended',
+    extends: [
+        'eslint:recommended',
+        'plugin:import/recommended',
+    ],
     rules: {
         'space-before-function-paren': [
             'error',
@@ -96,5 +105,15 @@ module.exports = {
             },
         ],
         'space-infix-ops': 'error',
+
+        // Ignore unresolved tmp file from build process
+        'import/no-unresolved': [
+            'error',
+            {
+                ignore: [
+                    'tmp/commands\\.json$',
+                ],
+            },
+        ],
     },
 };

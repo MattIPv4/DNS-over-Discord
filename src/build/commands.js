@@ -1,7 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const equal = require('deep-equal');
-const { grantToken, getCommands, registerCommand, updateCommand, removeCommand } = require('../utils/discord');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import equal from 'deep-equal';
+import { grantToken, getCommands as getDiscordCommands, registerCommand, updateCommand, removeCommand } from '../utils/discord.js';
 
 const consistentCommandOption = obj => ({
     type: obj.type,
@@ -29,18 +30,18 @@ const updatedCommandPatch = (cmd, diff) => Object.keys(cmd)
         return obj;
     }, {});
 
-module.exports.getCommands = () => {
+export const getCommands = async () => {
     const commands = [];
 
     // Get all files in the commands directory
-    const commandDirectory = path.join(__dirname, '..', 'commands');
+    const commandDirectory = fileURLToPath(new URL('../commands', import.meta.url));
     const commandFiles = fs.readdirSync(commandDirectory);
 
     // Work through each file
     for (const commandFile of commandFiles) {
         // Load the file in if JS
         if (!commandFile.endsWith('.js')) continue;
-        const commandData = require(path.join(commandDirectory, commandFile));
+        const { default: commandData } = await import(path.join(commandDirectory, commandFile));
 
         // Validate it is a command
         if (!('name' in commandData)) continue;
@@ -57,12 +58,12 @@ module.exports.getCommands = () => {
     return commands;
 };
 
-module.exports.registerCommands = async commands => {
+export const registerCommands = async commands => {
     // Get a token to talk to Discord
     const token = await grantToken();
 
     // Define the commands and get what Discord currently has
-    const discordCommands = await getCommands(process.env.CLIENT_ID, token.access_token, token.token_type, process.env.TEST_GUILD_ID);
+    const discordCommands = await getDiscordCommands(process.env.CLIENT_ID, token.access_token, token.token_type, process.env.TEST_GUILD_ID);
 
     // Remove old commands
     for (const command of discordCommands) {

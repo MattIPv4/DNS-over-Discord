@@ -1,11 +1,11 @@
-const { InteractionResponseType, MessageFlags, ComponentType } = require('discord-api-types/payloads/v9');
-const { component: docsComponent } = require('../components/docs');
-const { component: inviteComponent } = require('../components/invite');
-const { createEmbed } = require('../utils/embed');
-const { cmdExplainer } = require('../utils/commands');
-const commands = require('../../tmp/commands.json');
+import { InteractionResponseType, MessageFlags, ComponentType } from 'discord-api-types/payloads/v9';
+import docs from '../components/docs.js';
+import invite from '../components/invite.js';
+import { createEmbed } from '../utils/embed.js';
+import { cmdExplainer } from '../utils/commands.js';
+import commands from '../../tmp/commands.json' assert { type: 'json' };
 
-module.exports = {
+export default {
     name: 'help',
     description: 'Find out more about using DNS over Discord',
     execute: async ({ response }) => {
@@ -26,7 +26,7 @@ module.exports = {
                 components: [
                     {
                         type: ComponentType.ActionRow,
-                        components: [ docsComponent, inviteComponent ],
+                        components: [ docs.component, invite.component ],
                     },
                 ],
                 flags: MessageFlags.Ephemeral,

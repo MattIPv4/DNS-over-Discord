@@ -1,10 +1,10 @@
-const { InteractionResponseType, MessageFlags } = require('discord-api-types/payloads/v9');
-const isValidDomain = require('is-valid-domain');
-const { performLookupWithCache } = require('./dns');
-const { presentTable } = require('./table');
-const { createEmbed } = require('./embed');
+import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
+import isValidDomain from 'is-valid-domain';
+import { performLookupWithCache } from './dns.js';
+import { presentTable } from './table.js';
+import { createEmbed } from './embed.js';
 
-module.exports.validateDomain = (input, response) => {
+export const validateDomain = (input, response) => {
     // Clean the input
     const cleaned = input
         .trim()
@@ -27,7 +27,7 @@ module.exports.validateDomain = (input, response) => {
     };
 };
 
-module.exports.handleDig = async ({ domain, types, short }) => {
+export const handleDig = async ({ domain, types, short }) => {
     // Make the DNS queries
     const results = await Promise.all(types.map(type => performLookupWithCache(domain, type).then(data => ({ type, data }))));
 
@@ -73,7 +73,7 @@ module.exports.handleDig = async ({ domain, types, short }) => {
     return results.map(({ type, data }) => createEmbed(`${type} records`, present(type, data), 'diggy diggy hole'));
 };
 
-module.exports.parseEmbed = embed => {
+export const parseEmbed = embed => {
     // Match the domain name, type and if the short format was requested
     const descMatch = embed.description.match(/^`(\S+) (\S+) @1\.1\.1\.1 \+noall \+answer( \+short)?`\n/);
     if (!descMatch) return null;

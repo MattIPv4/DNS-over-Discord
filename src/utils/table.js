@@ -6,7 +6,7 @@ const chunkStr = (str, size) => {
     return ret;
 };
 
-module.exports.presentTable = tableRows => {
+export const presentTable = tableRows => {
     // Generate the column data
     const columns = tableRows.reduce((count, row) => Math.max(count, row.length), 0);
     const columnPadding = idx => idx === 0 || idx === columns - 1 ? 1 : 2;

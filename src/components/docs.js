@@ -1,4 +1,4 @@
-const { ComponentType, ButtonStyle } = require('discord-api-types/payloads/v9');
+import { ComponentType, ButtonStyle } from 'discord-api-types/payloads/v9';
 
 const component = {
     type: ComponentType.Button,
@@ -7,7 +7,7 @@ const component = {
     label: 'Read the docs',
 };
 
-module.exports = {
+export default {
     name: 'docs',
     component,
 };

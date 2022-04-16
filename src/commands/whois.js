@@ -1,10 +1,10 @@
-const { InteractionResponseType, ApplicationCommandOptionType } = require('discord-api-types/payloads/v9');
-const { performLookupWithCache } = require('../utils/whois');
-const { editDeferred } = require('../utils/discord');
-const { createEmbed } = require('../utils/embed');
-const { presentTable } = require('../utils/table');
+import { InteractionResponseType, ApplicationCommandOptionType } from 'discord-api-types/payloads/v9';
+import { performLookupWithCache } from '../utils/whois.js';
+import { editDeferred } from '../utils/discord.js';
+import { createEmbed } from '../utils/embed.js';
+import { presentTable } from '../utils/table.js';
 
-module.exports = {
+export default {
     name: 'whois',
     description: 'Perform a WHOIS lookup for a domain, IP or ASN',
     options: [
