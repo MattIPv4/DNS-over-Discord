@@ -7,6 +7,7 @@
   "scripts": {
     "build": "NODE_OPTIONS=--experimental-json-modules webpack",
     "dev": "NODE_ENV=development wrangler dev",
+    "tunnel": "cloudflared tunnel --url http://localhost:8787",
     "publish:production": "NODE_ENV=production wrangler publish -e production",
     "publish:staging": "NODE_ENV=staging wrangler publish -e staging",
     "logs:production": "wrangler tail -e production",
@@ -26,18 +27,18 @@
   },
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
-    "discord-api-types": "^0.24.0",
-    "is-valid-domain": "^0.1.2",
+    "discord-api-types": "^0.31.1",
+    "is-valid-domain": "^0.1.6",
     "web-whois": "0.0.6",
     "workers-sentry": "0.0.6"
   },
   "devDependencies": {
-    "@cloudflare/wrangler": "^1.19.3",
+    "@cloudflare/wrangler": "^1.19.11",
     "deep-equal": "^2.0.5",
     "dotenv": "^10.0.0",
-    "eslint": "^8.0.1",
+    "eslint": "^8.13.0",
     "node-fetch": "^2.6.7",
-    "webpack": "^5.58.2",
-    "webpack-cli": "^4.9.0"
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
   }
 }
