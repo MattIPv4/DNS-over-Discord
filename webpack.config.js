@@ -1,12 +1,11 @@
-import path from 'path';
 import { fileURLToPath } from 'url';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 import dotenv from 'dotenv';
 const env = dotenv.config({ path: fileURLToPath(new URL(`${NODE_ENV}.env`, import.meta.url)) });
 
 import webpack from 'webpack';
-import WorkersSentryWebpackPlugin from 'workers-sentry/webpack';
-import build from './src/build';
+import WorkersSentryWebpackPlugin from 'workers-sentry/webpack.js';
+import build from './src/build/index.js';
 
 console.log(`Using ${NODE_ENV} environment for build...`);
 
@@ -35,11 +34,4 @@ export default {
             process.env.SENTRY_PROJECT,
         ),
     ],
-    module: {
-        rules: [
-            {
-                test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader',
-            },
-        ],
-    },
 };

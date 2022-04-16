@@ -1,4 +1,4 @@
-import cache from './cache';
+import cache from './cache.js';
 
 const DNS_RCODES = Object.freeze({
     0: 'No error',

@@ -1,8 +1,8 @@
 import { InteractionResponseType, ApplicationCommandOptionType } from 'discord-api-types/payloads/v9';
-import { performLookupWithCache } from '../utils/whois';
-import { editDeferred } from '../utils/discord';
-import { createEmbed } from '../utils/embed';
-import { presentTable } from '../utils/table';
+import { performLookupWithCache } from '../utils/whois.js';
+import { editDeferred } from '../utils/discord.js';
+import { createEmbed } from '../utils/embed.js';
+import { presentTable } from '../utils/table.js';
 
 export default {
     name: 'whois',

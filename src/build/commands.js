@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import equal from 'deep-equal';
-import { grantToken, getCommands as getDiscordCommands, registerCommand, updateCommand, removeCommand } from '../utils/discord';
+import { grantToken, getCommands as getDiscordCommands, registerCommand, updateCommand, removeCommand } from '../utils/discord.js';
 
 const consistentCommandOption = obj => ({
     type: obj.type,

@@ -1,9 +1,9 @@
 import { InteractionResponseType, MessageFlags, ComponentType } from 'discord-api-types/payloads/v9';
-import docs from '../components/docs';
-import invite from '../components/invite';
-import { createEmbed } from '../utils/embed';
-import { cmdExplainer } from '../utils/commands';
-import commands from '../../tmp/commands.json';
+import docs from '../components/docs.js';
+import invite from '../components/invite.js';
+import { createEmbed } from '../utils/embed.js';
+import { cmdExplainer } from '../utils/commands.js';
+import commands from '../../tmp/commands.json' assert { type: 'json' };
 
 export default {
     name: 'help',

@@ -5,7 +5,7 @@
   "main": "dist/worker.js",
   "type": "module",
   "scripts": {
-    "build": "NODE_OPTIONS=--experimental-specifier-resolution=node webpack",
+    "build": "NODE_OPTIONS=--experimental-json-modules webpack",
     "dev": "NODE_ENV=development wrangler dev",
     "publish:production": "NODE_ENV=production wrangler publish -e production",
     "publish:staging": "NODE_ENV=staging wrangler publish -e staging",
@@ -32,10 +32,7 @@
     "workers-sentry": "0.0.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.15.8",
-    "@babel/plugin-proposal-optional-chaining": "^7.14.5",
     "@cloudflare/wrangler": "^1.19.3",
-    "babel-loader": "^8.2.2",
     "deep-equal": "^2.0.5",
     "dotenv": "^10.0.0",
     "eslint": "^8.0.1",

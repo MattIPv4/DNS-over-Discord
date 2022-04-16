@@ -1,8 +1,8 @@
 import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
 import isValidDomain from 'is-valid-domain';
-import { performLookupWithCache } from './dns';
-import { presentTable } from './table';
-import { createEmbed } from './embed';
+import { performLookupWithCache } from './dns.js';
+import { presentTable } from './table.js';
+import { createEmbed } from './embed.js';
 
 export const validateDomain = (input, response) => {
     // Clean the input

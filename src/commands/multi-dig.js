@@ -1,8 +1,8 @@
 import { InteractionResponseType, ApplicationCommandOptionType, ComponentType, MessageFlags } from 'discord-api-types/payloads/v9';
-import { VALID_TYPES } from '../utils/dns';
-import { validateDomain, handleDig } from '../utils/dig';
-import { sendFollowup, editDeferred } from '../utils/discord';
-import digRefresh from '../components/dig-refresh';
+import { VALID_TYPES } from '../utils/dns.js';
+import { validateDomain, handleDig } from '../utils/dig.js';
+import { sendFollowup, editDeferred } from '../utils/discord.js';
+import digRefresh from '../components/dig-refresh.js';
 
 export default {
     name: 'multi-dig',

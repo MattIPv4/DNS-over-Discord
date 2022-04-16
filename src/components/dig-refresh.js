@@ -1,7 +1,7 @@
 import { InteractionResponseType, ComponentType, ButtonStyle } from 'discord-api-types/payloads/v9';
-import { VALID_TYPES } from '../utils/dns';
-import { handleDig, parseEmbed } from '../utils/dig';
-import { editDeferred } from '../utils/discord';
+import { VALID_TYPES } from '../utils/dns.js';
+import { handleDig, parseEmbed } from '../utils/dig.js';
+import { editDeferred } from '../utils/discord.js';
 
 const component = {
     type: ComponentType.Button,

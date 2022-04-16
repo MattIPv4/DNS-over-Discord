@@ -1,6 +1,6 @@
 import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
-import { createEmbed } from '../utils/embed';
-import Privacy from '../utils/privacy';
+import { createEmbed } from '../utils/embed.js';
+import Privacy from '../utils/privacy.js';
 
 export default {
     name: 'privacy',
