@@ -8,6 +8,7 @@
 
 1.1.1.1 works from a Discord server, thanks to the 1.1.1.1 bot. [Invite the bot to your Discord server](https://dns-over-discord.v4.wtf/invite) to start using DNS over Discord.
 
+
 ## Perform DNS lookups
 
 Once the bot is in your server, type `/dig` to start performing DNS lookups. This will provide a native interface within Discord that allows you to specify the domain to lookup, an optional DNS record type and an optional flag for a short result.
@@ -19,6 +20,7 @@ Example:
 ```txt
 /dig domain: cloudflare.com
 ```
+
 
 ### Supported record types
 
@@ -59,16 +61,17 @@ Discord has a limit of 25 options in slash commands, so DNS over Discord offers 
 
 To query other DNS record types, or multiple record types at once, use the `/multi-dig` command.
 
+
 ### Short form response
 
-DNS over Discord has an optional flag in the `dig` command that allows the user to request a response in the short form.
+DNS over Discord has an optional flag in the `/dig` command that allows the user to request a response in the short form.
 
-When you request a response in the short form, the name and TTL columns will be excluded. The command only returns the data column without formatting, similar to the equivalent `dig` command response.
+When you request a response in the short form, the name and TTL columns will be excluded. The command only returns the data column without formatting, similar to the equivalent `dig` command-line interface response.
 
 Example:
 
 ```txt
-/dig domain: cloudflare.com type: AAAA short: true
+/dig domain: cloudflare.com type: AAAA records short: True
 ```
 
 
@@ -76,13 +79,14 @@ Example:
 
 You can refresh the DNS lookup results by clicking the Refresh button. Clicking it will trigger the bot to re-request the DNS query in the message, and update the results in the message. Any user can click this button.
 
-The refresh button is available on all responses to the `dig` command, including those that resulted in an error, such as an unknown domain or no records found.
+The refresh button is available on all responses to the `/dig` command, including those that resulted in an error, such as an unknown domain or no records found.
 
 <div class="medium-img">
 
 ![Refreshing dig domain: cloudflare.com](assets/commands/dig-command-refresh.gif)
 
 </div>
+
 
 ## `multi-dig` command
 
@@ -94,6 +98,7 @@ Example:
 /multi-dig domain: cloudflare.com types: A AAAA
 ```
 
+
 ### Supported record types
 
 When providing DNS record types for the `/multi-dig` command, Discord will not prompt you with options. You have to provide a space-separated list of valid DNS record types to lookup, as any invalid options will be silently dropped. `A` records will be used as the default if no valid types are given.
@@ -102,7 +107,7 @@ When providing DNS record types for the `/multi-dig` command, Discord will not p
 <summary>DNS record types supported and considered valid by the bot</summary>
 <div>
 
-Use a \* (asterisk) in place of a record type to get DNS results for all supported types.
+Use a `*` (asterisk) in place of a record type to get DNS results for all supported types.
 
 * `A`
 * `AAAA`
@@ -153,27 +158,30 @@ Use a \* (asterisk) in place of a record type to get DNS results for all support
 </div>
 </details>
 
+
 ### Short form response
 
-Like the main `dig` command, the `multi-dig` command also supports the optional short flag after the types have been specified in the slash command.
+Like the main `/dig` command, the `/multi-dig` command also supports the optional short flag after the types have been specified in the slash command.
 
 Example:
 
 ```txt
-/multi-dig domain: cloudflare.com types: CDS CDNSKEY short: true
+/multi-dig domain: cloudflare.com types: CDS CDNSKEY short: True
 ```
+
 
 ### Refreshing existing results
 
-The `multi-dig` command also provides a refresh button below each set of DNS results requested (or after each block of 10 DNS record types, if you requested more than 10).
+The `/multi-dig` command also provides a refresh button below each set of DNS results requested (or after each block of 10 DNS record types, if you requested more than 10).
 
-As with the `dig` command, any user can press the refresh button to refresh the displayed DNS results, including for DNS queries that had previously failed.
+As with the `/dig` command, any user can press the refresh button to refresh the displayed DNS results, including for DNS queries that had previously failed.
 
 <div class="medium-img">
 
 ![Refreshing multi-dig domain: cloudflare.com types: A AAAA](assets/commands/multi-dig-command-refresh.gif)
 
 </div>
+
 
 ## `whois` command
 
@@ -188,9 +196,11 @@ Examples:
 /whois query: 13335
 ```
 
+
 ## Other commands
 
 The bot also has a set of helper commands available to get more information about the bot and quick links.
+
 
 ### `help` command
 
@@ -202,7 +212,8 @@ Example:
 /help
 ```
 
-### privacy command
+
+### `privacy` command
 
 The `/privacy` command displays the privacy policy notice for using the 1.1.1.1 DNS over Discord bot. This notice can also be viewed at [https://dns-over-discord.v4.wtf/privacy](https://dns-over-discord.v4.wtf/privacy).
 
@@ -212,7 +223,8 @@ Example:
 /privacy
 ```
 
-### github command
+
+### `github` command
 
 The DNS over Discord bot is open-source, and the `/github` command provides a quick link to access the GitHub repository. The GitHub repository can be accessed at [https://github.com/MattIPv4/DNS-over-Discord/](https://github.com/MattIPv4/DNS-over-Discord/).
 
@@ -222,7 +234,8 @@ Example:
 /github
 ```
 
-### invite command
+
+### `invite` command
 
 The `/invite` command provides the user with a quick link to invite the 1.1.1.1 DNS over Discord bot to another Discord server.
 The bot can be invited at any time with [https://dns-over-discord.v4.wtf/invite](https://dns-over-discord.v4.wtf/invite).
@@ -232,16 +245,30 @@ The bot can be invited at any time with [https://dns-over-discord.v4.wtf/invite]
 ```
 
 <!--
-When in Cloudflare docs:
+# When in Cloudflare docs:
 
 - Use `https://cfl.re/3nM6VfQ` instead of `https://dns-over-discord.v4.wtf/invite`
 - Use `/1.1.1.1/static/dns-over-discord/*` instead of `assets/commands/*`
+- Include development foot note as below:
 
-Generating the types lists:
+```txt
+---
 
-```js
-types.slice(0, 25).map(type => `*   ${type}`).join('\n');
-types.map(type => `*   ${type}`).join('\n');
+## Development
+
+The DNS over Discord bot is deployed on [Cloudflare Workers](https://workers.cloudflare.com/).
+
+You can find the source code for the bot on GitHub, as well as information on getting started with contributing to the project, at [https://github.com/MattIPv4/DNS-over-Discord/](https://github.com/MattIPv4/DNS-over-Discord/).
+```
+
+# Generating the types lists:
+
+```txt
+node
+
+> const { VALID_TYPES } = await import('./src/utils/dns.js');
+> console.log(VALID_TYPES.slice(0, 25).map(type => `* \`${type}\``).join('\n'));
+> console.log(VALID_TYPES.map(type => `* \`${type}\``).join('\n'));
 ```
 -->
 
