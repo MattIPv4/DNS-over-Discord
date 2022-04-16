@@ -259,6 +259,7 @@ types.map(type => `*   ${type}`).join('\n');
    - Use `wrangler whoami` to get your account ID, update the value in `wrangler.toml` to match.
    - Use `wrangler kv:namespace create "CACHE"` to create the KV namespace, update the `id` and `preview_id` in `wrangler.toml` to match.
 5. Develop with the worker by running `npm run dev`.
+6. (Optional) Start an HTTP tunnel to your local development server by running `npm run tunnel`, using [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/run-tunnel/trycloudflare).
 
 ## Deployments
 
