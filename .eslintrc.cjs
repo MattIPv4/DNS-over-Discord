@@ -14,7 +14,10 @@ module.exports = {
         requireConfigFile: false,
         sourceType: 'module',
     },
-    extends: 'eslint:recommended',
+    extends: [
+        'eslint:recommended',
+        'plugin:import/recommended',
+    ],
     rules: {
         'space-before-function-paren': [
             'error',
