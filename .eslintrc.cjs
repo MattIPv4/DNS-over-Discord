@@ -105,5 +105,15 @@ module.exports = {
             },
         ],
         'space-infix-ops': 'error',
+
+        // Ignore unresolved tmp file from build process
+        'import/no-unresolved': [
+            'error',
+            {
+                ignore: [
+                    'tmp/commands\\.json$',
+                ],
+            },
+        ],
     },
 };
