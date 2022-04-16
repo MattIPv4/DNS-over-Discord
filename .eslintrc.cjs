@@ -1,12 +1,17 @@
 module.exports = {
     env: {
         browser: true,
-        commonjs: true,
-        es2021: true,
         node: true,
+        es2022: true,
     },
+    parser: '@babel/eslint-parser',
     parserOptions: {
-        ecmaVersion: 12,
+        babelOptions: {
+            plugins: [
+                '@babel/plugin-syntax-import-assertions',
+            ],
+        },
+        requireConfigFile: false,
         sourceType: 'module',
     },
     extends: 'eslint:recommended',

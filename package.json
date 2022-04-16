@@ -33,6 +33,9 @@
     "workers-sentry": "0.0.6"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.9",
+    "@babel/eslint-parser": "^7.17.0",
+    "@babel/plugin-syntax-import-assertions": "^7.16.7",
     "@cloudflare/wrangler": "^1.19.11",
     "deep-equal": "^2.0.5",
     "dotenv": "^10.0.0",
