@@ -1,5 +1,5 @@
-const whois = require('web-whois');
-const cache = require('./cache');
+import whois from 'web-whois';
+import cache from './cache';
 
-module.exports.performLookupWithCache = query =>
+export const performLookupWithCache = query =>
     cache(whois, [ query, true ], `whois-${query}`, Number(process.env.CACHE_WHOIS_TTL) || 30);

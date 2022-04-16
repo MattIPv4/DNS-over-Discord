@@ -1,6 +1,6 @@
 /* global CACHE */
 
-module.exports = async (func, args, key, ttl) => {
+export default async (func, args, key, ttl) => {
     // If no KV, no cache
     if (typeof CACHE === 'undefined') return func(...args);
 

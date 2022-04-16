@@ -1,4 +1,4 @@
-module.exports = `
+export default `
 By using DNS over Discord, whether you have read these notices or not, you agree to the following data being used as needed for DNS over Discord to operate and provide its functionality.
 
 DNS over Discord stores no data in a database and has no persistent in-memory cache as it runs as a stateless Cloudflare Worker.

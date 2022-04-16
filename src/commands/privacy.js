@@ -1,8 +1,8 @@
-const { InteractionResponseType, MessageFlags } = require('discord-api-types/payloads/v9');
-const { createEmbed } = require('../utils/embed');
-const Privacy = require('../utils/privacy');
+import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
+import { createEmbed } from '../utils/embed';
+import Privacy from '../utils/privacy';
 
-module.exports = {
+export default {
     name: 'privacy',
     description: 'View the privacy policy for DNS over Discord',
     execute: async ({ response }) => response({

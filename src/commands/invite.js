@@ -1,7 +1,7 @@
-const { InteractionResponseType } = require('discord-api-types/payloads/v9');
-const { createEmbed } = require('../utils/embed');
+import { InteractionResponseType } from 'discord-api-types/payloads/v9';
+import { createEmbed } from '../utils/embed';
 
-module.exports = {
+export default {
     name: 'invite',
     description: 'Get a link to add DNS over Discord to your server',
     execute: async ({ response }) => response({

@@ -1,7 +1,7 @@
-const optSignature = module.exports.optSignature = opt =>
+export const optSignature = opt =>
     `${opt.required ? '<' : '['}${opt.name}${opt.required ? '>' : ']'}`;
 
-const cmdSignature = module.exports.cmdSignature = cmd =>
+export const cmdSignature = cmd =>
     `/${cmd.name} ${(cmd.options || []).map(optSignature).join(' ')}`.trim();
 
 const optExplainer = opt =>
@@ -10,5 +10,5 @@ const optExplainer = opt =>
 const optsExplainer = opts =>
     (opts || []).map(optExplainer).join('\n\n').trim();
 
-module.exports.cmdExplainer = cmd =>
+export const cmdExplainer = cmd =>
     `${cmdSignature(cmd)}\n\n${cmd.description}\n\n${optsExplainer(cmd.options)}`.trim();

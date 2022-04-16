@@ -1,4 +1,4 @@
-const { ComponentType, ButtonStyle } = require('discord-api-types/payloads/v9');
+import { ComponentType, ButtonStyle } from 'discord-api-types/payloads/v9';
 
 const component = {
     type: ComponentType.Button,
@@ -7,7 +7,7 @@ const component = {
     label: 'Invite the bot',
 };
 
-module.exports = {
+export default {
     name: 'invite',
     component,
 };

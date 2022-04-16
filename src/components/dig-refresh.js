@@ -1,7 +1,7 @@
-const { InteractionResponseType, ComponentType, ButtonStyle } = require('discord-api-types/payloads/v9');
-const { VALID_TYPES } = require('../utils/dns');
-const { handleDig, parseEmbed } = require('../utils/dig');
-const { editDeferred } = require('../utils/discord');
+import { InteractionResponseType, ComponentType, ButtonStyle } from 'discord-api-types/payloads/v9';
+import { VALID_TYPES } from '../utils/dns';
+import { handleDig, parseEmbed } from '../utils/dig';
+import { editDeferred } from '../utils/discord';
 
 const component = {
     type: ComponentType.Button,
@@ -10,7 +10,7 @@ const component = {
     custom_id: 'dig-refresh',
 };
 
-module.exports = {
+export default {
     name: 'dig-refresh',
     component,
     execute: async ({ interaction, response, wait, sentry }) => {
