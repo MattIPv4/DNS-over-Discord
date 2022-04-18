@@ -8,7 +8,6 @@
 
 1.1.1.1 works from a Discord server, thanks to the 1.1.1.1 bot. [Invite the bot to your Discord server](https://dns-over-discord.v4.wtf/invite) to start using DNS over Discord.
 
-
 ## Perform DNS lookups
 
 Once the bot is in your server, type `/dig` to start performing DNS lookups. This will provide a native interface within Discord that allows you to specify the domain to lookup, an optional DNS record type and an optional flag for a short result.
@@ -20,7 +19,6 @@ Example:
 ```txt
 /dig domain: cloudflare.com
 ```
-
 
 ### Supported record types
 
@@ -61,7 +59,6 @@ Discord has a limit of 25 options in slash commands, so DNS over Discord offers 
 
 To query other DNS record types, or multiple record types at once, use the `/multi-dig` command.
 
-
 ### Short form response
 
 DNS over Discord has an optional flag in the `/dig` command that allows the user to request a response in the short form.
@@ -73,7 +70,6 @@ Example:
 ```txt
 /dig domain: cloudflare.com type: AAAA records short: True
 ```
-
 
 ### Refreshing existing results
 
@@ -87,7 +83,6 @@ The refresh button is available on all responses to the `/dig` command, includin
 
 </div>
 
-
 ## `multi-dig` command
 
 If you want to look up multiple DNS record types at once, use the `/multi-dig` command. This allows you to specify any supported DNS record type, and multiple types separated by a space.
@@ -97,7 +92,6 @@ Example:
 ```txt
 /multi-dig domain: cloudflare.com types: A AAAA
 ```
-
 
 ### Supported record types
 
@@ -158,7 +152,6 @@ Use a `*` (asterisk) in place of a record type to get DNS results for all suppor
 </div>
 </details>
 
-
 ### Short form response
 
 Like the main `/dig` command, the `/multi-dig` command also supports the optional short flag after the types have been specified in the slash command.
@@ -168,7 +161,6 @@ Example:
 ```txt
 /multi-dig domain: cloudflare.com types: CDS CDNSKEY short: True
 ```
-
 
 ### Refreshing existing results
 
@@ -181,7 +173,6 @@ As with the `/dig` command, any user can press the refresh button to refresh the
 ![Refreshing multi-dig domain: cloudflare.com types: A AAAA](assets/commands/multi-dig-command-refresh.gif)
 
 </div>
-
 
 ## `whois` command
 
@@ -196,11 +187,9 @@ Examples:
 /whois query: 13335
 ```
 
-
 ## Other commands
 
 The bot also has a set of helper commands available to get more information about the bot and quick links.
-
 
 ### `help` command
 
@@ -212,7 +201,6 @@ Example:
 /help
 ```
 
-
 ### `privacy` command
 
 The `/privacy` command displays the privacy policy notice for using the 1.1.1.1 DNS over Discord bot. This notice can also be viewed at [https://dns-over-discord.v4.wtf/privacy](https://dns-over-discord.v4.wtf/privacy).
@@ -223,7 +211,6 @@ Example:
 /privacy
 ```
 
-
 ### `github` command
 
 The DNS over Discord bot is open-source, and the `/github` command provides a quick link to access the GitHub repository. The GitHub repository can be accessed at [https://github.com/MattIPv4/DNS-over-Discord/](https://github.com/MattIPv4/DNS-over-Discord/).
@@ -233,7 +220,6 @@ Example:
 ```txt
 /github
 ```
-
 
 ### `invite` command
 
