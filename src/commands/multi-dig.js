@@ -3,6 +3,7 @@ import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
 import { sendFollowup, editDeferred } from '../utils/discord.js';
 import digRefresh from '../components/dig-refresh.js';
+import providers from '../utils/providers.js';
 
 export default {
     name: 'multi-dig',
@@ -28,12 +29,21 @@ export default {
             type: ApplicationCommandOptionType.Boolean,
             required: false,
         },
+        {
+            name: 'provider',
+            description: 'DNS provider to use',
+            help: `Supported providers:\n  ${Object.keys(providers).join(', ')}\n\nDefaults to ${providers[0].name}.`,
+            type: ApplicationCommandOptionType.String,
+            required: false,
+            choices: providers.map(({ name }) => ({ name, value: name })),
+        },
     ],
     execute: async ({ interaction, response, wait, sentry }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
         const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
+        const rawProvider = ((interaction.data.options.find(opt => opt.name === 'provider') || {}).value || '').trim();
 
         // Parse domain input, return any error response
         const { domain, error } = validateDomain(rawDomain, response);
@@ -45,6 +55,9 @@ export default {
             : rawTypes.split(' ').map(x => x.trim().toUpperCase()).filter(x => VALID_TYPES.includes(x));
         if (!types.length) types.push('A');
 
+        // Validate provider, fallback to Cloudflare
+        const provider = providers.find(p => p.name === rawProvider) || providers[0];
+
         // Make messages ephemeral if more than 5 types
         const flags = types.length > 5 ? MessageFlags.Ephemeral : undefined;
 
@@ -54,7 +67,7 @@ export default {
         // Do the processing after acknowledging the Discord command
         wait((async () => {
             // Run dig and get the embeds
-            const embeds = await handleDig({ domain, types, short: rawShort });
+            const embeds = await handleDig({ domain, types, short: rawShort, provider });
 
             // Edit the original deferred response with the first 10 embeds
             await editDeferred(interaction, {
