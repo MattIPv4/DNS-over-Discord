@@ -16,8 +16,7 @@ export default {
     execute: async ({ interaction, response, wait, sentry }) => {
         // Parse all the embeds
         const embeds = (interaction.message.embeds || [])
-            .map(embed => parseEmbed(embed))
-            .filter(data => data !== null && VALID_TYPES.includes(data.type));
+            .map(embed => parseEmbed(embed)).filter(data => data !== null);
 
         // If no types found, fail
         if (!embeds.length) return new Response(null, { status: 400 });
@@ -29,6 +28,7 @@ export default {
                 domain: embeds[0].name,
                 types: embeds.map(data => data.type),
                 short: embeds[0].short,
+                provider: embeds[0].provider,
             });
 
             // Edit the message with the new embeds

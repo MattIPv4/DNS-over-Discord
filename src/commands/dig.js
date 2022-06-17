@@ -3,6 +3,7 @@ import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
 import { editDeferred } from '../utils/discord.js';
 import digRefresh from '../components/dig-refresh.js';
+import providers from '../utils/providers.js';
 
 const optionTypes = Object.freeze(VALID_TYPES.slice(0, 25)); // Discord has a limit of 25 options
 
@@ -33,12 +34,21 @@ export default {
             type: ApplicationCommandOptionType.Boolean,
             required: false,
         },
+        {
+            name: 'provider',
+            description: 'DNS provider to use',
+            help: `Supported providers:\n  ${Object.keys(providers).join(', ')}\n\nDefaults to ${providers[0].name}.`,
+            type: ApplicationCommandOptionType.String,
+            required: false,
+            choices: providers.map(({ name }) => ({ name, value: name })),
+        },
     ],
     execute: async ({ interaction, response, wait, sentry }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawType = ((interaction.data.options.find(opt => opt.name === 'type') || {}).value || '').trim();
         const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
+        const rawProvider = ((interaction.data.options.find(opt => opt.name === 'provider') || {}).value || '').trim();
 
         // Parse domain input, return any error response
         const { domain, error } = validateDomain(rawDomain, response);
@@ -47,10 +57,13 @@ export default {
         // Validate type, fallback to 'A'
         const type = VALID_TYPES.includes(rawType) ? rawType : 'A';
 
+        // Validate provider, fallback to Cloudflare
+        const provider = providers.find(p => p.name === rawProvider) || providers[0];
+
         // Do the processing after acknowledging the Discord command
         wait((async () => {
             // Run dig and get the embeds
-            const [ embed ] = await handleDig({ domain, types: [ type ], short: rawShort });
+            const [ embed ] = await handleDig({ domain, types: [ type ], short: rawShort, provider });
 
             // Edit the original deferred response
             await editDeferred(interaction, {

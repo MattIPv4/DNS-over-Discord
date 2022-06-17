@@ -65,9 +65,9 @@ const processAnswer = (type, answer) => {
     return answer;
 };
 
-const performLookup = async (domain, type) => {
+const performLookup = async (domain, type, endpoint) => {
     // Build the query URL
-    const query = new URL('https://cloudflare-dns.com/dns-query');
+    const query = new URL(endpoint);
     query.searchParams.set('name', domain);
     query.searchParams.set('type', type.toLowerCase());
 
@@ -95,8 +95,12 @@ const performLookup = async (domain, type) => {
     };
 };
 
-export const performLookupWithCache = (domain, type) =>
-    cache(performLookup, [ domain, type ], `dns-${domain}-${type}`, Number(process.env.CACHE_DNS_TTL) || 10);
+export const performLookupWithCache = (domain, type, endpoint) => cache(
+    performLookup,
+    [ domain, type, endpoint ],
+    `dns-${domain}-${type}-${endpoint}`,
+    Number(process.env.CACHE_DNS_TTL) || 10,
+);
 
 // Ordered by "popularity", dig command offers the first 25, multi-dig supports all
 export const VALID_TYPES = Object.freeze([
