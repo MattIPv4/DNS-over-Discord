@@ -1,3 +1,6 @@
+import { Buffer } from 'buffer';
+import { decode, encode, RECURSION_DESIRED } from 'dns-packet';
+import { toRcode } from 'dns-packet/rcodes.js';
 import fetch from 'node-fetch';
 import cache from './cache.js';
 
@@ -25,9 +28,15 @@ const DNS_RCODES = Object.freeze({
 });
 
 const processAnswer = (type, answer) => {
-    // Handle hex rdata
     if (Array.isArray(answer)) {
         for (const entry of answer) {
+            // Consistent TTL prop
+            if (Object.prototype.hasOwnProperty.call(entry, 'TTL')) {
+                entry.ttl = entry.TTL;
+                Reflect.deleteProperty(entry, 'TTL');
+            }
+
+            // Handle hex rdata
             if (entry.data.startsWith('\\#')) {
                 const words = entry.data.split(' ');
                 const length = words.length > 1 ? Number(words[1]) : 0;
@@ -65,21 +74,67 @@ const processAnswer = (type, answer) => {
     return answer;
 };
 
-const performLookup = async (domain, type, endpoint) => {
+const performLookupJson = async (domain, type, endpoint) => {
     // Build the query URL
-    const query = new URL(endpoint);
+    const query = new URL(endpoint.endpoint);
     query.searchParams.set('name', domain);
     query.searchParams.set('type', type.toLowerCase());
 
-    // Make our request to Cloudflare
-    const res = await fetch(query.href, {
+    // Make our request
+    return fetch(query.href, {
         headers: {
             Accept: 'application/dns-json',
         },
+    }).then(res => res.json());
+};
+
+const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+const performLookupDns = async (domain, type, endpoint) => {
+    // Build the query packet
+    const packet = encode({
+        type: 'query',
+        id: randInt(1, 65534),
+        flags: RECURSION_DESIRED,
+        questions: [ {
+            name: domain,
+            type,
+        } ],
     });
 
-    // Parse the response
-    const { Status, Question, Answer } = await res.json();
+    // Build the query URL
+    const query = new URL(endpoint.endpoint);
+    query.searchParams.set('dns', packet.toString('base64').replace(/=+$/, ''));
+
+    // Make our request
+    return fetch(query.href, {
+        headers: {
+            Accept: 'application/dns-message',
+        },
+    }).then(res => res.arrayBuffer()).then(data => {
+        const dec = decode(Buffer.from(data));
+        return {
+            Status: toRcode(dec.rcode),
+            Question: dec.questions,
+            Answer: dec.answers,
+        };
+    });
+};
+
+const performLookupRequest = async (domain, type, endpoint) => {
+    switch (endpoint.type) {
+        case 'json':
+            return performLookupJson(domain, type, endpoint);
+        case 'dns':
+            return performLookupDns(domain, type, endpoint);
+        default:
+            return Promise.reject(new Error(`Unknown endpoint type: ${endpoint.type}`));
+    }
+};
+
+const performLookup = async (domain, type, endpoint) => {
+    // Make the request
+    const { Status, Question, Answer } = await performLookupRequest(domain, type, endpoint);
 
     // Return an error message for non-zero status
     if (Status !== 0)
@@ -98,7 +153,7 @@ const performLookup = async (domain, type, endpoint) => {
 export const performLookupWithCache = (domain, type, endpoint) => cache(
     performLookup,
     [ domain, type, endpoint ],
-    `dns-${domain}-${type}-${endpoint}`,
+    `dns-${domain}-${type}-${endpoint.endpoint}`,
     Number(process.env.CACHE_DNS_TTL) || 10,
 );
 

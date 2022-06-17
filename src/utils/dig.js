@@ -56,7 +56,7 @@ export const handleDig = async ({ domain, types, short, provider }) => {
             const truncStr = trunc ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
             const rowsStr = short ? rows.join('\n') : presentTable([
                 ['NAME', 'TTL', 'DATA'],
-                ...rows.map(rowData => [rowData.name, `${rowData.TTL.toLocaleString()}s`, rowData.data]),
+                ...rows.map(rowData => [rowData.name, `${rowData.ttl.toLocaleString()}s`, rowData.data]),
             ]);
             return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };

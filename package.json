@@ -28,6 +28,7 @@
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
     "discord-api-types": "^0.34.0",
+    "dns-packet": "^5.4.0",
     "is-valid-domain": "^0.1.6",
     "web-whois": "0.0.6",
     "workers-sentry": "0.0.6"
@@ -37,6 +38,7 @@
     "@babel/eslint-parser": "^7.18.2",
     "@babel/plugin-syntax-import-assertions": "^7.17.12",
     "@cloudflare/wrangler": "^1.19.12",
+    "buffer": "^6.0.3",
     "deep-equal": "^2.0.5",
     "dotenv": "^16.0.1",
     "eslint": "^8.17.0",
