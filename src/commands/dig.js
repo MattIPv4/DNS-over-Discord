@@ -3,6 +3,7 @@ import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
 import { editDeferred } from '../utils/discord.js';
 import digRefresh from '../components/dig-refresh.js';
+import digProvider from '../components/dig-provider.js';
 import providers from '../utils/providers.js';
 
 const optionTypes = Object.freeze(VALID_TYPES.slice(0, 25)); // Discord has a limit of 25 options
@@ -71,7 +72,15 @@ export default {
                 components: [
                     {
                         type: ComponentType.ActionRow,
-                        components: [ digRefresh.component ],
+                        components: [
+                            digProvider.component(provider.name),
+                        ],
+                    },
+                    {
+                        type: ComponentType.ActionRow,
+                        components: [
+                            digRefresh.component,
+                        ],
                     },
                 ],
             });

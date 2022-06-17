@@ -1,4 +1,5 @@
 import { InteractionResponseType, ApplicationCommandOptionType, ComponentType, MessageFlags } from 'discord-api-types/payloads/v9';
+import digProvider from '../components/dig-provider.js';
 import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
 import { sendFollowup, editDeferred } from '../utils/discord.js';
@@ -70,32 +71,31 @@ export default {
             const embeds = await handleDig({ domain, types, short: rawShort, provider });
 
             // Edit the original deferred response with the first 10 embeds
-            await editDeferred(interaction, {
-                embeds: embeds.splice(0, 10),
+            const messageBase = {
                 components: [
                     {
                         type: ComponentType.ActionRow,
-                        components: [ digRefresh.component ],
+                        components: [
+                            digProvider.component(provider.name),
+                        ],
+                    },
+                    {
+                        type: ComponentType.ActionRow,
+                        components: [
+                            digRefresh.component,
+                        ],
                     },
                 ],
                 flags,
-            });
+            };
+            await editDeferred(interaction, { ...messageBase, embeds: embeds.splice(0, 10) });
 
             // Track that the deferred message was edited for error handling
             deferredEdited = true;
 
             // If we have more than 10 embeds, the extras need to be sent as followups
             while (embeds.length)
-                await sendFollowup(interaction, {
-                    embeds: embeds.splice(0, 10),
-                    components: [
-                        {
-                            type: ComponentType.ActionRow,
-                            components: [ digRefresh.component ],
-                        },
-                    ],
-                    flags,
-                });
+                await sendFollowup(interaction, { ...messageBase, embeds: embeds.splice(0, 10) });
         })().catch(err => {
             // Log any error
             console.error(err);
