@@ -7,6 +7,9 @@ DNS over Discord responds solely to messages and requires no stored user data fo
 For DNS lookup commands, the domain name and record types provided will be sent to Cloudflare's 1.1.1.1 DNS over HTTPS JSON API to provide the functionality for the bot.
 You can read Cloudflare's Privacy Policies on their website: https://www.cloudflare.com/privacypolicy/ & https://developers.cloudflare.com/1.1.1.1/privacy/public-dns-resolver/
 
+At the request of the user, the domain name and record types for the DNS lookup command can also be sent to Google's 8.8.8.8 DNS over HTTPS JSON API, or to Quad9's DNS over HTTPS service.
+You can read both Google's and Quad9's Privacy Policies on their websites: https://developers.google.com/speed/public-dns/privacy & https://www.quad9.net/service/privacy/
+
 For WHOIS lookup commands, the query will be sent to RDAP.CLOUD, with fallback to WHOISJS, to provide the functionality for the bot.
 You can find out more about the services on their websites: https://rdap.cloud/ & https://whoisjs.com/
 The source for both of these services is available on a GitLab instance: https://codedin.wales/matthew/rdap.cloud & https://codedin.wales/matthew/whoisjs.com
