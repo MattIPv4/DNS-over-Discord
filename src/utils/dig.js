@@ -1,6 +1,7 @@
 import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
 import isValidDomain from 'is-valid-domain';
-import { performLookupWithCache } from './dns.js';
+import { performLookupWithCache, VALID_TYPES } from './dns.js';
+import providers from './providers.js';
 import { presentTable } from './table.js';
 import { createEmbed } from './embed.js';
 
@@ -27,14 +28,15 @@ export const validateDomain = (input, response) => {
     };
 };
 
-export const handleDig = async ({ domain, types, short }) => {
+export const handleDig = async ({ domain, types, short, provider }) => {
     // Make the DNS queries
-    const results = await Promise.all(types.map(type => performLookupWithCache(domain, type).then(data => ({ type, data }))));
+    const results = await Promise.all(types.map(type =>
+        performLookupWithCache(domain, type, provider.doh).then(data => ({ type, data }))));
 
     // Define the presenter
     const present = (type, data) => {
         // Generate the dig command equivalent
-        const digCmd = `\`${data.name} ${type} @1.1.1.1 +noall +answer${short ? ' +short' : ''}\`\n`;
+        const digCmd = `\`${data.name} ${type} @${provider.dig} +noall +answer${short ? ' +short' : ''}\`\n`;
 
         // Error message
         if (typeof data === 'object' && data.message)
@@ -54,7 +56,7 @@ export const handleDig = async ({ domain, types, short }) => {
             const truncStr = trunc ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
             const rowsStr = short ? rows.join('\n') : presentTable([
                 ['NAME', 'TTL', 'DATA'],
-                ...rows.map(rowData => [rowData.name, `${rowData.TTL.toLocaleString()}s`, rowData.data]),
+                ...rows.map(rowData => [rowData.name, `${rowData.ttl.toLocaleString()}s`, rowData.data]),
             ]);
             return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
@@ -75,13 +77,21 @@ export const handleDig = async ({ domain, types, short }) => {
 
 export const parseEmbed = embed => {
     // Match the domain name, type and if the short format was requested
-    const descMatch = embed.description.match(/^`(\S+) (\S+) @1\.1\.1\.1 \+noall \+answer( \+short)?`\n/);
+    const descMatch = embed.description.match(/^`(\S+) (\S+) @(\S+) \+noall \+answer( \+short)?`\n/);
     if (!descMatch) return null;
+
+    // Check the type
+    if (!VALID_TYPES.includes(descMatch[2])) return null;
+
+    // Find the full provider
+    const provider = providers.find(provider => provider.dig === descMatch[3]);
+    if (!provider) return null;
 
     // Return the matched data
     return {
         name: descMatch[1],
         type: descMatch[2],
-        short: !!descMatch[3],
+        short: !!descMatch[4],
+        provider,
     };
 };

@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 import dotenv from 'dotenv';
 const env = dotenv.config({ path: fileURLToPath(new URL(`${NODE_ENV}.env`, import.meta.url)) });
@@ -40,5 +41,11 @@ export default {
     externals: {
         // Don't webpack node-fetch, rely on fetch global
         'node-fetch': 'fetch',
+    },
+    resolve: {
+        fallback: {
+            // We need to polyfill buffer for DNS packets
+            buffer: createRequire(import.meta.url).resolve('buffer/'),
+        },
     },
 };
