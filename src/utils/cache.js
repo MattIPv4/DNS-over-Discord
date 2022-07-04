@@ -1,23 +1,17 @@
 /* global CACHE */
 
-const jsonDateStringify = (key, value) => {
+const jsonDateStringify = function (key, value) {
     // Wrap Date objects in a custom Date() string
-    if (value instanceof Date) return `Date(${value.toISOString()})`;
-
-    // Process objects recursively
-    if (typeof value === 'object') return Object.entries(value).reduce((acc, [ k, v ]) => ({
-        ...acc,
-        [k]: jsonDateStringify(k, v),
-    }), {});
-
+    if (this[key] instanceof Date) return `Date(${this[key].toISOString()})`;
     return value;
 };
 
-const jsonDateParse = (key, value) => {
+const jsonDateParse = function (key, value) {
     // Unwrap Date objects in a custom Date() string
-    if (typeof value === 'string') {
-        const match = value.match(/^Date\((.+)\)$/);
-        if (match) return new Date(match[1]);
+    if (typeof this[key] === 'string') {
+        const match = this[key].match(/^Date\((.+)\)$/);
+        const date = match?.[1] && new Date(match[1]);
+        if (date) return date;
     }
     return value;
 };
