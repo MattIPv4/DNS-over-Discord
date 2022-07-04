@@ -22,9 +22,7 @@ export default async (func, args, key, ttl) => {
 
     // Check KV for cache
     const kvValue = await CACHE.getWithMetadata(key);
-    if (kvValue && kvValue.value && kvValue.metadata && kvValue.metadata.exp > Date.now()) {
-        return JSON.parse(kvValue.value, jsonDateParse);
-    }
+    if (kvValue?.value && kvValue?.metadata?.exp > Date.now()) return JSON.parse(kvValue.value, jsonDateParse);
 
     // Run the lookup and store in KV
     const res = await func(...args);
