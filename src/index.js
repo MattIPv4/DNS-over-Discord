@@ -1,7 +1,7 @@
 import { InteractionType, InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
 import WorkersSentry from 'workers-sentry/worker.js';
 import verify from './utils/verify.js';
-import Privacy from './utils/privacy.js';
+import Privacy from './utils/strings/privacy.js';
 import Terms from './utils/strings/terms.js';
 import commands from '../tmp/commands.json' assert { type: 'json' };
 
