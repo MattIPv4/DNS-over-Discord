@@ -292,7 +292,8 @@ The bot can be invited at any time with [https://dns-over-discord.v4.wtf/invite]
 # When in Cloudflare docs:
 
 - Use `https://cfl.re/3nM6VfQ` instead of `https://dns-over-discord.v4.wtf/invite`
-- Use `/1.1.1.1/static/dns-over-discord/*` instead of `assets/commands/*`
+- Remove all images
+- Remove alternate DNS provider details
 - Include development foot note as below:
 
 ```txt
