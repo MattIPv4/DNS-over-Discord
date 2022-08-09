@@ -2,7 +2,7 @@
 
 **A 1.1.1.1 DNS resolver built for Discord**
 
-*For the latest docs, please see [developers.cloudflare.com/1.1.1.1/other-ways-to-use-1.1.1.1/dns-over-discord](https://developers.cloudflare.com/1.1.1.1/other-ways-to-use-1.1.1.1/dns-over-discord)*
+*This documentation is also available on [Cloudflare's developer documentation site](https://developers.cloudflare.com/1.1.1.1/other-ways-to-use-1.1.1.1/dns-over-discord)*
 
 ---
 
@@ -85,9 +85,7 @@ The refresh button is available on all responses to the `/dig` command, includin
 
 ### Changing DNS provider
 
-By default, the DNS over Discord bot will use Cloudflare's 1.1.1.1 DNS service. You can run the DNS lookup with alternate DNS providers by using the dropdown below the result. Clicking it will show a list of available providers, and selecting a new provider will update the results in the message. Any user can change the DNS provider.
-
-Like the refresh button, the provider dropdown is available on all responses to the `/dig` command.
+By default, the DNS over Discord bot uses Cloudflare's 1.1.1.1 DNS service. You can run the DNS lookup with alternate DNS providers by selecting the dropdown below the result. This shows you a list of available providers. Selecting a new provider updates the results in the message. Any user can change the DNS provider.
 
 <details>
 <summary>Supported DNS providers</summary>
@@ -201,9 +199,9 @@ As with the `/dig` command, any user can press the refresh button to refresh the
 
 ### Changing DNS provider
 
-Much like the `/dig` command, the `/multi-dig` command also allows for the DNS provider being used for the lookup to be changed. The menu will appear after each set of DNS results (or after each block of results if more than 10 record types are requested).
+Like the `/dig` command, you can change the DNS provider when using the `/multi-dig` command. The menu appears after each set of DNS results (or after each block of results if more than 10 record types are requested).
 
-This menu can be used be any user to change the DNS provider used for the lookup, like with the `/dig` command.
+This menu can be used be any user to change the DNS provider used for the lookup.
 
 <details>
 <summary>Supported DNS providers</summary>
@@ -253,7 +251,7 @@ Example:
 
 ### `privacy` command
 
-The `/privacy` command displays the Privacy Policy notice for using the 1.1.1.1 DNS over Discord bot. This notice can also be viewed at [https://dns-over-discord.v4.wtf/privacy](https://dns-over-discord.v4.wtf/privacy).
+The `/privacy` command displays the Privacy Policy notice for using the 1.1.1.1 DNS over Discord bot. You can also [refer to the Privacy Policy page](https://dns-over-discord.v4.wtf/privacy) to access it.
 
 Example:
 
@@ -263,7 +261,7 @@ Example:
 
 ### `terms` command
 
-The `/terms` command displays the Terms of Service notice for using the 1.1.1.1 DNS over Discord bot. This notice can also be viewed at [https://dns-over-discord.v4.wtf/terms](https://dns-over-discord.v4.wtf/terms).
+The `/terms` command displays the Terms of Service notice for using the 1.1.1.1 DNS over Discord bot. You can also [refer to the Terms of Service page](https://dns-over-discord.v4.wtf/terms) to access it.
 
 Example:
 
@@ -294,7 +292,8 @@ The bot can be invited at any time with [https://dns-over-discord.v4.wtf/invite]
 # When in Cloudflare docs:
 
 - Use `https://cfl.re/3nM6VfQ` instead of `https://dns-over-discord.v4.wtf/invite`
-- Use `/1.1.1.1/static/dns-over-discord/*` instead of `assets/commands/*`
+- Remove all images
+- Remove alternate DNS provider details
 - Include development foot note as below:
 
 ```txt
