@@ -77,7 +77,7 @@ export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
 
 export const parseEmbed = embed => {
     // Match the domain name, type and if the short format was requested
-    const descMatch = embed.description.match(/^`(\S+) (\S+) @(\S+) \+noall \+answer( \+short)?`\n/);
+    const descMatch = embed.description.match(/^`(\S+) (\S+) @(\S+) \+noall \+answer( \+short \+cdflag)?`\n/);
     if (!descMatch) return null;
 
     // Check the type
@@ -92,6 +92,7 @@ export const parseEmbed = embed => {
         name: descMatch[1],
         type: descMatch[2],
         short: !!descMatch[4],
+        cdflag: descMatch[5],
         provider,
     };
 };
