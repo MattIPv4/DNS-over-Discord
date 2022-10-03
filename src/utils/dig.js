@@ -28,7 +28,7 @@ export const validateDomain = (input, response) => {
     };
 };
 
-export const handleDig = async ({ domain, types, short, provider }) => {
+export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
     // Make the DNS queries
     const results = await Promise.all(types.map(type =>
         performLookupWithCache(domain, type, provider.doh).then(data => ({ type, data }))));
@@ -36,7 +36,7 @@ export const handleDig = async ({ domain, types, short, provider }) => {
     // Define the presenter
     const present = (type, data) => {
         // Generate the dig command equivalent
-        const digCmd = `\`${data.name} ${type} @${provider.dig} +noall +answer${short ? ' +short' : ''}\`\n`;
+        const digCmd = `\`${data.name} ${type} @${provider.dig} +noall +answer${short ? ' +short' : ''}${cdflag ? ' +cdflag' : ''}\`\n`;
 
         // Error message
         if (typeof data === 'object' && data.message)
