@@ -72,7 +72,7 @@ export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
     };
 
     // Convert results to an embed
-    return results.map(({ type, data }) => createEmbed(`${type} records`, present(type, data), 'diggy diggy hole'));
+    return results.map(({ type, data }) => createEmbed(`${type} records`, present(type, data), 'diggy diggy hole :warning: cd bit set for request, DNSSEC validation disabled'));
 };
 
 export const parseEmbed = embed => {

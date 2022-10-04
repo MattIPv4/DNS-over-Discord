@@ -71,6 +71,16 @@ Example:
 /dig domain: cloudflare.com type: AAAA records short: True
 ```
 
+### Disable DNSSEC checking
+
+You can disable DNSSEC checking in the `dig` command by passing `cdflag` as true. This will get the records even if validation fails.
+
+Example:
+
+```txt
+/dig domain: cloudflare.com type: AAAA records cdflag: True
+```
+
 ### Refreshing existing results
 
 You can refresh the DNS lookup results by clicking the Refresh button. Clicking it will trigger the bot to re-request the DNS query in the message, and update the results in the message. Any user can click this button.
@@ -183,6 +193,16 @@ Example:
 
 ```txt
 /multi-dig domain: cloudflare.com types: CDS CDNSKEY short: True
+```
+
+### Disable DNSSEC checking
+
+Exactly like `dig` command, you can disable dns checking by passing `cdflag` as true. This will get the records even if validation fails.
+
+Example:
+
+```txt
+/multi-dig domain: cloudflare.com type: AAAA records cdflag: True
 ```
 
 ### Refreshing existing results
