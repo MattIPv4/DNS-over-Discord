@@ -5,6 +5,9 @@ import providers from './providers.js';
 import { presentTable } from './table.js';
 import { createEmbed } from './embed.js';
 
+const DNSSEC_DISABLED_WARNING_MESSAGE = ":warning: cd bit set for request, DNSSEC validation disabled";
+
+
 export const validateDomain = (input, response) => {
     // Clean the input
     const cleaned = input
@@ -45,7 +48,7 @@ export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
         // No results
         if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
             return `${digCmd}\nNo records found${(cdflag
-                ? "\n\n:warning: cd bit set for request, DNSSEC validation disabled"
+                ? "\n\n" + DNSSEC_DISABLED_WARNING_MESSAGE
                 : "")}`;
 
         // Map the data if short requested
@@ -70,7 +73,7 @@ export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
         }
 
         // Render and return final rows
-        return output(finalRows) + (cdflag ? "\n\n:warning: cd bit set for request, DNSSEC validation disabled" : "") ;
+        return output(finalRows) + (cdflag ? "\n\n" + DNSSEC_DISABLED_WARNING_MESSAGE : "") ;
     };
 
     // Convert results to an embed
