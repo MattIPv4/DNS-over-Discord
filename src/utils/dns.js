@@ -53,29 +53,20 @@ const processAnswer = (type, answer) => {
 
                     // Get the tag, dropping any non alpha-numeric bytes per
                     //  https://tools.ietf.org/html/rfc6844#section-5.1
-                    const tag = words
-                        .splice(0, tagLength)
-                        .map((part) => String.fromCharCode(parseInt(part, 16)))
-                        .join('')
-                        .trim()
+                    const tag = words.splice(0, tagLength)
+                        .map(part => String.fromCharCode(parseInt(part, 16))).join('').trim()
                         .replace(/[^a-z0-9]/gi, '');
 
                     // Get the value
-                    const value = words
-                        .map((part) => String.fromCharCode(parseInt(part, 16)))
-                        .join('')
-                        .trim();
+                    const value = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
 
                     // Combine and output
-                    entry.data = `${flags} ${tag} '${value}'`;
+                    entry.data = `${flags} ${tag} "${value}"`;
                     continue;
                 }
 
                 // Normal hex data
-                entry.data = words
-                    .map((part) => String.fromCharCode(parseInt(part, 16)))
-                    .join('')
-                    .trim();
+                entry.data = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
             }
         }
     }
