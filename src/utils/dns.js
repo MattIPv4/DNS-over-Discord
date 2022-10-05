@@ -95,7 +95,7 @@ const performLookupJson = async (domain, type, endpoint, cdflag) => {
         headers: {
             Accept: 'application/dns-json',
         },
-    }).then((res) => res.json());
+    }).then(res => res.json());
 };
 
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
