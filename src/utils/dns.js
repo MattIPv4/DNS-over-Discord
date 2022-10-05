@@ -132,7 +132,7 @@ const performLookupRequest = async (domain, type, endpoint, cdflag) => {
             return performLookupDns(domain, type, endpoint, cdflag);
         default:
             return Promise.reject(
-                new Error(`Unknown endpoint type: ${endpoint.type}`)
+                new Error(`Unknown endpoint type: ${endpoint.type}`),
             );
     }
 };

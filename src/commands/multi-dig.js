@@ -50,7 +50,7 @@ export default {
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
         const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
-        const rawCdFlag = (interaction.data.options.find(opt => opt.name === 'cdflag') || {}).value || false;    
+        const rawCdFlag = (interaction.data.options.find(opt => opt.name === 'cdflag') || {}).value || false;
         const rawProvider = ((interaction.data.options.find(opt => opt.name === 'provider') || {}).value || '').trim();
 
         // Parse domain input, return any error response
