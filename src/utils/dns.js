@@ -53,20 +53,29 @@ const processAnswer = (type, answer) => {
 
                     // Get the tag, dropping any non alpha-numeric bytes per
                     //  https://tools.ietf.org/html/rfc6844#section-5.1
-                    const tag = words.splice(0, tagLength)
-                        .map(part => String.fromCharCode(parseInt(part, 16))).join('').trim()
+                    const tag = words
+                        .splice(0, tagLength)
+                        .map((part) => String.fromCharCode(parseInt(part, 16)))
+                        .join('')
+                        .trim()
                         .replace(/[^a-z0-9]/gi, '');
 
                     // Get the value
-                    const value = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
+                    const value = words
+                        .map((part) => String.fromCharCode(parseInt(part, 16)))
+                        .join('')
+                        .trim();
 
                     // Combine and output
-                    entry.data = `${flags} ${tag} "${value}"`;
+                    entry.data = `${flags} ${tag} '${value}'`;
                     continue;
                 }
 
                 // Normal hex data
-                entry.data = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
+                entry.data = words
+                    .map((part) => String.fromCharCode(parseInt(part, 16)))
+                    .join('')
+                    .trim();
             }
         }
     }
@@ -74,32 +83,35 @@ const processAnswer = (type, answer) => {
     return answer;
 };
 
-const performLookupJson = async (domain, type, endpoint) => {
+const performLookupJson = async (domain, type, endpoint, cdflag) => {
     // Build the query URL
     const query = new URL(endpoint.endpoint);
     query.searchParams.set('name', domain);
     query.searchParams.set('type', type.toLowerCase());
+    query.searchParams.set('cd', cdflag);
 
     // Make our request
     return fetch(query.href, {
         headers: {
             Accept: 'application/dns-json',
         },
-    }).then(res => res.json());
+    }).then((res) => res.json());
 };
 
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-const performLookupDns = async (domain, type, endpoint) => {
+const performLookupDns = async (domain, type, endpoint, cdflag) => {
     // Build the query packet
     const packet = encode({
         type: 'query',
         id: randInt(1, 65534),
-        flags: RECURSION_DESIRED,
-        questions: [ {
-            name: domain,
-            type,
-        } ],
+        flags: RECURSION_DESIRED | (cdflag && CHECKING_DISABLED),
+        questions: [
+            {
+                name: domain,
+                type,
+            },
+        ],
     });
 
     // Build the query URL
@@ -111,28 +123,32 @@ const performLookupDns = async (domain, type, endpoint) => {
         headers: {
             Accept: 'application/dns-message',
         },
-    }).then(res => res.arrayBuffer()).then(data => {
-        const dec = decode(Buffer.from(data));
-        return {
-            Status: toRcode(dec.rcode),
-            Question: dec.questions,
-            Answer: dec.answers,
-        };
-    });
+    })
+        .then((res) => res.arrayBuffer())
+        .then((data) => {
+            const dec = decode(Buffer.from(data));
+            return {
+                Status: toRcode(dec.rcode),
+                Question: dec.questions,
+                Answer: dec.answers,
+            };
+        });
 };
 
-const performLookupRequest = async (domain, type, endpoint) => {
+const performLookupRequest = async (domain, type, endpoint, cdflag) => {
     switch (endpoint.type) {
         case 'json':
-            return performLookupJson(domain, type, endpoint);
+            return performLookupJson(domain, type, endpoint, cdflag);
         case 'dns':
-            return performLookupDns(domain, type, endpoint);
+            return performLookupDns(domain, type, endpoint, cdflag);
         default:
-            return Promise.reject(new Error(`Unknown endpoint type: ${endpoint.type}`));
+            return Promise.reject(
+                new Error(`Unknown endpoint type: ${endpoint.type}`)
+            );
     }
 };
 
-const performLookup = async (domain, type, endpoint) => {
+const performLookup = async (domain, type, endpoint, cdflag) => {
     // Make the request
     const { Status, Question, Answer } = await performLookupRequest(domain, type, endpoint);
 
@@ -152,12 +168,12 @@ const performLookup = async (domain, type, endpoint) => {
 
 export const performLookupWithCache = (domain, type, endpoint) => cache(
     performLookup,
-    [ domain, type, endpoint ],
+    [ domain, type, endpoint, cdflag ],
     `dns-${domain}-${type}-${endpoint.endpoint}`,
     Number(process.env.CACHE_DNS_TTL) || 10,
 );
 
-// Ordered by "popularity", dig command offers the first 25, multi-dig supports all
+// Ordered by 'popularity', dig command offers the first 25, multi-dig supports all
 export const VALID_TYPES = Object.freeze([
     // Most common record types
     'A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'MX', 'NS', 'SPF', 'SRV', 'TXT', 'DNSKEY', 'DS', 'LOC', 'URI', 'HTTPS',
