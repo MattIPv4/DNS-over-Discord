@@ -70,7 +70,7 @@ export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
         }
 
         // Render and return final rows
-        return  output(finalRows) + (cdflag ? "\n\n:warning: cd bit set for request, DNSSEC validation disabled" : "") ;
+        return output(finalRows) + (cdflag ? "\n\n:warning: cd bit set for request, DNSSEC validation disabled" : "") ;
     };
 
     // Convert results to an embed
