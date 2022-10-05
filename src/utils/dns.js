@@ -162,7 +162,7 @@ export const performLookupWithCache = (domain, type, endpoint, cdflag) => cache(
     Number(process.env.CACHE_DNS_TTL) || 10,
 );
 
-// Ordered by 'popularity', dig command offers the first 25, multi-dig supports all
+// Ordered by "popularity", dig command offers the first 25, multi-dig supports all
 export const VALID_TYPES = Object.freeze([
     // Most common record types
     'A', 'AAAA', 'CAA', 'CERT', 'CNAME', 'MX', 'NS', 'SPF', 'SRV', 'TXT', 'DNSKEY', 'DS', 'LOC', 'URI', 'HTTPS',
