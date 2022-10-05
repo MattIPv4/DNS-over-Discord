@@ -1,10 +1,10 @@
 name = "dns-over-discord"
 type = "javascript"
-account_id = "fb1f542488f2441acf88ca15f3a8390d"
+account_id = "47c2b4d598af9d423c06fc9f936226d5"
 workers_dev = true
 compatibility_date = "2021-10-17"
 kv_namespaces = [
-    { binding = "CACHE", id = "49442b14c2cb482ea086750526022d3e", preview_id = "49442b14c2cb482ea086750526022d3e" }
+    { binding = "CACHE", id = "fd0fa495945f4fb1bbeb22324b30445c", preview_id = "fd0fa495945f4fb1bbeb22324b30445c" }
 ]
 
 [build]
@@ -18,7 +18,7 @@ zone_id = "63feb9b9ee057b117f7c833928b0d21f"
 workers_dev = false
 route = "dns-over-discord-staging.v4.wtf/*"
 kv_namespaces = [
-    { binding = "CACHE", id = "a4e14492f7624d39810022793969428b" }
+    { binding = "CACHE", id = "fd0fa495945f4fb1bbeb22324b30445c" }
 ]
 
 [env.production]
@@ -26,5 +26,6 @@ zone_id = "63feb9b9ee057b117f7c833928b0d21f"
 workers_dev = false
 route = "dns-over-discord.v4.wtf/*"
 kv_namespaces = [
-    { binding = "CACHE", id = "ac1c24f2c9594a97aeb7dd30377b45ef" }
+    { binding = "CACHE", id = "fd0fa495945f4fb1bbeb22324b30445c" }
 ]
+

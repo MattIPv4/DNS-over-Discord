@@ -150,7 +150,7 @@ const performLookupRequest = async (domain, type, endpoint, cdflag) => {
 
 const performLookup = async (domain, type, endpoint, cdflag) => {
     // Make the request
-    const { Status, Question, Answer } = await performLookupRequest(domain, type, endpoint);
+    const { Status, Question, Answer } = await performLookupRequest(domain, type, endpoint, cdflag);
 
     // Return an error message for non-zero status
     if (Status !== 0)
@@ -166,7 +166,7 @@ const performLookup = async (domain, type, endpoint, cdflag) => {
     };
 };
 
-export const performLookupWithCache = (domain, type, endpoint) => cache(
+export const performLookupWithCache = (domain, type, endpoint, cdflag) => cache(
     performLookup,
     [ domain, type, endpoint, cdflag ],
     `dns-${domain}-${type}-${endpoint.endpoint}`,

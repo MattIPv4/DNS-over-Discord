@@ -31,7 +31,7 @@ export const validateDomain = (input, response) => {
 export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
     // Make the DNS queries
     const results = await Promise.all(types.map(type =>
-        performLookupWithCache(domain, type, provider.doh).then(data => ({ type, data }))));
+        performLookupWithCache(domain, type, provider.doh, cdflag).then(data => ({ type, data }))));
 
     // Define the presenter
     const present = (type, data) => {
@@ -44,7 +44,9 @@ export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
 
         // No results
         if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
-            return `${digCmd}\nNo records found`;
+            return `${digCmd}\nNo records found \n${(cdflag
+                ? ":warning: cd bit set for request, DNSSEC validation disabled"
+                : "")}`;
 
         // Map the data if short requested
         const sourceRows = short ? data.answer.map(x => x.data) : data.answer;
@@ -61,18 +63,18 @@ export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
             return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
 
-        // Keep adding rows until we reach Discord 4096 char limit
+        // Keep adding rows until we reach Discord 4096 char limit ()
         for (const row of sourceRows) {
-            if (output([...finalRows, row]).length > 4096) break;
+            if (output([...finalRows, row]).length > (cdflag ? 4000 : 4096)) break;
             finalRows.push(row);
         }
 
         // Render and return final rows
-        return output(finalRows);
+        return  output(finalRows) + (cdflag ? "\n\n:warning: cd bit set for request, DNSSEC validation disabled" : "") ;
     };
 
     // Convert results to an embed
-    return results.map(({ type, data }) => createEmbed(`${type} records`, present(type, data), 'diggy diggy hole :warning: cd bit set for request, DNSSEC validation disabled'));
+    return results.map(({ type, data }) => createEmbed(`${type} records`, present(type, data), 'diggy diggy hole'));
 };
 
 export const parseEmbed = embed => {
