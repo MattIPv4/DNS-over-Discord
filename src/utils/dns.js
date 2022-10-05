@@ -122,7 +122,7 @@ const performLookupDns = async (domain, type, endpoint, cdflag) => {
             Accept: 'application/dns-message',
         },
     })
-        .then((res) => res.arrayBuffer())
+        .then(res => res.arrayBuffer())
         .then(data => {
             const dec = decode(Buffer.from(data));
             return {
