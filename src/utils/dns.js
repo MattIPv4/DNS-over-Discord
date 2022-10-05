@@ -106,12 +106,10 @@ const performLookupDns = async (domain, type, endpoint, cdflag) => {
         type: 'query',
         id: randInt(1, 65534),
         flags: RECURSION_DESIRED | (cdflag ? CHECKING_DISABLED : 0),
-        questions: [
-            {
-                name: domain,
-                type,
-            },
-        ],
+        questions: [ {
+            name: domain,
+            type,
+        } ],
     });
 
     // Build the query URL
