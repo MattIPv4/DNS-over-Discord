@@ -105,7 +105,7 @@ const performLookupDns = async (domain, type, endpoint, cdflag) => {
     const packet = encode({
         type: 'query',
         id: randInt(1, 65534),
-        flags: RECURSION_DESIRED | (cdflag && CHECKING_DISABLED),
+        flags: RECURSION_DESIRED | (cdflag ? CHECKING_DISABLED : 0),
         questions: [
             {
                 name: domain,
