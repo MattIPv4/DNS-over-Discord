@@ -123,7 +123,7 @@ const performLookupDns = async (domain, type, endpoint, cdflag) => {
         },
     })
         .then((res) => res.arrayBuffer())
-        .then((data) => {
+        .then(data => {
             const dec = decode(Buffer.from(data));
             return {
                 Status: toRcode(dec.rcode),
