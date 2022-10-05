@@ -44,8 +44,8 @@ export const handleDig = async ({ domain, types, short, cdflag ,provider }) => {
 
         // No results
         if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
-            return `${digCmd}\nNo records found \n${(cdflag
-                ? ":warning: cd bit set for request, DNSSEC validation disabled"
+            return `${digCmd}\nNo records found${(cdflag
+                ? "\n\n:warning: cd bit set for request, DNSSEC validation disabled"
                 : "")}`;
 
         // Map the data if short requested
