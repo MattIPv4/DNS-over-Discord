@@ -36,6 +36,12 @@ export default {
             required: false,
         },
         {
+            name: 'cdflag',
+            description: 'Disable DNSSEC checking',
+            type: ApplicationCommandOptionType.Boolean,
+            required: false,
+        },
+        {
             name: 'provider',
             description: 'DNS provider to use',
             help: `Supported providers:\n  ${Object.keys(providers).join(', ')}\n\nDefaults to ${providers[0].name}.`,
@@ -49,6 +55,7 @@ export default {
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawType = ((interaction.data.options.find(opt => opt.name === 'type') || {}).value || '').trim();
         const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
+        const rawCdFlag = (interaction.data.options.find(opt => opt.name === 'cdflag') || {}).value || false;
         const rawProvider = ((interaction.data.options.find(opt => opt.name === 'provider') || {}).value || '').trim();
 
         // Parse domain input, return any error response
@@ -64,7 +71,7 @@ export default {
         // Do the processing after acknowledging the Discord command
         wait((async () => {
             // Run dig and get the embeds
-            const [ embed ] = await handleDig({ domain, types: [ type ], short: rawShort, provider });
+            const [ embed ] = await handleDig({ domain, types: [ type ], short: rawShort, cdflag: rawCdFlag, provider });
 
             // Edit the original deferred response
             await editDeferred(interaction, {

@@ -5,6 +5,8 @@ import providers from './providers.js';
 import { presentTable } from './table.js';
 import { createEmbed } from './embed.js';
 
+const DNSSEC_DISABLED_WARNING_MESSAGE = ':warning: cd bit set for request, DNSSEC validation disabled';
+
 export const validateDomain = (input, response) => {
     // Clean the input
     const cleaned = input
@@ -28,15 +30,15 @@ export const validateDomain = (input, response) => {
     };
 };
 
-export const handleDig = async ({ domain, types, short, provider }) => {
+export const handleDig = async ({ domain, types, short, cdflag, provider }) => {
     // Make the DNS queries
     const results = await Promise.all(types.map(type =>
-        performLookupWithCache(domain, type, provider.doh).then(data => ({ type, data }))));
+        performLookupWithCache(domain, type, provider.doh, cdflag).then(data => ({ type, data }))));
 
     // Define the presenter
     const present = (type, data) => {
         // Generate the dig command equivalent
-        const digCmd = `\`${data.name} ${type} @${provider.dig} +noall +answer${short ? ' +short' : ''}\`\n`;
+        const digCmd = `\`${data.name} ${type} @${provider.dig} +noall +answer${short ? ' +short' : ''}${cdflag ? ' +cdflag' : ''}\`\n`;
 
         // Error message
         if (typeof data === 'object' && data.message)
@@ -44,7 +46,9 @@ export const handleDig = async ({ domain, types, short, provider }) => {
 
         // No results
         if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
-            return `${digCmd}\nNo records found`;
+            return `${digCmd}\nNo records found${cdflag
+                ? `\n\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
+                : ''}`;
 
         // Map the data if short requested
         const sourceRows = short ? data.answer.map(x => x.data) : data.answer;
@@ -61,14 +65,18 @@ export const handleDig = async ({ domain, types, short, provider }) => {
             return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
 
+        const maxLength = 4096 - (cdflag ? DNSSEC_DISABLED_WARNING_MESSAGE.length : 0);
+
         // Keep adding rows until we reach Discord 4096 char limit
         for (const row of sourceRows) {
-            if (output([...finalRows, row]).length > 4096) break;
+            if (output([...finalRows, row]).length > maxLength) break;
             finalRows.push(row);
         }
 
         // Render and return final rows
-        return output(finalRows);
+        return `${output(finalRows)}${cdflag
+            ? `\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
+            : ''}`;
     };
 
     // Convert results to an embed
@@ -77,7 +85,7 @@ export const handleDig = async ({ domain, types, short, provider }) => {
 
 export const parseEmbed = embed => {
     // Match the domain name, type and if the short format was requested
-    const descMatch = embed.description.match(/^`(\S+) (\S+) @(\S+) \+noall \+answer( \+short)?`\n/);
+    const descMatch = embed.description.match(/^`(\S+) (\S+) @(\S+) \+noall \+answer( \+short)?( \+cdflag)?`\n/);
     if (!descMatch) return null;
 
     // Check the type
@@ -92,6 +100,7 @@ export const parseEmbed = embed => {
         name: descMatch[1],
         type: descMatch[2],
         short: !!descMatch[4],
+        cdflag: !!descMatch[5],
         provider,
     };
 };

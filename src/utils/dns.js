@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { decode, encode, RECURSION_DESIRED } from 'dns-packet';
+import { decode, encode, RECURSION_DESIRED, CHECKING_DISABLED } from 'dns-packet';
 import { toRcode } from 'dns-packet/rcodes.js';
 import fetch from 'node-fetch';
 import cache from './cache.js';
@@ -74,11 +74,12 @@ const processAnswer = (type, answer) => {
     return answer;
 };
 
-const performLookupJson = async (domain, type, endpoint) => {
+const performLookupJson = async (domain, type, endpoint, cdflag) => {
     // Build the query URL
     const query = new URL(endpoint.endpoint);
     query.searchParams.set('name', domain);
     query.searchParams.set('type', type.toLowerCase());
+    query.searchParams.set('cd', cdflag.toString().toLowerCase());
 
     // Make our request
     return fetch(query.href, {
@@ -90,12 +91,12 @@ const performLookupJson = async (domain, type, endpoint) => {
 
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-const performLookupDns = async (domain, type, endpoint) => {
+const performLookupDns = async (domain, type, endpoint, cdflag) => {
     // Build the query packet
     const packet = encode({
         type: 'query',
         id: randInt(1, 65534),
-        flags: RECURSION_DESIRED,
+        flags: RECURSION_DESIRED | (cdflag ? CHECKING_DISABLED : 0),
         questions: [ {
             name: domain,
             type,
@@ -111,30 +112,34 @@ const performLookupDns = async (domain, type, endpoint) => {
         headers: {
             Accept: 'application/dns-message',
         },
-    }).then(res => res.arrayBuffer()).then(data => {
-        const dec = decode(Buffer.from(data));
-        return {
-            Status: toRcode(dec.rcode),
-            Question: dec.questions,
-            Answer: dec.answers,
-        };
-    });
+    })
+        .then(res => res.arrayBuffer())
+        .then(data => {
+            const dec = decode(Buffer.from(data));
+            return {
+                Status: toRcode(dec.rcode),
+                Question: dec.questions,
+                Answer: dec.answers,
+            };
+        });
 };
 
-const performLookupRequest = async (domain, type, endpoint) => {
+const performLookupRequest = async (domain, type, endpoint, cdflag) => {
     switch (endpoint.type) {
         case 'json':
-            return performLookupJson(domain, type, endpoint);
+            return performLookupJson(domain, type, endpoint, cdflag);
         case 'dns':
-            return performLookupDns(domain, type, endpoint);
+            return performLookupDns(domain, type, endpoint, cdflag);
         default:
-            return Promise.reject(new Error(`Unknown endpoint type: ${endpoint.type}`));
+            return Promise.reject(
+                new Error(`Unknown endpoint type: ${endpoint.type}`),
+            );
     }
 };
 
-const performLookup = async (domain, type, endpoint) => {
+const performLookup = async (domain, type, endpoint, cdflag) => {
     // Make the request
-    const { Status, Question, Answer } = await performLookupRequest(domain, type, endpoint);
+    const { Status, Question, Answer } = await performLookupRequest(domain, type, endpoint, cdflag);
 
     // Return an error message for non-zero status
     if (Status !== 0)
@@ -150,10 +155,10 @@ const performLookup = async (domain, type, endpoint) => {
     };
 };
 
-export const performLookupWithCache = (domain, type, endpoint) => cache(
+export const performLookupWithCache = (domain, type, endpoint, cdflag) => cache(
     performLookup,
-    [ domain, type, endpoint ],
-    `dns-${domain}-${type}-${endpoint.endpoint}`,
+    [ domain, type, endpoint, cdflag ],
+    `dns-${domain}-${type}-${endpoint.endpoint}-${cdflag}`,
     Number(process.env.CACHE_DNS_TTL) || 10,
 );
 
