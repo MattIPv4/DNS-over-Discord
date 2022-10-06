@@ -65,7 +65,7 @@ export const handleDig = async ({ domain, types, short, cdflag, provider }) => {
             return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
 
-        // Keep adding rows until we reach Discord 4096 char limit ()
+        // Keep adding rows until we reach Discord 4096 char limit
         for (const row of sourceRows) {
             if (output([...finalRows, row]).length > (cdflag ? 4000 : 4096)) break;
             finalRows.push(row);
