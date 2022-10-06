@@ -75,8 +75,8 @@ export const handleDig = async ({ domain, types, short, cdflag, provider }) => {
 
         // Render and return final rows
         return `${output(finalRows)}${cdflag
-          ? `\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
-          : ''}`;
+            ? `\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
+            : ''}`;
     };
 
     // Convert results to an embed
