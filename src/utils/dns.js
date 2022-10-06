@@ -79,7 +79,7 @@ const performLookupJson = async (domain, type, endpoint, cdflag) => {
     const query = new URL(endpoint.endpoint);
     query.searchParams.set('name', domain);
     query.searchParams.set('type', type.toLowerCase());
-    query.searchParams.set('cd', cdflag);
+    query.searchParams.set('cd', cdflag.toString().toLowerCase());
 
     // Make our request
     return fetch(query.href, {
