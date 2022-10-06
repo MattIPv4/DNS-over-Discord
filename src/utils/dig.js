@@ -5,7 +5,7 @@ import providers from './providers.js';
 import { presentTable } from './table.js';
 import { createEmbed } from './embed.js';
 
-const DNSSEC_DISABLED_WARNING_MESSAGE = '\n\n:warning: cd bit set for request, DNSSEC validation disabled';
+const DNSSEC_DISABLED_WARNING_MESSAGE = ':warning: cd bit set for request, DNSSEC validation disabled';
 
 export const validateDomain = (input, response) => {
     // Clean the input
