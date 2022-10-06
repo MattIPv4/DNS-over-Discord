@@ -35,8 +35,6 @@ export const handleDig = async ({ domain, types, short, cdflag, provider }) => {
     const results = await Promise.all(types.map(type =>
         performLookupWithCache(domain, type, provider.doh, cdflag).then(data => ({ type, data }))));
 
-    const max_length = 4096 - (cdflag ? DNSSEC_DISABLED_WARNING_MESSAGE.length : 0);
-
     // Define the presenter
     const present = (type, data) => {
         // Generate the dig command equivalent
@@ -67,9 +65,11 @@ export const handleDig = async ({ domain, types, short, cdflag, provider }) => {
             return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
 
+        const maxLength = 4096 - (cdflag ? DNSSEC_DISABLED_WARNING_MESSAGE.length : 0);
+
         // Keep adding rows until we reach Discord 4096 char limit
         for (const row of sourceRows) {
-            if (output([...finalRows, row]).length > max_length) break;
+            if (output([...finalRows, row]).length > maxLength) break;
             finalRows.push(row);
         }
 
