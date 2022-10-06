@@ -46,9 +46,9 @@ export const handleDig = async ({ domain, types, short, cdflag, provider }) => {
 
         // No results
         if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
-            return `${digCmd}\nNo records found${(cdflag
-                ? DNSSEC_DISABLED_WARNING_MESSAGE
-                : '')}`;
+            return `${digCmd}\nNo records found${cdflag
+                ? `\n\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
+                : ''}`;
 
         // Map the data if short requested
         const sourceRows = short ? data.answer.map(x => x.data) : data.answer;
