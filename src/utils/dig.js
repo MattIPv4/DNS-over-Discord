@@ -98,7 +98,7 @@ export const parseEmbed = embed => {
         name: descMatch[1],
         type: descMatch[2],
         short: !!descMatch[4],
-        cdflag: descMatch[5],
+        cdflag: !!descMatch[5],
         provider,
     };
 };
