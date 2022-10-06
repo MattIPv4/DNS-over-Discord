@@ -158,7 +158,7 @@ const performLookup = async (domain, type, endpoint, cdflag) => {
 export const performLookupWithCache = (domain, type, endpoint, cdflag) => cache(
     performLookup,
     [ domain, type, endpoint, cdflag ],
-    `dns-${domain}-${type}-${endpoint.endpoint}`,
+    `dns-${domain}-${type}-${endpoint.endpoint}-${cdflag}`,
     Number(process.env.CACHE_DNS_TTL) || 10,
 );
 
