@@ -27,8 +27,7 @@ export default {
             const updatedEmbeds = await handleDig({
                 domain: embeds[0].name,
                 types: embeds.map(data => data.type),
-                short: embeds[0].short,
-                cdflag: embeds[0].cdflag,
+                flags: { short: embeds[0].short, cdflag: embeds[0].cdflag },
                 provider: embeds[0].provider,
             });
 

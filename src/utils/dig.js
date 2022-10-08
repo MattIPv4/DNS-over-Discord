@@ -30,15 +30,26 @@ export const validateDomain = (input, response) => {
     };
 };
 
-export const handleDig = async ({ domain, types, short, cdflag, provider }) => {
+/**
+ * Handle a dig command.
+ *
+ * @param {string} domain
+ * @param {string[]} types
+ * @param {Object} flags
+ * @param {boolean} [flags.short]
+ * @param {boolean} [flags.cdflag]
+ * @param {import('./providers.js').Provider} provider
+ * @return {Promise<import('./embed.js').Embed[]>}
+ */
+export const handleDig = async ({ domain, types, flags, provider }) => {
     // Make the DNS queries
     const results = await Promise.all(types.map(type =>
-        performLookupWithCache(domain, type, provider.doh, cdflag).then(data => ({ type, data }))));
+        performLookupWithCache(domain, type, provider.doh, flags).then(data => ({ type, data }))));
 
     // Define the presenter
     const present = (type, data) => {
         // Generate the dig command equivalent
-        const digCmd = `\`${data.name} ${type} @${provider.dig} +noall +answer${short ? ' +short' : ''}${cdflag ? ' +cdflag' : ''}\`\n`;
+        const digCmd = `\`${data.name} ${type} @${provider.dig} +noall +answer${flags.short ? ' +short' : ''}${flags.cdflag ? ' +cdflag' : ''}\`\n`;
 
         // Error message
         if (typeof data === 'object' && data.message)
@@ -46,26 +57,26 @@ export const handleDig = async ({ domain, types, short, cdflag, provider }) => {
 
         // No results
         if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
-            return `${digCmd}\nNo records found${cdflag
+            return `${digCmd}\nNo records found${flags.cdflag
                 ? `\n\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
                 : ''}`;
 
         // Map the data if short requested
-        const sourceRows = short ? data.answer.map(x => x.data) : data.answer;
+        const sourceRows = flags.short ? data.answer.map(x => x.data) : data.answer;
         const finalRows = [];
 
         // Render the rows and truncated count
         const output = rows => {
             const trunc = sourceRows.length - rows.length;
             const truncStr = trunc ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
-            const rowsStr = short ? rows.join('\n') : presentTable([
+            const rowsStr = flags.short ? rows.join('\n') : presentTable([
                 ['NAME', 'TTL', 'DATA'],
                 ...rows.map(rowData => [rowData.name, `${rowData.ttl.toLocaleString()}s`, rowData.data]),
             ]);
             return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
 
-        const maxLength = 4096 - (cdflag ? DNSSEC_DISABLED_WARNING_MESSAGE.length : 0);
+        const maxLength = 4096 - (flags.cdflag ? DNSSEC_DISABLED_WARNING_MESSAGE.length : 0);
 
         // Keep adding rows until we reach Discord 4096 char limit
         for (const row of sourceRows) {
@@ -74,7 +85,7 @@ export const handleDig = async ({ domain, types, short, cdflag, provider }) => {
         }
 
         // Render and return final rows
-        return `${output(finalRows)}${cdflag
+        return `${output(finalRows)}${flags.cdflag
             ? `\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
             : ''}`;
     };
