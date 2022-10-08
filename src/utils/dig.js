@@ -31,25 +31,40 @@ export const validateDomain = (input, response) => {
 };
 
 /**
+ * @typedef {Object} DigOptions
+ * @property {boolean} [short]
+ * @property {boolean} [cdflag]
+ */
+
+/**
  * Handle a dig command.
  *
  * @param {string} domain
  * @param {string[]} types
- * @param {Object} flags
- * @param {boolean} [flags.short]
- * @param {boolean} [flags.cdflag]
+ * @param {DigOptions} options
  * @param {import('./providers.js').Provider} provider
  * @return {Promise<import('./embed.js').Embed[]>}
  */
-export const handleDig = async ({ domain, types, flags, provider }) => {
+export const handleDig = async ({ domain, types, options, provider }) => {
     // Make the DNS queries
     const results = await Promise.all(types.map(type =>
-        performLookupWithCache(domain, type, provider.doh, flags).then(data => ({ type, data }))));
+        performLookupWithCache(domain, type, provider.doh, { cd: options.cdflag })
+            .then(data => ({ type, data })),
+    ));
 
     // Define the presenter
     const present = (type, data) => {
         // Generate the dig command equivalent
-        const digCmd = `\`${data.name} ${type} @${provider.dig} +noall +answer${flags.short ? ' +short' : ''}${flags.cdflag ? ' +cdflag' : ''}\`\n`;
+        const digCmdParts = [
+            data.name,
+            type,
+            `@${provider.dig}`,
+            '+noall',
+            '+answer',
+            options.short ? '+short' : null,
+            options.cdflag ? '+cdflag' : null,
+        ].filter(x => x !== null);
+        const digCmd = `\`${digCmdParts.join(' ')}\`\n`;
 
         // Error message
         if (typeof data === 'object' && data.message)
@@ -62,14 +77,14 @@ export const handleDig = async ({ domain, types, flags, provider }) => {
                 : ''}`;
 
         // Map the data if short requested
-        const sourceRows = flags.short ? data.answer.map(x => x.data) : data.answer;
+        const sourceRows = options.short ? data.answer.map(x => x.data) : data.answer;
         const finalRows = [];
 
         // Render the rows and truncated count
         const output = rows => {
             const trunc = sourceRows.length - rows.length;
             const truncStr = trunc ? `\n...(${trunc.toLocaleString()} row${trunc === 1 ? '' : 's'} truncated)` : '';
-            const rowsStr = flags.short ? rows.join('\n') : presentTable([
+            const rowsStr = options.short ? rows.join('\n') : presentTable([
                 ['NAME', 'TTL', 'DATA'],
                 ...rows.map(rowData => [rowData.name, `${rowData.ttl.toLocaleString()}s`, rowData.data]),
             ]);
@@ -94,6 +109,12 @@ export const handleDig = async ({ domain, types, flags, provider }) => {
     return results.map(({ type, data }) => createEmbed(`${type} records`, present(type, data), 'diggy diggy hole'));
 };
 
+/**
+ * Parse an existing DNS over Discord embed and extract the dig command.
+ *
+ * @param {{ description: string }} embed
+ * @return {?{ name: string, type: string, options: DigOptions, provider: import('./providers.js').Provider }}
+ */
 export const parseEmbed = embed => {
     // Match the domain name, type and if the short format was requested
     const descMatch = embed.description.match(/^`(\S+) (\S+) @(\S+) \+noall \+answer( \+short)?( \+cdflag)?`\n/);
@@ -110,8 +131,7 @@ export const parseEmbed = embed => {
     return {
         name: descMatch[1],
         type: descMatch[2],
-        short: !!descMatch[4],
-        cdflag: !!descMatch[5],
+        options: { short: !!descMatch[4], cdflag: !!descMatch[5] },
         provider,
     };
 };

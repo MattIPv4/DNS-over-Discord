@@ -74,7 +74,7 @@ export default {
             const [ embed ] = await handleDig({
                 domain,
                 types: [ type ],
-                flags: { short: rawShort, cdflag: rawCdflag },
+                options: { short: rawShort, cdflag: rawCdflag },
                 provider,
             });
 

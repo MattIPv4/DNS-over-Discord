@@ -28,6 +28,11 @@ const DNS_RCODES = Object.freeze({
 });
 
 /**
+ * @typedef {Object} LookupFlags
+ * @property {boolean} [cd]
+ */
+
+/**
  * @template {string} T
  * @template {Object} U
  * @typedef {function} LookupMethod
@@ -35,8 +40,7 @@ const DNS_RCODES = Object.freeze({
  * @param {string} type
  * @param {import('./providers.js').ProviderEndpoint} endpoint
  * @param {T} endpoint.type
- * @param {Object} flags
- * @param {boolean} [flags.cdflag]
+ * @param {LookupFlags} flags
  * @return {Promise<U>}
  */
 
@@ -45,16 +49,11 @@ const DNS_RCODES = Object.freeze({
  */
 
 /**
- * @typedef {Object} LookupResultFlags
- * @property {boolean} cd
- */
-
-/**
  * @typedef {Object} LookupResultData
  * @property {number} Status
  * @property {{ name: string, type: number }[]} Question
  * @property {LookupResultAnswer[]} [Answer]
- * @property {LookupResultFlags} Flags
+ * @property {LookupFlags} Flags
  */
 
 /**
@@ -69,7 +68,7 @@ const performLookupJson = async (domain, type, endpoint, flags) => {
     query.searchParams.set('type', type.toLowerCase());
 
     // TODO: We should be able to set this to false safely, Cloudflare has a bug
-    if (flags.cdflag) query.searchParams.set('cd', (!!flags.cdflag).toString().toLowerCase());
+    if (flags.cd) query.searchParams.set('cd', (!!flags.cd).toString().toLowerCase());
 
     // Make our request
     return fetch(query.href, {
@@ -98,7 +97,7 @@ const performLookupDns = async (domain, type, endpoint, flags) => {
     const packet = encode({
         type: 'query',
         id: randInt(1, 65534),
-        flags: RECURSION_DESIRED | (flags.cdflag ? CHECKING_DISABLED : 0),
+        flags: RECURSION_DESIRED | (flags.cd ? CHECKING_DISABLED : 0),
         questions: [ {
             name: domain,
             type,
@@ -191,7 +190,7 @@ const processData = (type, data) => {
  */
 
 /**
- * @typedef {{ name: string, flags: LookupResultFlags } & ({ message: string }|{ answer: LookupAnswer[] })} LookupResult
+ * @typedef {{ name: string, flags: LookupFlags } & ({ message: string }|{ answer: LookupAnswer[] })} LookupResult
  */
 
 /**
@@ -245,7 +244,7 @@ const performLookup = async (domain, type, endpoint, flags) => {
 export const performLookupWithCache = (domain, type, endpoint, flags) => cache(
     performLookup,
     [ domain, type, endpoint, flags ],
-    `dns-${domain}-${type}-${endpoint.endpoint}-${!!flags.cdflag}`,
+    `dns-${domain}-${type}-${endpoint.endpoint}-${!!flags.cd}`,
     Number(process.env.CACHE_DNS_TTL) || 10,
 );
 
