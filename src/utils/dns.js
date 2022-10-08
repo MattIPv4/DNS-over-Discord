@@ -67,7 +67,9 @@ const performLookupJson = async (domain, type, endpoint, flags) => {
     const query = new URL(endpoint.endpoint);
     query.searchParams.set('name', domain);
     query.searchParams.set('type', type.toLowerCase());
-    query.searchParams.set('cd', (!!flags.cdflag).toString().toLowerCase());
+
+    // TODO: We should be able to set this to false safely, Cloudflare has a bug
+    if (flags.cdflag) query.searchParams.set('cd', (!!flags.cdflag).toString().toLowerCase());
 
     // Make our request
     return fetch(query.href, {
