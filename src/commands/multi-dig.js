@@ -50,7 +50,7 @@ export default {
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
         const rawShort = (interaction.data.options.find(opt => opt.name === 'short') || {}).value || false;
-        const rawCdFlag = (interaction.data.options.find(opt => opt.name === 'cdflag') || {}).value || false;
+        const rawCdflag = (interaction.data.options.find(opt => opt.name === 'cdflag') || {}).value || false;
         const rawProvider = ((interaction.data.options.find(opt => opt.name === 'provider') || {}).value || '').trim();
 
         // Parse domain input, return any error response
@@ -75,7 +75,12 @@ export default {
         // Do the processing after acknowledging the Discord command
         wait((async () => {
             // Run dig and get the embeds
-            const embeds = await handleDig({ domain, types, short: rawShort, cdflag: rawCdFlag, provider });
+            const embeds = await handleDig({
+                domain,
+                types,
+                options: { short: rawShort, cdFlag: rawCdflag },
+                provider,
+            });
 
             // Edit the original deferred response with the first 10 embeds
             const messageBase = {

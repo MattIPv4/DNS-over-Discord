@@ -1,6 +1,24 @@
-// Supported DNS providers
-// name, doh & dig must all be unique for each provider
-// doh.type can be 'json' or 'dns'
+/**
+ * @typedef {Object} ProviderEndpoint
+ * @property {string} endpoint
+ * @property {'json'|'dns'} type
+ */
+
+/**
+ * @typedef {Object} Provider
+ * @property {string} name
+ * @property {string} info
+ * @property {ProviderEndpoint} doh
+ * @property {string} dig
+ */
+
+/**
+ * Supported DNS providers.
+ *
+ * name, doh & dig must all be unique for each provider.
+ *
+ * @type {Provider[]}
+ */
 export default Object.freeze([
     {
         name: '1.1.1.1 (Cloudflare)',

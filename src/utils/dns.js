@@ -27,76 +27,77 @@ const DNS_RCODES = Object.freeze({
     23: 'Bad/missing Server Cookie',
 });
 
-const processAnswer = (type, answer) => {
-    if (Array.isArray(answer)) {
-        for (const entry of answer) {
-            // Consistent TTL prop
-            if (Object.prototype.hasOwnProperty.call(entry, 'TTL')) {
-                entry.ttl = entry.TTL;
-                Reflect.deleteProperty(entry, 'TTL');
-            }
+/**
+ * @typedef {Object} LookupFlags
+ * @property {boolean} [cd]
+ */
 
-            // Handle hex rdata
-            if (entry.data.startsWith('\\#')) {
-                const words = entry.data.split(' ');
-                const length = words.length > 1 ? Number(words[1]) : 0;
+/**
+ * @template {string} T
+ * @template {Object} U
+ * @typedef {function} LookupMethod
+ * @param {string} domain
+ * @param {string} type
+ * @param {import('./providers.js').ProviderEndpoint} endpoint
+ * @param {T} endpoint.type
+ * @param {LookupFlags} flags
+ * @return {Promise<U>}
+ */
 
-                // Drop the # and length, and any extra bytes beyond the declared length
-                words.splice(0, 2);
-                words.splice(length);
+/**
+ * @typedef {{ name: string, type: number, data: string } & ({ TTL: number }|{ ttl: number})} LookupResultAnswer
+ */
 
-                // CAA
-                if (type === 'CAA' && words.length > 1) {
-                    const flags = Number(words[0]);
-                    const tagLength = Number(words[1]);
-                    words.splice(0, 2);
+/**
+ * @typedef {Object} LookupResultData
+ * @property {number} Status
+ * @property {{ name: string, type: number }[]} Question
+ * @property {LookupResultAnswer[]} [Answer]
+ * @property {LookupFlags} Flags
+ */
 
-                    // Get the tag, dropping any non alpha-numeric bytes per
-                    //  https://tools.ietf.org/html/rfc6844#section-5.1
-                    const tag = words.splice(0, tagLength)
-                        .map(part => String.fromCharCode(parseInt(part, 16))).join('').trim()
-                        .replace(/[^a-z0-9]/gi, '');
-
-                    // Get the value
-                    const value = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
-
-                    // Combine and output
-                    entry.data = `${flags} ${tag} "${value}"`;
-                    continue;
-                }
-
-                // Normal hex data
-                entry.data = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
-            }
-        }
-    }
-
-    return answer;
-};
-
-const performLookupJson = async (domain, type, endpoint, cdflag) => {
+/**
+ * Perform a DNS lookup for a JSON DoH provider.
+ *
+ * @type LookupMethod<'json', LookupResultData>
+ */
+const performLookupJson = async (domain, type, endpoint, flags) => {
     // Build the query URL
     const query = new URL(endpoint.endpoint);
     query.searchParams.set('name', domain);
     query.searchParams.set('type', type.toLowerCase());
-    query.searchParams.set('cd', cdflag.toString().toLowerCase());
+
+    // TODO: We should be able to set this to false safely, Cloudflare has a bug
+    if (flags.cd) query.searchParams.set('cd', (!!flags.cd).toString().toLowerCase());
 
     // Make our request
     return fetch(query.href, {
         headers: {
             Accept: 'application/dns-json',
         },
-    }).then(res => res.json());
+    })
+        .then(res => res.json())
+        .then(data => ({
+            Status: data.Status,
+            Question: data.Question,
+            Answer: data.Answer,
+            Flags: { cd: !!data.CD },
+        }));
 };
 
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-const performLookupDns = async (domain, type, endpoint, cdflag) => {
+/**
+ * Perform a DNS lookup for a DNS DoH provider.
+ *
+ * @type LookupMethod<'dns', LookupResultData>
+ */
+const performLookupDns = async (domain, type, endpoint, flags) => {
     // Build the query packet
     const packet = encode({
         type: 'query',
         id: randInt(1, 65534),
-        flags: RECURSION_DESIRED | (cdflag ? CHECKING_DISABLED : 0),
+        flags: RECURSION_DESIRED | (flags.cd ? CHECKING_DISABLED : 0),
         questions: [ {
             name: domain,
             type,
@@ -114,22 +115,26 @@ const performLookupDns = async (domain, type, endpoint, cdflag) => {
         },
     })
         .then(res => res.arrayBuffer())
-        .then(data => {
-            const dec = decode(Buffer.from(data));
-            return {
-                Status: toRcode(dec.rcode),
-                Question: dec.questions,
-                Answer: dec.answers,
-            };
-        });
+        .then(buffer => decode(Buffer.from(buffer)))
+        .then(data => ({
+            Status: toRcode(data.rcode),
+            Question: data.questions,
+            Answer: data.answers,
+            Flags: { cd: data.flag_cd },
+        }));
 };
 
-const performLookupRequest = async (domain, type, endpoint, cdflag) => {
+/**
+ * Perform a DNS lookup for a DoH provider.
+ *
+ * @type LookupMethod<'json'|'dns', LookupResultData>
+ */
+const performLookupRequest = async (domain, type, endpoint, flags) => {
     switch (endpoint.type) {
         case 'json':
-            return performLookupJson(domain, type, endpoint, cdflag);
+            return performLookupJson(domain, type, endpoint, flags);
         case 'dns':
-            return performLookupDns(domain, type, endpoint, cdflag);
+            return performLookupDns(domain, type, endpoint, flags);
         default:
             return Promise.reject(
                 new Error(`Unknown endpoint type: ${endpoint.type}`),
@@ -137,28 +142,109 @@ const performLookupRequest = async (domain, type, endpoint, cdflag) => {
     }
 };
 
-const performLookup = async (domain, type, endpoint, cdflag) => {
+/**
+ * Process data for a DNS answer, handling hex rdata.
+ *
+ * @param {string} type
+ * @param {string} data
+ * @return {string}
+ */
+const processData = (type, data) => {
+    // Handle hex rdata
+    if (data.startsWith('\\#')) {
+        const words = data.split(' ');
+        const length = words.length > 1 ? Number(words[1]) : 0;
+
+        // Drop the # and length, and any extra bytes beyond the declared length
+        words.splice(0, 2);
+        words.splice(length);
+
+        // CAA
+        if (type === 'CAA' && words.length > 1) {
+            const flags = Number(words[0]);
+            const tagLength = Number(words[1]);
+            words.splice(0, 2);
+
+            // Get the tag, dropping any non alpha-numeric bytes per
+            //  https://tools.ietf.org/html/rfc6844#section-5.1
+            const tag = words.splice(0, tagLength)
+                .map(part => String.fromCharCode(parseInt(part, 16))).join('').trim()
+                .replace(/[^a-z0-9]/gi, '');
+
+            // Get the value
+            const value = words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
+
+            // Combine and output
+            return `${flags} ${tag} "${value}"`;
+        }
+
+        // Normal hex data
+        return words.map(part => String.fromCharCode(parseInt(part, 16))).join('').trim();
+    }
+
+    return data;
+};
+
+/**
+ * @typedef {{ name: string, type: number, ttl: number, data: string }} LookupAnswer
+ */
+
+/**
+ * @typedef {{ name: string, flags: LookupFlags } & ({ message: string }|{ answer: LookupAnswer[] })} LookupResult
+ */
+
+/**
+ * Process answers for a DNS lookup.
+ *
+ * @param {string} type
+ * @param {LookupResultAnswer[]} [answer]
+ * @return {LookupAnswer[]|undefined}
+ */
+const processAnswer = (type, answer) => {
+    if (!Array.isArray(answer)) return answer; // TODO: What do we actually have that's not an array?
+
+    return answer.map(raw => ({
+        name: raw.name,
+        type: raw.type,
+        ttl: raw.TTL ?? raw.ttl,
+        data: processData(type, raw.data),
+    }));
+};
+
+/**
+ * Perform a DNS lookup for a DoH provider.
+ *
+ * @type LookupMethod<'json'|'dns', LookupResult>
+ */
+const performLookup = async (domain, type, endpoint, flags) => {
     // Make the request
-    const { Status, Question, Answer } = await performLookupRequest(domain, type, endpoint, cdflag);
+    const { Status, Question, Answer, Flags } = await performLookupRequest(domain, type, endpoint, flags);
 
     // Return an error message for non-zero status
     if (Status !== 0)
         return {
             name: Question[0].name,
+            flags: Flags,
             message: DNS_RCODES[Status] || `An unexpected error occurred [${Status}]`,
         };
 
     // Valid answer
     return {
         name: Question[0].name,
+        flags: Flags,
         answer: processAnswer(type, Answer),
     };
 };
 
-export const performLookupWithCache = (domain, type, endpoint, cdflag) => cache(
+/**
+ * Perform a DNS lookup for a DoH provider, with caching.
+ *
+ * @type LookupMethod<'json'|'dns', LookupResult>
+ */
+export const performLookupWithCache = (domain, type, endpoint, flags) => cache(
     performLookup,
-    [ domain, type, endpoint, cdflag ],
-    `dns-${domain}-${type}-${endpoint.endpoint}-${cdflag}`,
+    [ domain, type, endpoint, flags ],
+    `dns-${domain}-${type}-${endpoint.endpoint}-${!!flags.cd}`,
     Number(process.env.CACHE_DNS_TTL) || 10,
 );
 
