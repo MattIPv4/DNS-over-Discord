@@ -45,10 +45,16 @@ const DNS_RCODES = Object.freeze({
  */
 
 /**
+ * @typedef {Object} LookupResultFlags
+ * @property {boolean} cd
+ */
+
+/**
  * @typedef {Object} LookupResultData
  * @property {number} Status
  * @property {{ name: string, type: number }[]} Question
  * @property {LookupResultAnswer[]} [Answer]
+ * @property {LookupResultFlags} Flags
  */
 
 /**
@@ -68,7 +74,14 @@ const performLookupJson = async (domain, type, endpoint, flags) => {
         headers: {
             Accept: 'application/dns-json',
         },
-    }).then(res => res.json());
+    })
+        .then(res => res.json())
+        .then(data => ({
+            Status: data.Status,
+            Question: data.Question,
+            Answer: data.Answer,
+            Flags: { cd: !!data.CD },
+        }));
 };
 
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -101,14 +114,13 @@ const performLookupDns = async (domain, type, endpoint, flags) => {
         },
     })
         .then(res => res.arrayBuffer())
-        .then(data => {
-            const dec = decode(Buffer.from(data));
-            return {
-                Status: toRcode(dec.rcode),
-                Question: dec.questions,
-                Answer: dec.answers,
-            };
-        });
+        .then(buffer => decode(Buffer.from(buffer)))
+        .then(data => ({
+            Status: toRcode(data.rcode),
+            Question: data.questions,
+            Answer: data.answers,
+            Flags: { cd: data.flag_cd },
+        }));
 };
 
 /**
@@ -177,7 +189,7 @@ const processData = (type, data) => {
  */
 
 /**
- * @typedef {{ name: string, message: string }|{ name: string, answer: LookupAnswer[] }} LookupResult
+ * @typedef {{ name: string, flags: LookupResultFlags } & ({ message: string }|{ answer: LookupAnswer[] })} LookupResult
  */
 
 /**
@@ -205,18 +217,20 @@ const processAnswer = (type, answer) => {
  */
 const performLookup = async (domain, type, endpoint, flags) => {
     // Make the request
-    const { Status, Question, Answer } = await performLookupRequest(domain, type, endpoint, flags);
+    const { Status, Question, Answer, Flags } = await performLookupRequest(domain, type, endpoint, flags);
 
     // Return an error message for non-zero status
     if (Status !== 0)
         return {
             name: Question[0].name,
+            flags: Flags,
             message: DNS_RCODES[Status] || `An unexpected error occurred [${Status}]`,
         };
 
     // Valid answer
     return {
         name: Question[0].name,
+        flags: Flags,
         answer: processAnswer(type, Answer),
     };
 };

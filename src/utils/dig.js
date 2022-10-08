@@ -5,7 +5,7 @@ import providers from './providers.js';
 import { presentTable } from './table.js';
 import { createEmbed } from './embed.js';
 
-const DNSSEC_DISABLED_WARNING_MESSAGE = ':warning: cd bit set for request, DNSSEC validation disabled';
+const DNSSEC_DISABLED_WARNING_MESSAGE = ':warning: cd bit set, DNSSEC validation disabled';
 
 export const validateDomain = (input, response) => {
     // Clean the input
@@ -57,7 +57,7 @@ export const handleDig = async ({ domain, types, flags, provider }) => {
 
         // No results
         if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
-            return `${digCmd}\nNo records found${flags.cdflag
+            return `${digCmd}\nNo records found${data.flags.cd
                 ? `\n\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
                 : ''}`;
 
@@ -76,7 +76,7 @@ export const handleDig = async ({ domain, types, flags, provider }) => {
             return `${digCmd}\`\`\`\n${rowsStr}${truncStr}\n\`\`\``;
         };
 
-        const maxLength = 4096 - (flags.cdflag ? DNSSEC_DISABLED_WARNING_MESSAGE.length : 0);
+        const maxLength = 4096 - (data.flags.cd ? DNSSEC_DISABLED_WARNING_MESSAGE.length : 0);
 
         // Keep adding rows until we reach Discord 4096 char limit
         for (const row of sourceRows) {
@@ -85,7 +85,7 @@ export const handleDig = async ({ domain, types, flags, provider }) => {
         }
 
         // Render and return final rows
-        return `${output(finalRows)}${flags.cdflag
+        return `${output(finalRows)}${data.flags.cd
             ? `\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
             : ''}`;
     };
