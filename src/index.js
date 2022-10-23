@@ -1,5 +1,6 @@
 import { InteractionType, InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
 import WorkersSentry from 'workers-sentry/worker.js';
+import { captureException } from './utils/error.js';
 import verify from './utils/verify.js';
 import Privacy from './utils/strings/privacy.js';
 import Terms from './utils/strings/terms.js';
@@ -22,6 +23,10 @@ const redirectResponse = url => new Response(null, {
 
 // Process a Discord command interaction
 const handleCommandInteraction = async ({ body, wait, sentry }) => {
+    // Sentry scope
+    sentry.getScope().setTransactionName(`command: ${body.data.name}`);
+    sentry.getScope().setTag('command', body.data.name);
+
     // Locate the command data
     const commandData = commands[body.data.id];
     if (!commandData)
@@ -34,10 +39,9 @@ const handleCommandInteraction = async ({ body, wait, sentry }) => {
         // Execute
         return await command.execute({ interaction: body, response: jsonResponse, wait, sentry });
     } catch (err) {
-        // Catch & log any errors
+        // Log any errors
         console.log(body);
-        console.error(err);
-        sentry.captureException(err);
+        captureException(err, sentry);
 
         // Send an ephemeral message to the user
         return jsonResponse({
@@ -52,6 +56,10 @@ const handleCommandInteraction = async ({ body, wait, sentry }) => {
 
 // Process a Discord component interaction
 const handleComponentInteraction = async ({ body, wait, sentry }) => {
+    // Sentry scope
+    sentry.getScope().setTransactionName(`component: ${body.data.custom_id}`);
+    sentry.getScope().setTag('component', body.data.custom_id);
+
     try {
         // Load in the component handler
         const { default: component } = await import(`./components/${body.data.custom_id}.js`);
@@ -63,10 +71,9 @@ const handleComponentInteraction = async ({ body, wait, sentry }) => {
         if (err.code === 'MODULE_NOT_FOUND')
             return new Response(null, { status: 404 });
 
-        // Catch & log any errors
+        // Log any errors
         console.log(body);
-        console.error(err);
-        sentry.captureException(err);
+        captureException(err, sentry);
 
         // Send a 500
         return new Response(null, { status: 500 });
@@ -173,15 +180,30 @@ addEventListener('fetch', event => {
     // Start Sentry
     const sentry = new WorkersSentry(event, process.env.SENTRY_DSN);
 
+    // Monkey-patch transaction name support
+    // TODO: Remove once https://github.com/robertcepa/toucan-js/issues/109 is resolved
+    const scopeProto = Object.getPrototypeOf(sentry.getScope());
+    scopeProto.setTransactionName = function (name) {
+        this.adapter.setTransactionName(name);
+    };
+    const adapterProto = Object.getPrototypeOf(sentry.getScope().adapter);
+    const apply = adapterProto.applyToEventSync;
+    adapterProto.applyToEventSync = function (event) {
+        const applied = apply.call(this, event);
+        if (this._transactionName) applied.transaction = this._transactionName;
+        return applied;
+    };
+
     // Process the event
     return event.respondWith(handleRequest({
         request: event.request,
         wait: event.waitUntil.bind(event),
         sentry,
     }).catch(err => {
-        // Log & re-throw any errors
-        console.error(err);
-        sentry.captureException(err);
+        // Log any errors
+        captureException(err, sentry);
+
+        // Re-throw the error for Cf
         throw err;
     }));
 });

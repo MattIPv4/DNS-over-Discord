@@ -2,6 +2,7 @@ import { InteractionResponseType, ComponentType } from 'discord-api-types/payloa
 import { updateComponents } from '../utils/components.js';
 import { handleDig, parseEmbed } from '../utils/dig.js';
 import { editDeferred } from '../utils/discord.js';
+import { captureException, contextualThrow } from '../utils/error.js';
 import providers from '../utils/providers.js';
 
 const component = name => ({
@@ -32,12 +33,13 @@ export default {
         // Do the processing after acknowledging the Discord command
         wait((async () => {
             // Run dig and get the embeds
-            const updatedEmbeds = await handleDig({
+            const opts = {
                 domain: embeds[0].name,
                 types: embeds.map(data => data.type),
                 options: embeds[0].options,
                 provider,
-            });
+            };
+            const updatedEmbeds = await handleDig(opts).catch(err => contextualThrow(err, { dig: opts }));
 
             // Edit the message with the new embeds
             await editDeferred(interaction, {
@@ -51,9 +53,12 @@ export default {
                 ),
             });
         })().catch(err => {
-            // Log & re-throw any errors
-            console.error(err);
-            sentry.captureException(err);
+            // Log any errors
+            captureException(err, sentry);
+
+            // TODO: Indicate to the user something went wrong?
+
+            // Re-throw the error for Cf
             throw err;
         }));
 

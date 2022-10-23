@@ -3,6 +3,7 @@ import { decode, encode, RECURSION_DESIRED, CHECKING_DISABLED } from 'dns-packet
 import { toRcode } from 'dns-packet/rcodes.js';
 import fetch from 'node-fetch';
 import cache from './cache.js';
+import { contextualThrow } from './error.js';
 
 const DNS_RCODES = Object.freeze({
     0: 'No error',
@@ -150,6 +151,8 @@ const performLookupRequest = async (domain, type, endpoint, flags) => {
  * @return {string}
  */
 const processData = (type, data) => {
+    if (typeof data !== 'string') contextualThrow(new Error(`Expected data to be an string, got ${data === null ? 'null' : typeof data}`), { data });
+
     // Handle hex rdata
     if (data.startsWith('\\#')) {
         const words = data.split(' ');
@@ -201,7 +204,7 @@ const processData = (type, data) => {
  * @return {LookupAnswer[]|undefined}
  */
 const processAnswer = (type, answer) => {
-    if (!Array.isArray(answer)) return answer; // TODO: What do we actually have that's not an array?
+    if (!Array.isArray(answer)) contextualThrow(new Error(`Expected answer to be an array, got ${answer === null ? 'null' : typeof answer}`), { answer });
 
     return answer.map(raw => ({
         name: raw.name,

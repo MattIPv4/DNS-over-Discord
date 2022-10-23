@@ -1,5 +1,8 @@
 /* global CACHE */
 
+const sha512 = key => crypto.subtle.digest('SHA-512', new TextEncoder().encode(key))
+    .then(buffer => Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join(''));
+
 const jsonDateStringify = function (key, value) {
     // Wrap Date objects in a custom Date() string
     if (this[key] instanceof Date) return `Date(${this[key].toISOString()})`;
@@ -16,17 +19,20 @@ const jsonDateParse = function (key, value) {
     return value;
 };
 
-export default async (func, args, key, ttl) => {
+export default async (func, args, key, ttl, hash = true) => {
     // If no KV, no cache
     if (typeof CACHE === 'undefined') return func(...args);
 
+    // Get the hashed key if needed
+    const hashedKey = hash ? await sha512(key) : key;
+
     // Check KV for cache
-    const kvValue = await CACHE.getWithMetadata(key);
+    const kvValue = await CACHE.getWithMetadata(hashedKey);
     if (kvValue?.value && kvValue?.metadata?.exp > Date.now()) return JSON.parse(kvValue.value, jsonDateParse);
 
     // Run the lookup and store in KV
     const res = await func(...args);
-    await CACHE.put(key, JSON.stringify(res, jsonDateStringify), {
+    await CACHE.put(hashedKey, JSON.stringify(res, jsonDateStringify), {
         metadata: { exp: Date.now() + ttl * 1000 },
         expirationTtl: Math.max(ttl, 60),
     });
