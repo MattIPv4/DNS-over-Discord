@@ -1,5 +1,6 @@
 import { InteractionType, InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
 import WorkersSentry from 'workers-sentry/worker.js';
+import { captureException } from './utils/error.js';
 import verify from './utils/verify.js';
 import Privacy from './utils/strings/privacy.js';
 import Terms from './utils/strings/terms.js';
@@ -34,10 +35,9 @@ const handleCommandInteraction = async ({ body, wait, sentry }) => {
         // Execute
         return await command.execute({ interaction: body, response: jsonResponse, wait, sentry });
     } catch (err) {
-        // Catch & log any errors
+        // Log any errors
         console.log(body);
-        console.error(err);
-        sentry.captureException(err);
+        captureException(err, sentry);
 
         // Send an ephemeral message to the user
         return jsonResponse({
@@ -63,10 +63,9 @@ const handleComponentInteraction = async ({ body, wait, sentry }) => {
         if (err.code === 'MODULE_NOT_FOUND')
             return new Response(null, { status: 404 });
 
-        // Catch & log any errors
+        // Log any errors
         console.log(body);
-        console.error(err);
-        sentry.captureException(err);
+        captureException(err, sentry);
 
         // Send a 500
         return new Response(null, { status: 500 });

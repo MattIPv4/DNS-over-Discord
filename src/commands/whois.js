@@ -1,4 +1,5 @@
 import { InteractionResponseType, ApplicationCommandOptionType } from 'discord-api-types/payloads/v9';
+import { captureException, contextualThrow } from '../utils/error.js';
 import { performLookupWithCache } from '../utils/whois.js';
 import { editDeferred } from '../utils/discord.js';
 import { createEmbed } from '../utils/embed.js';
@@ -27,7 +28,7 @@ export default {
             // TODO: Try to validate as domain/IPv4/IPv6/ASN before running lookup
 
             // Do the rdap/whois lookup
-            const data = await performLookupWithCache(query);
+            const data = await performLookupWithCache(query).catch(err => contextualThrow(err, { lookup: { query } }));
 
             // If no result, send back simple message
             if (!data)
@@ -64,9 +65,8 @@ export default {
                 embeds: [createEmbed('WHOIS', `\`\`\`\n${title}\n${table}\n\`\`\``)],
             });
         })().catch(err => {
-            // Log any error
-            console.error(err);
-            sentry.captureException(err);
+            // Log any errors
+            captureException(err, sentry);
 
             // Tell the user it errored
             editDeferred(interaction, {
