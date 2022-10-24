@@ -14,23 +14,13 @@ jobs:
       NODE_OPTIONS: --unhandled-rejections=strict
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
-
-      - name: Use Node.js (.nvmrc)
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
-
-      - uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          node-version-file: .nvmrc
+          cache: npm
 
       - name: Install Dependencies
         run: npm ci
@@ -47,28 +37,19 @@ jobs:
       NODE_OPTIONS: --unhandled-rejections=strict
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Read .nvmrc
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-        id: nvm
-
-      - name: Use Node.js (.nvmrc)
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ steps.nvm.outputs.NVMRC }}
-
-      - uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          node-version-file: .nvmrc
+          cache: npm
 
       - name: Install Dependencies
         run: npm ci
 
       - name: Generate staging.env
+        run: envsubst < staging.env.sample > staging.env
         env:
           CLIENT_ID: ${{ secrets.STAGING_CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.STAGING_CLIENT_SECRET }}
@@ -78,7 +59,6 @@ jobs:
           SENTRY_ORG: ${{ secrets.STAGING_SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.STAGING_SENTRY_PROJECT }}
           SENTRY_DSN: ${{ secrets.STAGING_SENTRY_DSN }}
-        run: envsubst < staging.env.sample > staging.env
 
       - name: Publish to Staging
         run: npm run publish:staging
