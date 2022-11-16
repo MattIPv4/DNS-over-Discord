@@ -199,11 +199,16 @@ const processData = (type, data) => {
  *
  * @param {string} type
  * @param {LookupResultAnswer[]} [answer]
- * @return {LookupAnswer[]|undefined}
+ * @return {LookupAnswer[]}
  */
 const processAnswer = (type, answer) => {
+    // Handle no results
+    if (answer === undefined) return [];
+
+    // Handle unknown results
     if (!Array.isArray(answer)) contextualThrow(new Error(`Expected answer to be an array, got ${answer === null ? 'null' : typeof answer}`), { answer });
 
+    // Process each answer
     return answer.map(raw => ({
         name: raw.name,
         type: raw.type,

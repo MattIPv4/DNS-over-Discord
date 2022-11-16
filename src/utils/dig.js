@@ -70,11 +70,11 @@ export const handleDig = async ({ domain, types, options, provider }) => {
         const digCmd = `\`${digCmdParts.join(' ')}\`\n`;
 
         // Error message
-        if (typeof data === 'object' && data.message)
+        if (data.message)
             return `${digCmd}\n${data.message}`;
 
         // No results
-        if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
+        if (!data.answer.length)
             return `${digCmd}\nNo records found${data.flags.cd
                 ? `\n\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
                 : ''}`;
