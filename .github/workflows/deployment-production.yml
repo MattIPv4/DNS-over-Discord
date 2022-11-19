@@ -32,6 +32,9 @@ jobs:
     name: Deploy
     needs: test
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://dns-over-discord.v4.wtf/invite
 
     env:
       NODE_OPTIONS: --unhandled-rejections=strict
