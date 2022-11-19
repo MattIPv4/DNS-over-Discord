@@ -2,7 +2,7 @@ import { InteractionResponseType, ComponentType, ButtonStyle } from 'discord-api
 import { updateComponents } from '../utils/components.js';
 import { handleDig, parseEmbed } from '../utils/dig.js';
 import { editDeferred } from '../utils/discord.js';
-import { captureException, contextualThrow } from '../utils/error.js';
+import { captureException } from '../utils/error.js';
 
 const component = {
     type: ComponentType.Button,
@@ -31,7 +31,7 @@ export default {
                 options: embeds[0].options,
                 provider: embeds[0].provider,
             };
-            const updatedEmbeds = await handleDig(opts).catch(err => contextualThrow(err, { dig: opts }));
+            const updatedEmbeds = await handleDig(opts, sentry);
 
             // Edit the message with the new embeds
             await editDeferred(interaction, {

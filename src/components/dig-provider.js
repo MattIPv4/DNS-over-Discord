@@ -2,7 +2,7 @@ import { InteractionResponseType, ComponentType } from 'discord-api-types/payloa
 import { updateComponents } from '../utils/components.js';
 import { handleDig, parseEmbed } from '../utils/dig.js';
 import { editDeferred } from '../utils/discord.js';
-import { captureException, contextualThrow } from '../utils/error.js';
+import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
 
 const component = name => ({
@@ -39,7 +39,7 @@ export default {
                 options: embeds[0].options,
                 provider,
             };
-            const updatedEmbeds = await handleDig(opts).catch(err => contextualThrow(err, { dig: opts }));
+            const updatedEmbeds = await handleDig(opts, sentry);
 
             // Edit the message with the new embeds
             await editDeferred(interaction, {

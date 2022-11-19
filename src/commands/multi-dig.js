@@ -4,7 +4,7 @@ import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
 import { sendFollowup, editDeferred } from '../utils/discord.js';
 import digRefresh from '../components/dig-refresh.js';
-import { captureException, contextualThrow } from '../utils/error.js';
+import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
 
 export default {
@@ -82,7 +82,7 @@ export default {
                 options: { short: rawShort, cdFlag: rawCdflag },
                 provider,
             };
-            const embeds = await handleDig(opts).catch(err => contextualThrow(err, { dig: opts }));
+            const embeds = await handleDig(opts, sentry);
 
             // Edit the original deferred response with the first 10 embeds
             const messageBase = {
