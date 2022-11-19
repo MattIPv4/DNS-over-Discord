@@ -1,7 +1,7 @@
 import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
 import isValidDomain from 'is-valid-domain';
 import { performLookupWithCache, VALID_TYPES } from './dns.js';
-import { contextualThrow } from './error.js';
+import { captureException, contextualThrow } from './error.js';
 import providers from './providers.js';
 import { presentTable } from './table.js';
 import { createEmbed } from './embed.js';
@@ -44,15 +44,20 @@ export const validateDomain = (input, response) => {
  * @param {string[]} types
  * @param {DigOptions} options
  * @param {import('./providers.js').Provider} provider
+ * @param {import('workers-sentry/worker')} sentry
  * @return {Promise<import('./embed.js').Embed[]>}
  */
-export const handleDig = async ({ domain, types, options, provider }) => {
+export const handleDig = async ({ domain, types, options, provider }, sentry) => {
     // Make the DNS queries
     const results = await Promise.all(types.map(type => {
         const opts = { domain, type, endpoint: provider.doh, flags: { cd: options.cdflag } };
         return performLookupWithCache(opts.domain, opts.type, opts.endpoint, opts.flags)
             .then(data => ({ type, data }))
-            .catch(err => contextualThrow(err, { lookup: opts }));
+            .catch(err => contextualThrow(err, { lookup: opts }))
+            .catch(err => {
+                captureException(err, sentry);
+                return { type, data: { name: domain, message: 'An unexpected error occurred' } };
+            });
     }));
 
     // Define the presenter
@@ -70,11 +75,11 @@ export const handleDig = async ({ domain, types, options, provider }) => {
         const digCmd = `\`${digCmdParts.join(' ')}\`\n`;
 
         // Error message
-        if (typeof data === 'object' && data.message)
+        if (data.message)
             return `${digCmd}\n${data.message}`;
 
         // No results
-        if (typeof data !== 'object' || !Array.isArray(data.answer) || data.answer.length === 0)
+        if (!data.answer.length)
             return `${digCmd}\nNo records found${data.flags.cd
                 ? `\n\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
                 : ''}`;

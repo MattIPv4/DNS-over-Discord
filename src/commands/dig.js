@@ -4,7 +4,7 @@ import { validateDomain, handleDig } from '../utils/dig.js';
 import { editDeferred } from '../utils/discord.js';
 import digRefresh from '../components/dig-refresh.js';
 import digProvider from '../components/dig-provider.js';
-import { captureException, contextualThrow } from '../utils/error.js';
+import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
 
 const optionTypes = Object.freeze(VALID_TYPES.slice(0, 25)); // Discord has a limit of 25 options
@@ -78,7 +78,7 @@ export default {
                 options: { short: rawShort, cdflag: rawCdflag },
                 provider,
             };
-            const [ embed ] = await handleDig(opts).catch(err => contextualThrow(err, { dig: opts }));
+            const [ embed ] = await handleDig(opts, sentry);
 
             // Edit the original deferred response
             await editDeferred(interaction, {

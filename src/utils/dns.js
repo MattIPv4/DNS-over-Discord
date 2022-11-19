@@ -67,9 +67,7 @@ const performLookupJson = async (domain, type, endpoint, flags) => {
     const query = new URL(endpoint.endpoint);
     query.searchParams.set('name', domain);
     query.searchParams.set('type', type.toLowerCase());
-
-    // TODO: We should be able to set this to false safely, Cloudflare has a bug
-    if (flags.cd) query.searchParams.set('cd', (!!flags.cd).toString().toLowerCase());
+    query.searchParams.set('cd', (!!flags.cd).toString().toLowerCase());
 
     // Make our request
     return fetch(query.href, {
@@ -144,13 +142,54 @@ const performLookupRequest = async (domain, type, endpoint, flags) => {
 };
 
 /**
+ * @typedef {import('@types/dns-packet').SrvData|import('@types/dns-packet').HInfoData|import('@types/dns-packet').SoaData|import('@types/dns-packet').TxtData|import('@types/dns-packet').CaaData|import('@types/dns-packet').MxData} DnsPacketData
+ */
+
+/**
  * Process data for a DNS answer, handling hex rdata.
  *
  * @param {string} type
- * @param {string} data
+ * @param {string|DnsPacketData} data
  * @return {string}
  */
 const processData = (type, data) => {
+    // Handle an array
+    // dns-packet TxtData may be an array of strings or buffers
+    if (Array.isArray(data)) return data.map(item => processData(type, item)).join(' ');
+
+    // Handle a buffer
+    // dns-packet TxtData may be a buffer
+    if (Buffer.isBuffer(data)) return data.toString();
+
+    // Handle dns-packet custom objects
+    if (typeof data === 'object') {
+        // Handle SrvData
+        if (type === 'SRV' && 'port' in data && 'target' in data) {
+            return `${data.priority} ${data.weight} ${data.port} ${data.target}`;
+        }
+
+        // Handle HInfoData
+        if (type === 'HINFO' && 'cpu' in data && 'os' in data) {
+            return `${data.cpu} ${data.os}`;
+        }
+
+        // Handle SoaData
+        if (type === 'SOA' && 'mname' in data && 'rname' in data) {
+            return `${data.mname} ${data.rname} ${data.serial} ${data.refresh} ${data.retry} ${data.expire} ${data.minimum}`;
+        }
+
+        // Handle CaaData
+        if (type === 'CAA' && 'flags' in data && 'tag' in data && 'value' in data) {
+            return `${data.flags || 0} ${data.tag} "${data.value}"`;
+        }
+
+        // Handle MxData
+        if (type === 'MX' && 'exchange' in data && 'preference' in data) {
+            return `${data.preference} ${data.exchange}`;
+        }
+    }
+
+    // We've handled all the known extras, so everything now should be a string
     if (typeof data !== 'string') contextualThrow(new Error(`Expected data to be an string, got ${data === null ? 'null' : typeof data}`), { data });
 
     // Handle hex rdata
@@ -201,11 +240,16 @@ const processData = (type, data) => {
  *
  * @param {string} type
  * @param {LookupResultAnswer[]} [answer]
- * @return {LookupAnswer[]|undefined}
+ * @return {LookupAnswer[]}
  */
 const processAnswer = (type, answer) => {
+    // Handle no results
+    if (answer === undefined) return [];
+
+    // Handle unknown results
     if (!Array.isArray(answer)) contextualThrow(new Error(`Expected answer to be an array, got ${answer === null ? 'null' : typeof answer}`), { answer });
 
+    // Process each answer
     return answer.map(raw => ({
         name: raw.name,
         type: raw.type,
