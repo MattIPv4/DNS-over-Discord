@@ -351,11 +351,13 @@ node
 ## Development
 
 1. Create your test Discord application at https://discord.com/developers/applications (this does not need a bot account, just the application).
-2. Create your `development.env` file. Copy `development.env.sample` and fill out the information from your Discord application, plus the ID of your test server/guild.
-3. Authenticate with Wrangler by running `wrangler login`.
+2. Create your `development.env` file.
+   - Copy `development.env.sample` and fill out the information from your Discord application, plus the ID of your test server/guild.
+   - A Sentry DSN is required, but the token/org/project can be set to empty if source map uploads are not required.
+3. Authenticate with Wrangler by running `npx wrangler login`.
 4. Update `wrangler.toml` for your account.
-   - Use `wrangler whoami` to get your account ID, update the value in `wrangler.toml` to match.
-   - Use `wrangler kv:namespace create "CACHE"` to create the KV namespace, update the `id` and `preview_id` in `wrangler.toml` to match.
+   - Use `npx wrangler whoami` to get your account ID, update the value in `wrangler.toml` to match.
+   - Use `npx wrangler kv:namespace create "CACHE"` to create the KV namespace, update the `id` and `preview_id` in `wrangler.toml` to match.
 5. Develop with the worker by running `npm run dev`.
 6. (Optional) Start an HTTP tunnel to your local development server by running `npm run tunnel`, using [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/run-tunnel/trycloudflare).
 
@@ -368,7 +370,7 @@ Ensure that you've created and configured `staging.env` and `production.env` app
 Ensure that the staging/production environments in `wrangler.toml` have been updated with your zone IDs and routes for the workers.
 
 Ensure that the KV namespaces are created for staging/production environments and are configured in `wrangler.toml`.
-Use `wrangler kv:namespace create "CACHE" --env <staging/production>`.
+Use `npx wrangler kv:namespace create "CACHE" --env <staging/production>`.
 
 To deploy from local, run `npm run publish:staging` to deploy to staging, and `npm run publish:production` to deploy to the production environment.
 
