@@ -1,4 +1,4 @@
-import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
+import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads';
 import isValidDomain from 'is-valid-domain';
 import { performLookupWithCache, VALID_TYPES } from './dns.js';
 import { captureException, contextualThrow } from './error.js';

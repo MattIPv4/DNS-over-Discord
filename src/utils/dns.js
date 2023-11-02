@@ -1,7 +1,6 @@
 import { Buffer } from 'buffer';
 import { decode, encode, RECURSION_DESIRED, CHECKING_DISABLED } from 'dns-packet';
 import { toRcode } from 'dns-packet/rcodes.js';
-import fetch from 'node-fetch';
 import cache from './cache.js';
 import { contextualThrow } from './error.js';
 

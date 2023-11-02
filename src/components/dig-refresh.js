@@ -1,4 +1,4 @@
-import { InteractionResponseType, ComponentType, ButtonStyle } from 'discord-api-types/payloads/v9';
+import { InteractionResponseType, ComponentType, ButtonStyle } from 'discord-api-types/payloads';
 import { updateComponents } from '../utils/components.js';
 import { handleDig, parseEmbed } from '../utils/dig.js';
 import { editDeferred } from '../utils/discord.js';

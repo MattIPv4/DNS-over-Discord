@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
+
 const NODE_ENV = process.env.NODE_ENV || 'development';
 import dotenv from 'dotenv';
 const env = dotenv.config({ path: fileURLToPath(new URL(`${NODE_ENV}.env`, import.meta.url)) });
@@ -13,7 +14,7 @@ console.log(`Using ${NODE_ENV} environment for build...`);
 export default {
     mode: 'none',
     target: 'webworker',
-    entry: './src/index.js',
+    entry: fileURLToPath(new URL('src/index.js', import.meta.url)),
     output: {
         path: fileURLToPath(new URL('dist', import.meta.url)),
         filename: 'worker.js',
@@ -32,12 +33,15 @@ export default {
         new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
 
         // Publish source maps to Sentry on each build
-        new WorkersSentryWebpackPlugin(
-            process.env.SENTRY_AUTH_TOKEN,
-            process.env.SENTRY_ORG,
-            process.env.SENTRY_PROJECT,
-        ),
-    ],
+        process.env.SENTRY_AUTH_TOKEN
+            && process.env.SENTRY_ORG
+            && process.env.SENTRY_PROJECT
+            && new WorkersSentryWebpackPlugin(
+                process.env.SENTRY_AUTH_TOKEN,
+                process.env.SENTRY_ORG,
+                process.env.SENTRY_PROJECT,
+            ),
+    ].filter(Boolean),
     externals: {
         // Don't webpack node-fetch, rely on fetch global
         'node-fetch': 'fetch',

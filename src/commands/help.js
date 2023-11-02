@@ -1,4 +1,4 @@
-import { InteractionResponseType, MessageFlags, ComponentType } from 'discord-api-types/payloads/v9';
+import { InteractionResponseType, MessageFlags, ComponentType } from 'discord-api-types/payloads';
 import docs from '../components/docs.js';
 import invite from '../components/invite.js';
 import { createEmbed } from '../utils/embed.js';

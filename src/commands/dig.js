@@ -1,4 +1,4 @@
-import { InteractionResponseType, ApplicationCommandOptionType, ComponentType } from 'discord-api-types/payloads/v9';
+import { InteractionResponseType, ApplicationCommandOptionType, ComponentType } from 'discord-api-types/payloads';
 import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
 import { editDeferred } from '../utils/discord.js';
@@ -45,7 +45,7 @@ export default {
         {
             name: 'provider',
             description: 'DNS provider to use',
-            help: `Supported providers:\n  ${Object.keys(providers).join(', ')}\n\nDefaults to ${providers[0].name}.`,
+            help: `Supported providers:\n  ${providers.map(provider => provider.name).join(', ')}\n\nDefaults to ${providers[0].name}.`,
             type: ApplicationCommandOptionType.String,
             required: false,
             choices: providers.map(({ name }) => ({ name, value: name })),

@@ -1,4 +1,4 @@
-import { ComponentType, ButtonStyle } from 'discord-api-types/payloads/v9';
+import { ComponentType, ButtonStyle } from 'discord-api-types/payloads';
 
 const component = {
     type: ComponentType.Button,

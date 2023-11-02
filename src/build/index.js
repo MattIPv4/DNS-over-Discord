@@ -1,6 +1,6 @@
-import path from 'path';
-import { promises as fs } from 'fs';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { getCommands, registerCommands } from './commands.js';
 
 const mkdirSafe = path => fs.access(path).catch(() => fs.mkdir(path, { recursive: true }));

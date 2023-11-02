@@ -1,4 +1,4 @@
-import { InteractionResponseType, ApplicationCommandOptionType } from 'discord-api-types/payloads/v9';
+import { InteractionResponseType, ApplicationCommandOptionType } from 'discord-api-types/payloads';
 import { captureException, contextualThrow } from '../utils/error.js';
 import { performLookupWithCache } from '../utils/whois.js';
 import { editDeferred } from '../utils/discord.js';
