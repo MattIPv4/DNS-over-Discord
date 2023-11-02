@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { RouteBases, Routes } from 'discord-api-types/rest/v9';
 
 const api = async (endpoint, method, token = undefined, tokenType = undefined, data = undefined) => {

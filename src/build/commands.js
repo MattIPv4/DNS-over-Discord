@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import equal from 'deep-equal';
 import { grantToken, getCommands as getDiscordCommands, registerCommand, updateCommand, removeCommand } from '../utils/discord.js';
 
