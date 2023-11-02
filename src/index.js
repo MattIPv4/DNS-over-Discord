@@ -1,4 +1,4 @@
-import { InteractionType, InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
+import { InteractionType, InteractionResponseType, MessageFlags } from 'discord-api-types/payloads';
 import WorkersSentry from 'workers-sentry/worker.js';
 import { captureException } from './utils/error.js';
 import verify from './utils/verify.js';
@@ -207,4 +207,3 @@ addEventListener('fetch', event => {
         throw err;
     }));
 });
-

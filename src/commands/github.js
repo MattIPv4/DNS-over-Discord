@@ -1,4 +1,4 @@
-import { InteractionResponseType } from 'discord-api-types/payloads/v9';
+import { InteractionResponseType } from 'discord-api-types/payloads';
 import { createEmbed } from '../utils/embed.js';
 
 export default {

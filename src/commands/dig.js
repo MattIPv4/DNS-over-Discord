@@ -1,4 +1,4 @@
-import { InteractionResponseType, ApplicationCommandOptionType, ComponentType } from 'discord-api-types/payloads/v9';
+import { InteractionResponseType, ApplicationCommandOptionType, ComponentType } from 'discord-api-types/payloads';
 import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
 import { editDeferred } from '../utils/discord.js';

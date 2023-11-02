@@ -1,4 +1,4 @@
-import { InteractionResponseType, ApplicationCommandOptionType, ComponentType, MessageFlags } from 'discord-api-types/payloads/v9';
+import { InteractionResponseType, ApplicationCommandOptionType, ComponentType, MessageFlags } from 'discord-api-types/payloads';
 import digProvider from '../components/dig-provider.js';
 import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';

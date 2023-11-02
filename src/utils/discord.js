@@ -1,4 +1,4 @@
-import { RouteBases, Routes } from 'discord-api-types/rest/v9';
+import { RouteBases, Routes } from 'discord-api-types/rest';
 
 const api = async (endpoint, method, token = undefined, tokenType = undefined, data = undefined) => {
     const res = await fetch(

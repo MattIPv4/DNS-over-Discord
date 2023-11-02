@@ -1,4 +1,4 @@
-import { ComponentType } from 'discord-api-types/payloads/v9';
+import { ComponentType } from 'discord-api-types/payloads';
 
 export const updateComponents = (components, update) => components.map(component => {
     if (component.type === ComponentType.ActionRow)

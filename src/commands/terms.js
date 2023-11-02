@@ -1,4 +1,4 @@
-import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads/v9';
+import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads';
 import { createEmbed } from '../utils/embed.js';
 import Terms from '../utils/strings/terms.js';
 
