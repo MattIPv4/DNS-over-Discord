@@ -8,7 +8,12 @@ import { createEmbed } from './embed.js';
 
 const DNSSEC_DISABLED_WARNING_MESSAGE = ':warning: cd bit set, DNSSEC validation disabled';
 
-export const validateDomain = (input, response) => {
+/**
+ *
+ * @param {string} input User input to validate
+ * @returns
+ */
+export const validateDomain = input => {
     // Clean the input
     const cleaned = input
         .trim()
@@ -21,13 +26,13 @@ export const validateDomain = (input, response) => {
     // Return the input with an optional error
     return {
         domain: cleaned,
-        error: valid ? null : response({
+        error: valid ? null : {
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
                 content: 'A domain name could not be parsed from the given input.',
                 flags: MessageFlags.Ephemeral,
             },
-        }),
+        },
     };
 };
 

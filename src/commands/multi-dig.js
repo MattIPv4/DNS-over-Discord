@@ -1,11 +1,13 @@
 import { InteractionResponseType, ApplicationCommandOptionType, ComponentType, MessageFlags } from 'discord-api-types/payloads';
-import digProvider from '../components/dig-provider.js';
+
 import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
 import { sendFollowup, editDeferred } from '../utils/discord.js';
-import digRefresh from '../components/dig-refresh.js';
 import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
+
+import digRefresh from '../components/dig-refresh.js';
+import digProvider from '../components/dig-provider.js';
 
 export default {
     name: 'multi-dig',
@@ -55,8 +57,8 @@ export default {
         const rawProvider = ((interaction.data.options.find(opt => opt.name === 'provider') || {}).value || '').trim();
 
         // Parse domain input, return any error response
-        const { domain, error } = validateDomain(rawDomain, response);
-        if (error) return error;
+        const { domain, error } = validateDomain(rawDomain);
+        if (error) return response(error);
 
         // Parse types input, mapping '*' to all records and defaulting to 'A' if none given
         const types = rawTypes === '*'

@@ -1,15 +1,20 @@
-import { InteractionType, InteractionResponseType, MessageFlags } from 'discord-api-types/payloads';
 import WorkersSentry from 'workers-sentry/worker.js';
+
+import createHandler from './core/handler.js';
+
+import commands from './commands/index.js';
+import components from './components/index.js';
+
 import { captureException } from './utils/error.js';
-import verify from './utils/verify.js';
 import Privacy from './utils/strings/privacy.js';
 import Terms from './utils/strings/terms.js';
-import commands from '../tmp/commands.json' assert { type: 'json' };
 
-// Util to send a JSON response
-const jsonResponse = obj => new Response(JSON.stringify(obj), {
+const handler = createHandler(commands, components);
+
+// Util to send a plain-text response
+const textResponse = text => new Response(text, {
     headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/plain',
     },
 });
 
@@ -21,154 +26,37 @@ const redirectResponse = url => new Response(null, {
     },
 });
 
-// Process a Discord command interaction
-const handleCommandInteraction = async ({ body, wait, sentry }) => {
-    // Sentry scope
-    sentry.getScope().setTransactionName(`command: ${body.data.name}`);
-    sentry.getScope().setTag('command', body.data.name);
-
-    // Locate the command data
-    const commandData = commands[body.data.id];
-    if (!commandData)
-        return new Response(null, { status: 404 });
-
-    try {
-        // Load in the command
-        const { default: command } = await import(`./commands/${commandData.file}`);
-
-        // Execute
-        return await command.execute({ interaction: body, response: jsonResponse, wait, sentry });
-    } catch (err) {
-        // Log any errors
-        console.log(body);
-        captureException(err, sentry);
-
-        // Send an ephemeral message to the user
-        return jsonResponse({
-            type: InteractionResponseType.ChannelMessageWithSource,
-            data: {
-                content: 'An unexpected error occurred when executing the command.',
-                flags: MessageFlags.Ephemeral,
-            },
-        });
-    }
-};
-
-// Process a Discord component interaction
-const handleComponentInteraction = async ({ body, wait, sentry }) => {
-    // Sentry scope
-    sentry.getScope().setTransactionName(`component: ${body.data.custom_id}`);
-    sentry.getScope().setTag('component', body.data.custom_id);
-
-    try {
-        // Load in the component handler
-        const { default: component } = await import(`./components/${body.data.custom_id}.js`);
-
-        // Execute
-        return await component.execute({ interaction: body, response: jsonResponse, wait, sentry });
-    } catch (err) {
-        // Handle a non-existent component
-        if (err.code === 'MODULE_NOT_FOUND')
-            return new Response(null, { status: 404 });
-
-        // Log any errors
-        console.log(body);
-        captureException(err, sentry);
-
-        // Send a 500
-        return new Response(null, { status: 500 });
-    }
-};
-
-// Process a Discord interaction POST request
-const handleInteraction = async ({ request, wait, sentry }) => {
-    // Get the body as text
-    const bodyText = await request.text();
-    sentry.setRequestBody(bodyText);
-
-    // Verify a legitimate request
-    if (!await verify(request, bodyText))
-        return new Response(null, { status: 401 });
-
-    // Work with JSON body going forward
-    const body = JSON.parse(bodyText);
-    sentry.setRequestBody(body);
-
-    // Handle different interaction types
-    switch (body.type) {
-        // Handle a PING
-        case InteractionType.Ping:
-            return jsonResponse({
-                type: InteractionResponseType.Pong,
-            });
-
-        // Handle a command
-        case InteractionType.ApplicationCommand:
-            return handleCommandInteraction({ body, wait, sentry });
-
-        // Handle a component
-        case InteractionType.MessageComponent:
-            return handleComponentInteraction({ body, wait, sentry });
-
-        // Unknown
-        default:
-            return new Response(null, { status: 501 });
-    }
-};
-
 // Process all requests to the worker
-const handleRequest = async ({ request, wait, sentry }) => {
-    const url = new URL(request.url);
+const handleRequest = async (event, sentry) => {
+    // Check if this is a Discord interaction (or a health check)
+    const resp = await handler(event, sentry);
+    if (resp) return resp;
 
-    // Send interactions off to their own handler
-    if (request.method === 'POST' && url.pathname === '/interactions')
-        return await handleInteraction({ request, wait, sentry });
-
-    // Otherwise, we only care for GET requests
-    if (request.method !== 'GET')
-        return new Response(null, { status: 404 });
-
-    // Health check route
-    if (url.pathname === '/health')
-        return new Response('OK', {
-            headers: {
-                'Content-Type': 'text/plain',
-                'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-                Expires: '0',
-                'Surrogate-Control': 'no-store',
-            },
-        });
+    // Otherwise, process the request
+    const url = new URL(event.request.url);
 
     // Privacy notice route
-    if (url.pathname === '/privacy')
-        return new Response(Privacy, {
-            headers: {
-                'Content-Type': 'text/plain',
-            },
-        });
+    if (event.request.method === 'GET' && url.pathname === '/privacy')
+        return textResponse(Privacy);
 
     // Terms notice route
-    if (url.pathname === '/terms')
-        return new Response(Terms, {
-            headers: {
-                'Content-Type': 'text/plain',
-            },
-        });
+    if (event.request.method === 'GET' && url.pathname === '/terms')
+        return textResponse(Terms);
 
     // Invite redirect
-    if (url.pathname === '/invite')
+    if (event.request.method === 'GET' && url.pathname === '/invite')
         return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=applications.commands`);
 
     // Discord redirect
-    if (url.pathname === '/server')
+    if (event.request.method === 'GET' && url.pathname === '/server')
         return redirectResponse('https://discord.gg/JgxVfGn');
 
     // GitHub redirect
-    if (url.pathname === '/github')
+    if (event.request.method === 'GET' && url.pathname === '/github')
         return redirectResponse('https://github.com/MattIPv4/DNS-over-Discord');
 
     // Docs redirect
-    if (url.pathname === '/')
+    if (event.request.method === 'GET' && url.pathname === '/')
         return redirectResponse('https://developers.cloudflare.com/1.1.1.1/other-ways-to-use-1.1.1.1/dns-over-discord');
 
     // Not found
@@ -195,15 +83,14 @@ addEventListener('fetch', event => {
     };
 
     // Process the event
-    return event.respondWith(handleRequest({
-        request: event.request,
-        wait: event.waitUntil.bind(event),
-        sentry,
-    }).catch(err => {
-        // Log any errors
-        captureException(err, sentry);
+    return event.respondWith(
+        handleRequest(event, sentry)
+            .catch(err => {
+                // Log any errors
+                captureException(err, sentry);
 
-        // Re-throw the error for Cf
-        throw err;
-    }));
+                // Re-throw the error for Cf
+                throw err;
+            }),
+    );
 });

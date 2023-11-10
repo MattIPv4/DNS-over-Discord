@@ -1,10 +1,11 @@
 import { InteractionResponseType } from 'discord-api-types/payloads';
+
 import { createEmbed } from '../utils/embed.js';
 
 export default {
     name: 'invite',
     description: 'Get a link to add DNS over Discord to your server',
-    execute: async ({ response }) => response({
+    execute: ({ response }) => response({
         type: InteractionResponseType.ChannelMessageWithSource,
         data: {
             embeds: [
