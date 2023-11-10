@@ -16,7 +16,7 @@ export default {
             required: true,
         },
     ],
-    execute: async ({ interaction, response, wait, sentry }) => {
+    execute: async ({ interaction, response, event, wait, sentry }) => {
         // Do the processing after acknowledging the Discord command
         wait((async () => {
             // Get the raw values from Discord
@@ -28,7 +28,7 @@ export default {
             // TODO: Try to validate as domain/IPv4/IPv6/ASN before running lookup
 
             // Do the rdap/whois lookup
-            const data = await performLookupWithCache(query).catch(err => contextualThrow(err, { lookup: { query } }));
+            const data = await performLookupWithCache(query, event.env.CACHE).catch(err => contextualThrow(err, { lookup: { query } }));
 
             // If no result, send back simple message
             if (!data)

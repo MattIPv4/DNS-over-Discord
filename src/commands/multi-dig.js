@@ -48,7 +48,7 @@ export default {
             choices: providers.map(({ name }) => ({ name, value: name })),
         },
     ],
-    execute: async ({ interaction, response, wait, sentry }) => {
+    execute: async ({ interaction, response, event, wait, sentry }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
@@ -84,7 +84,7 @@ export default {
                 options: { short: rawShort, cdFlag: rawCdflag },
                 provider,
             };
-            const embeds = await handleDig(opts, sentry);
+            const embeds = await handleDig(opts, event.env.CACHE, sentry);
 
             // Edit the original deferred response with the first 10 embeds
             const messageBase = {

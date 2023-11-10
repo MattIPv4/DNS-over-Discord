@@ -49,14 +49,15 @@ export const validateDomain = input => {
  * @param {string[]} types
  * @param {DigOptions} options
  * @param {import('./providers.js').Provider} provider
+ * @param {*} cache TODO: type
  * @param {import('workers-sentry/worker')} sentry
  * @return {Promise<import('./embed.js').Embed[]>}
  */
-export const handleDig = async ({ domain, types, options, provider }, sentry) => {
+export const handleDig = async ({ domain, types, options, provider }, cache, sentry) => {
     // Make the DNS queries
     const results = await Promise.all(types.map(type => {
         const opts = { domain, type, endpoint: provider.doh, flags: { cd: options.cdflag } };
-        return performLookupWithCache(opts.domain, opts.type, opts.endpoint, opts.flags)
+        return performLookupWithCache(opts.domain, opts.type, opts.endpoint, opts.flags, cache)
             .then(data => ({ type, data }))
             .catch(err => contextualThrow(err, { lookup: opts }))
             .catch(err => {

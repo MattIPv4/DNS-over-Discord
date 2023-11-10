@@ -63,34 +63,37 @@ const handleRequest = async (event, sentry) => {
     return new Response(null, { status: 404 });
 };
 
-// Register the worker listener
-addEventListener('fetch', event => {
-    // Start Sentry
-    const sentry = new WorkersSentry(event, process.env.SENTRY_DSN);
+// Register the Worker fetch handler
+export default {
+    fetch: async (request, env, ctx) => {
+        // Construct the event (similar to the old service worker payload)
+        const event = { type: 'fetch', request, env, ctx };
 
-    // Monkey-patch transaction name support
-    // TODO: Remove once https://github.com/robertcepa/toucan-js/issues/109 is resolved
-    const scopeProto = Object.getPrototypeOf(sentry.getScope());
-    scopeProto.setTransactionName = function (name) {
-        this.adapter.setTransactionName(name);
-    };
-    const adapterProto = Object.getPrototypeOf(sentry.getScope().adapter);
-    const apply = adapterProto.applyToEventSync;
-    adapterProto.applyToEventSync = function (event) {
-        const applied = apply.call(this, event);
-        if (this._transactionName) applied.transaction = this._transactionName;
-        return applied;
-    };
+        // Start Sentry
+        const sentry = new WorkersSentry(event, process.env.SENTRY_DSN);
 
-    // Process the event
-    return event.respondWith(
-        handleRequest(event, sentry)
+        // Monkey-patch transaction name support
+        // TODO: Remove once https://github.com/robertcepa/toucan-js/issues/109 is resolved
+        const scopeProto = Object.getPrototypeOf(sentry.getScope());
+        scopeProto.setTransactionName = function (name) {
+            this.adapter.setTransactionName(name);
+        };
+        const adapterProto = Object.getPrototypeOf(sentry.getScope().adapter);
+        const apply = adapterProto.applyToEventSync;
+        adapterProto.applyToEventSync = function (event) {
+            const applied = apply.call(this, event);
+            if (this._transactionName) applied.transaction = this._transactionName;
+            return applied;
+        };
+
+        // Process the event
+        return handleRequest(event, sentry)
             .catch(err => {
                 // Log any errors
                 captureException(err, sentry);
 
                 // Re-throw the error for Cf
                 throw err;
-            }),
-    );
-});
+            });
+    },
+};

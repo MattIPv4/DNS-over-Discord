@@ -15,7 +15,7 @@ const component = {
 export default {
     name: 'dig-refresh',
     component,
-    execute: async ({ interaction, response, wait, sentry }) => {
+    execute: async ({ interaction, response, event, wait, sentry }) => {
         // Parse all the embeds
         const embeds = (interaction.message.embeds || [])
             .map(embed => parseEmbed(embed)).filter(data => data !== null);
@@ -32,7 +32,7 @@ export default {
                 options: embeds[0].options,
                 provider: embeds[0].provider,
             };
-            const updatedEmbeds = await handleDig(opts, sentry);
+            const updatedEmbeds = await handleDig(opts, event.env.CACHE, sentry);
 
             // Edit the message with the new embeds
             await editDeferred(interaction, {

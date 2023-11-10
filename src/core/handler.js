@@ -16,6 +16,13 @@ import verify from './verify.js';
  */
 
 /**
+ * @typedef {Object} Event
+ * @property {*} request TODO: type
+ * @property {*} env TODO: type
+ * @property {*} ctx TODO: type
+ */
+
+/**
  * Create a new JSON response
  *
  * @param {any} obj Value to return as JSON
@@ -30,7 +37,7 @@ const jsonResponse = obj => new Response(JSON.stringify(obj), {
 /**
  * Handle an incoming Discord command interaction request to the Worker
  *
- * @param {*} event TODO: type
+ * @param {Event} event
  * @param {import('discord-api-types/payloads').APIApplicationCommandInteraction} interaction
  * @param {Record<string, Command>} commands
  * @param {*} [sentry] TODO: type
@@ -47,7 +54,7 @@ const handleCommandInteraction = async (event, interaction, commands, sentry) =>
 
     // Execute
     try {
-        return commands[interaction.data.name].execute({ interaction, response: jsonResponse, event, wait: event.waitUntil.bind(event), sentry });
+        return commands[interaction.data.name].execute({ interaction, response: jsonResponse, event, wait: event.ctx.waitUntil.bind(event.ctx), sentry });
     } catch (err) {
         // Log any errors
         console.log(interaction);
@@ -68,7 +75,7 @@ const handleCommandInteraction = async (event, interaction, commands, sentry) =>
 /**
  * Handle an incoming Discord component interaction request to the Worker
  *
- * @param {*} event TODO: type
+ * @param {Event} event
  * @param {import('discord-api-types/payloads').APIMessageComponentInteraction} interaction
  * @param {Record<string, Component>} components
  * @param {*} [sentry] TODO: type
@@ -85,7 +92,7 @@ const handleComponentInteraction = async (event, interaction, components, sentry
 
     // Execute
     try {
-        return components[interaction.data.custom_id].execute({ interaction, response: jsonResponse, event, wait: event.waitUntil.bind(event), sentry });
+        return components[interaction.data.custom_id].execute({ interaction, response: jsonResponse, event, wait: event.ctx.waitUntil.bind(event.ctx), sentry });
     } catch (err) {
         // Log any errors
         console.log(interaction);
@@ -100,7 +107,7 @@ const handleComponentInteraction = async (event, interaction, components, sentry
 /**
  * Handle an incoming Discord interaction request to the Worker
  *
- * @param {*} event TODO: type
+ * @param {Event} event
  * @param {Record<string, Command>} commands
  * @param {Record<string, Component>} components
  * @param {*} [sentry] TODO: type
@@ -150,7 +157,7 @@ const handleInteraction = async (event, commands, components, sentry) => {
  *   - POST /interactions
  *   - GET  /health
  *
- * @param {*} event TODO: type
+ * @param {Event} event
  * @param {Record<string, Command>} commands
  * @param {Record<string, Component>} components
  * @param {*} [sentry] TODO: type
@@ -178,7 +185,7 @@ const handleRequest = async (event, commands, components, sentry) => {
  *
  * @param {Command[]} commands Commands to register
  * @param {Component[]} components Components to register
- * @returns {(event: *, sentry: *) => Promise<Response | undefined>} TODO: type
+ * @returns {(event: Event, sentry: *) => Promise<Response | undefined>} TODO: type
  */
 const createHandler = (commands, components) => {
     const cmds = commands.reduce((acc, cmd) => {
