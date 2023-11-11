@@ -9,7 +9,7 @@ import { captureException } from './utils/error.js';
 import Privacy from './utils/strings/privacy.js';
 import Terms from './utils/strings/terms.js';
 
-const handler = createHandler(commands, components);
+const handler = createHandler(commands, components, process.env.CLIENT_PUBLIC_KEY);
 
 // Util to send a plain-text response
 const textResponse = text => new Response(text, {

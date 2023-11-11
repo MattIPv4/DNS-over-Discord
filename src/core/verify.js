@@ -8,9 +8,15 @@ const hex2bin = hex => {
     return buf;
 };
 
-const PUBLIC_KEY = crypto.subtle.importKey(
+/**
+ * Import a hex-encoded key into a CryptoKey
+ *
+ * @param {string} key Hex-encoded key
+ * @returns {Promise<CryptoKey>}
+ */
+export const importKey = key => crypto.subtle.importKey(
     'raw',
-    hex2bin(process.env.CLIENT_PUBLIC_KEY),
+    hex2bin(key),
     {
         name: 'NODE-ED25519',
         namedCurve: 'NODE-ED25519',
@@ -22,13 +28,23 @@ const PUBLIC_KEY = crypto.subtle.importKey(
 
 const encoder = new TextEncoder();
 
-export default async (request, bodyText) => {
+/**
+ * Verify a request from Discord
+ *
+ * @param {Request} request Request to verify
+ * @param {string} bodyText Body text of the request
+ * @param {CryptoKey} publicKey Public key to verify with
+ * @returns {Promise<boolean>}
+ */
+const verifyRequest = (request, bodyText, publicKey) => {
     const timestamp = request.headers.get('X-Signature-Timestamp') || '';
     const signature = hex2bin(request.headers.get('X-Signature-Ed25519'));
     return crypto.subtle.verify(
         'NODE-ED25519',
-        await PUBLIC_KEY,
+        publicKey,
         signature,
         encoder.encode(timestamp + bodyText),
     );
 };
+
+export default verifyRequest;

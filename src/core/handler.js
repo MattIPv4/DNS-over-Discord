@@ -1,6 +1,6 @@
 import { InteractionType, InteractionResponseType, MessageFlags } from 'discord-api-types/payloads';
 
-import verify from './verify.js';
+import verify, { importKey } from './verify.js';
 import { validateCommands, validateComponents } from './util.js';
 
 /**
@@ -96,18 +96,19 @@ const handleComponentInteraction = async (event, interaction, components, sentry
  * Handle an incoming Discord interaction request to the Worker
  *
  * @param {Event} event
+ * @param {Promise<CryptoKey>} publicKey
  * @param {Record<string, import('./util.js').Command>} commands
  * @param {Record<string, import('./util.js').Component>} components
  * @param {*} [sentry] TODO: type
  * @returns {Promise<Response>}
  */
-const handleInteraction = async (event, commands, components, sentry) => {
+const handleInteraction = async (event, publicKey, commands, components, sentry) => {
     // Get the body as text
     const body = await event.request.text();
     if (sentry) sentry.setRequestBody(body);
 
     // Verify a legitimate request
-    if (!await verify(event.request, body))
+    if (!await verify(event.request, body, await publicKey))
         return new Response(null, { status: 401 });
 
     /**
@@ -146,16 +147,17 @@ const handleInteraction = async (event, commands, components, sentry) => {
  *   - GET  /health
  *
  * @param {Event} event
+ * @param {Promise<CryptoKey>} publicKey
  * @param {Record<string, import('./util.js').Command>} commands
  * @param {Record<string, import('./util.js').Component>} components
  * @param {*} [sentry] TODO: type
  * @returns {Promise<Response | undefined>}
  */
-const handleRequest = async (event, commands, components, sentry) => {
+const handleRequest = async (event, publicKey, commands, components, sentry) => {
     const url = new URL(event.request.url);
 
     if (event.request.method === 'POST' && url.pathname === '/interactions')
-        return handleInteraction(event, commands, components, sentry);
+        return handleInteraction(event, publicKey, commands, components, sentry);
 
     if (event.request.method === 'GET' && url.pathname === '/health')
         return new Response('OK', {
@@ -173,15 +175,19 @@ const handleRequest = async (event, commands, components, sentry) => {
  *
  * @param {import('./util.js').Command[]} commands Commands to register
  * @param {import('./util.js').Component[]} components Components to register
+ * @param {string} publicKey Public key for verifying requests
  * @returns {(event: Event, sentry: *) => Promise<Response | undefined>} TODO: type
  */
-const createHandler = (commands, components) => {
+const createHandler = async (commands, components, publicKey) => {
     // Validate the commands and components given
     const cmds = validateCommands(commands);
     const cmps = validateComponents(components);
 
+    // Import the full key for verification
+    const key = importKey(publicKey);
+
     // Return the handler
-    return (event, sentry) => handleRequest(event, cmds, cmps, sentry);
+    return (event, sentry) => handleRequest(event, key, cmds, cmps, sentry);
 };
 
 export default createHandler;
