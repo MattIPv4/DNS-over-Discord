@@ -2,9 +2,10 @@ import { InteractionResponseType, ComponentType } from 'discord-api-types/payloa
 
 import { updateComponents } from '../utils/components.js';
 import { handleDig, parseEmbed } from '../utils/dig.js';
-import { editDeferred } from '../utils/discord.js';
 import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
+
+import { editDeferred } from '../core/api.js';
 
 const component = name => ({
     type: ComponentType.SelectMenu,

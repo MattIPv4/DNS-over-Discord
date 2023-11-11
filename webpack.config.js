@@ -7,7 +7,9 @@ const env = dotenv.config({ path: fileURLToPath(new URL(`${NODE_ENV}.env`, impor
 
 import webpack from 'webpack';
 import WorkersSentryWebpackPlugin from 'workers-sentry/webpack.js';
-import build from './src/build/index.js';
+
+import commands from './src/commands/index.js';
+import registerCommands from './src/core/register.js';
 
 console.log(`Using ${NODE_ENV} environment for build...`);
 
@@ -25,8 +27,18 @@ export default {
     },
     experiments: { outputModule: true },
     plugins: [
-        // Hook in the commands build process before each Webpack run
-        { apply: compiler => compiler.hooks.beforeRun.tapPromise('PrepareBuildBeforeWebpack', build) },
+        // Hook in the commands registrations process before each Webpack run
+        {
+            apply: compiler => compiler.hooks.beforeRun.tapPromise(
+                'RegisterCommandsBeforeWebpack',
+                () => registerCommands(
+                    process.env.CLIENT_ID,
+                    process.env.CLIENT_SECRET,
+                    commands,
+                    process.env.TEST_GUILD_ID,
+                ),
+            ),
+        },
 
         // Expose our environment in the worker
         new webpack.DefinePlugin(Object.entries(env.parsed).reduce((obj, [ key, val ]) => {

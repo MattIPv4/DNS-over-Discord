@@ -6,14 +6,10 @@ import { cmdExplainer } from '../utils/commands.js';
 import docs from '../components/docs.js';
 import invite from '../components/invite.js';
 
-// TODO: Remove reliance on JSON file
-//       Pass commands object from handler into context
-import commands from '../../tmp/commands.json' assert { type: 'json' };
-
 export default {
     name: 'help',
     description: 'Find out more about using DNS over Discord',
-    execute: ({ response }) => {
+    execute: ({ response, commands }) => {
         // Create the base embed and fetch commands
         const embed = createEmbed('Help');
 

@@ -1,8 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import equal from 'deep-equal';
-import { grantToken, getCommands as getDiscordCommands, registerCommand, updateCommand, removeCommand } from '../utils/discord.js';
+
+import { grantToken, getCommands as getDiscordCommands, registerCommand, updateCommand, removeCommand } from './api.js';
+import { validateCommands } from './util.js';
 
 const consistentCommandOption = obj => ({
     type: obj.type,
@@ -30,51 +29,26 @@ const updatedCommandPatch = (cmd, diff) => Object.keys(cmd)
         return obj;
     }, {});
 
-export const getCommands = async () => {
-    const commands = [];
+const registerCommands = async (clientId, clientSecret, commands, guildId = undefined) => {
+    // Validate the provided commands
+    const cmds = Object.values(validateCommands(commands));
 
-    // Get all files in the commands directory
-    const commandDirectory = fileURLToPath(new URL('../commands', import.meta.url));
-    const commandFiles = fs.readdirSync(commandDirectory);
-
-    // Work through each file
-    for (const commandFile of commandFiles) {
-        // Load the file in if JS
-        if (!commandFile.endsWith('.js')) continue;
-        const { default: commandData } = await import(path.join(commandDirectory, commandFile));
-
-        // Validate it is a command
-        if (!('name' in commandData)) continue;
-        if (!('execute' in commandData)) continue;
-
-        // Remove execute for storing and add file
-        delete commandData.execute;
-        commandData.file = commandFile;
-
-        // Store
-        commands.push(commandData);
-    }
-
-    return commands;
-};
-
-export const registerCommands = async commands => {
     // Get a token to talk to Discord
-    const token = await grantToken();
+    const token = await grantToken(clientId, clientSecret);
 
     // Define the commands and get what Discord currently has
-    const discordCommands = await getDiscordCommands(process.env.CLIENT_ID, token.access_token, token.token_type, process.env.TEST_GUILD_ID);
+    const discordCommands = await getDiscordCommands(clientId, token, guildId);
 
     // Remove old commands
     for (const command of discordCommands) {
-        if (commands.find(cmd => cmd.name === command.name)) continue;
-        await removeCommand(process.env.CLIENT_ID, token.access_token, token.token_type, command.id, process.env.TEST_GUILD_ID);
+        if (cmds.find(cmd => cmd.name === command.name)) continue;
+        await removeCommand(clientId, token, command.id, guildId);
         await new Promise(resolve => setTimeout(resolve, 250));
     }
 
     // Register or update the commands with Discord
     const commandData = [];
-    for (const command of commands) {
+    for (const command of cmds) {
         // This command already exists in Discord
         const discordCommand = discordCommands.find(cmd => cmd.name === command.name);
         if (discordCommand) {
@@ -85,7 +59,7 @@ export const registerCommands = async commands => {
             if (Object.values(cmdDiff).includes(true)) {
                 // Get the props to patch and do the update
                 const cmdPatch = updatedCommandPatch(command, cmdDiff);
-                const data = await updateCommand(process.env.CLIENT_ID, token.access_token, token.token_type, discordCommand.id, cmdPatch, process.env.TEST_GUILD_ID);
+                const data = await updateCommand(clientId, token, discordCommand.id, cmdPatch, guildId);
                 await new Promise(resolve => setTimeout(resolve, 250));
                 commandData.push({ ...command, ...data });
                 continue;
@@ -97,7 +71,7 @@ export const registerCommands = async commands => {
         }
 
         // Register the new command
-        const data = await registerCommand(process.env.CLIENT_ID, token.access_token, token.token_type, command, process.env.TEST_GUILD_ID);
+        const data = await registerCommand(clientId, token, command, guildId);
         await new Promise(resolve => setTimeout(resolve, 250));
         commandData.push({ ...command, ...data });
     }
@@ -105,3 +79,5 @@ export const registerCommands = async commands => {
     // Done
     return commandData;
 };
+
+export default registerCommands;

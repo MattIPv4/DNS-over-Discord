@@ -2,9 +2,10 @@ import { InteractionResponseType, ApplicationCommandOptionType, ComponentType } 
 
 import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
-import { editDeferred } from '../utils/discord.js';
 import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
+
+import { editDeferred } from '../core/api.js';
 
 import digRefresh from '../components/dig-refresh.js';
 import digProvider from '../components/dig-provider.js';

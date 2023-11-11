@@ -2,8 +2,9 @@ import { InteractionResponseType, ComponentType, ButtonStyle } from 'discord-api
 
 import { updateComponents } from '../utils/components.js';
 import { handleDig, parseEmbed } from '../utils/dig.js';
-import { editDeferred } from '../utils/discord.js';
 import { captureException } from '../utils/error.js';
+
+import { editDeferred } from '../core/api.js';
 
 const component = {
     type: ComponentType.Button,
