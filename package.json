@@ -5,7 +5,7 @@
   "main": "dist/worker.js",
   "type": "module",
   "scripts": {
-    "build": "NODE_OPTIONS=--experimental-json-modules webpack",
+    "build": "webpack",
     "dev": "NODE_ENV=development wrangler dev",
     "tunnel": "cloudflared tunnel --url http://localhost:8787",
     "publish:production": "NODE_ENV=production wrangler deploy -e production",
@@ -36,7 +36,6 @@
   "devDependencies": {
     "@babel/core": "^7.23.2",
     "@babel/eslint-parser": "^7.22.15",
-    "@babel/plugin-syntax-import-assertions": "^7.22.5",
     "@types/dns-packet": "^5.6.2",
     "buffer": "^6.0.3",
     "deep-equal": "^2.2.2",
