@@ -35,6 +35,7 @@ export default {
                     process.env.CLIENT_ID,
                     process.env.CLIENT_SECRET,
                     commands,
+                    true,
                     process.env.TEST_GUILD_ID,
                 ),
             ),
