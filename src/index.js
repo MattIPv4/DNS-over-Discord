@@ -1,6 +1,5 @@
 import WorkersSentry from 'workers-sentry/worker.js';
-
-import createHandler from './core/handler.js';
+import { createHandler } from 'workers-discord';
 
 import commands from './commands/index.js';
 import components from './components/index.js';
@@ -27,36 +26,39 @@ const redirectResponse = url => new Response(null, {
 });
 
 // Process all requests to the worker
-const handleRequest = async (event, sentry) => {
+const handleRequest = async (request, env, ctx, sentry) => {
+    // Include the env in the context we pass to the handler
+    ctx.env = env;
+
     // Check if this is a Discord interaction (or a health check)
-    const resp = await handler(event, sentry);
+    const resp = await handler(request, ctx, sentry);
     if (resp) return resp;
 
     // Otherwise, process the request
-    const url = new URL(event.request.url);
+    const url = new URL(request.url);
 
     // Privacy notice route
-    if (event.request.method === 'GET' && url.pathname === '/privacy')
+    if (request.method === 'GET' && url.pathname === '/privacy')
         return textResponse(Privacy);
 
     // Terms notice route
-    if (event.request.method === 'GET' && url.pathname === '/terms')
+    if (request.method === 'GET' && url.pathname === '/terms')
         return textResponse(Terms);
 
     // Invite redirect
-    if (event.request.method === 'GET' && url.pathname === '/invite')
+    if (request.method === 'GET' && url.pathname === '/invite')
         return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=applications.commands`);
 
     // Discord redirect
-    if (event.request.method === 'GET' && url.pathname === '/server')
+    if (request.method === 'GET' && url.pathname === '/server')
         return redirectResponse('https://discord.gg/JgxVfGn');
 
     // GitHub redirect
-    if (event.request.method === 'GET' && url.pathname === '/github')
+    if (request.method === 'GET' && url.pathname === '/github')
         return redirectResponse('https://github.com/MattIPv4/DNS-over-Discord');
 
     // Docs redirect
-    if (event.request.method === 'GET' && url.pathname === '/')
+    if (request.method === 'GET' && url.pathname === '/')
         return redirectResponse('https://developers.cloudflare.com/1.1.1.1/other-ways-to-use-1.1.1.1/dns-over-discord');
 
     // Not found
@@ -66,11 +68,12 @@ const handleRequest = async (event, sentry) => {
 // Register the Worker fetch handler
 export default {
     fetch: async (request, env, ctx) => {
-        // Construct the event (similar to the old service worker payload)
-        const event = { type: 'fetch', request, env, ctx };
-
         // Start Sentry
-        const sentry = new WorkersSentry(event, process.env.SENTRY_DSN);
+        const sentry = new WorkersSentry({
+            type: 'fetch',
+            request,
+            waitUntil: ctx.waitUntil.bind(ctx),
+        }, process.env.SENTRY_DSN);
 
         // Monkey-patch transaction name support
         // TODO: Remove once https://github.com/robertcepa/toucan-js/issues/109 is resolved
@@ -87,7 +90,7 @@ export default {
         };
 
         // Process the event
-        return handleRequest(event, sentry)
+        return handleRequest(request, env, ctx, sentry)
             .catch(err => {
                 // Log any errors
                 captureException(err, sentry);

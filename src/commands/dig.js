@@ -5,8 +5,6 @@ import { validateDomain, handleDig } from '../utils/dig.js';
 import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
 
-import { editDeferred } from '../core/api.js';
-
 import digRefresh from '../components/dig-refresh.js';
 import digProvider from '../components/dig-provider.js';
 
@@ -54,7 +52,7 @@ export default {
             choices: providers.map(({ name }) => ({ name, value: name })),
         },
     ],
-    execute: async ({ interaction, response, event, wait, sentry }) => {
+    execute: async ({ interaction, response, wait, edit, context, sentry }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawType = ((interaction.data.options.find(opt => opt.name === 'type') || {}).value || '').trim();
@@ -81,10 +79,10 @@ export default {
                 options: { short: rawShort, cdflag: rawCdflag },
                 provider,
             };
-            const [ embed ] = await handleDig(opts, event.env.CACHE, sentry);
+            const [ embed ] = await handleDig(opts, context.env.CACHE, sentry);
 
             // Edit the original deferred response
-            await editDeferred(interaction, {
+            await edit({
                 embeds: [ embed ],
                 components: [
                     {
@@ -106,7 +104,7 @@ export default {
             captureException(err, sentry);
 
             // Tell the user it errored
-            editDeferred(interaction, {
+            edit({
                 content: 'Sorry, something went wrong when processing your DNS query',
             }).catch(() => {}); // Ignore any further errors
 

@@ -5,8 +5,6 @@ import { performLookupWithCache } from '../utils/whois.js';
 import { createEmbed } from '../utils/embed.js';
 import { presentTable } from '../utils/table.js';
 
-import { editDeferred } from '../core/api.js';
-
 export default {
     name: 'whois',
     description: 'Perform a WHOIS lookup for a domain, IP or ASN',
@@ -18,7 +16,7 @@ export default {
             required: true,
         },
     ],
-    execute: async ({ interaction, response, event, wait, sentry }) => {
+    execute: async ({ interaction, response, wait, edit, context, sentry }) => {
         // Do the processing after acknowledging the Discord command
         wait((async () => {
             // Get the raw values from Discord
@@ -30,11 +28,11 @@ export default {
             // TODO: Try to validate as domain/IPv4/IPv6/ASN before running lookup
 
             // Do the rdap/whois lookup
-            const data = await performLookupWithCache(query, event.env.CACHE).catch(err => contextualThrow(err, { lookup: { query } }));
+            const data = await performLookupWithCache(query, context.env.CACHE).catch(err => contextualThrow(err, { lookup: { query } }));
 
             // If no result, send back simple message
             if (!data)
-                return editDeferred(interaction, {
+                return edit({
                     embeds: [
                         createEmbed(
                             'WHOIS',
@@ -63,7 +61,7 @@ export default {
             const title = query.replace(/^([0-9]+)$/, 'AS$1');
 
             // Edit our deferred message with the results
-            await editDeferred(interaction, {
+            await edit({
                 embeds: [createEmbed('WHOIS', `\`\`\`\n${title}\n${table}\n\`\`\``)],
             });
         })().catch(err => {
@@ -71,7 +69,7 @@ export default {
             captureException(err, sentry);
 
             // Tell the user it errored
-            editDeferred(interaction, {
+            edit({
                 content: 'Sorry, something went wrong when processing your WHOIS query',
             }).catch(() => {}); // Ignore any further errors
 

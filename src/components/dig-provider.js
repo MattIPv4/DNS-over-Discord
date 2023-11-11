@@ -5,8 +5,6 @@ import { handleDig, parseEmbed } from '../utils/dig.js';
 import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
 
-import { editDeferred } from '../core/api.js';
-
 const component = name => ({
     type: ComponentType.SelectMenu,
     custom_id: 'dig-provider',
@@ -21,7 +19,7 @@ const component = name => ({
 export default {
     name: 'dig-provider',
     component,
-    execute: async ({ interaction, response, event, wait, sentry }) => {
+    execute: async ({ interaction, response, wait, edit, context, sentry }) => {
         // Parse all the embeds
         const embeds = (interaction.message.embeds || [])
             .map(embed => parseEmbed(embed)).filter(data => data !== null);
@@ -41,10 +39,10 @@ export default {
                 options: embeds[0].options,
                 provider,
             };
-            const updatedEmbeds = await handleDig(opts, event.env.CACHE, sentry);
+            const updatedEmbeds = await handleDig(opts, context.env.CACHE, sentry);
 
             // Edit the message with the new embeds
-            await editDeferred(interaction, {
+            await edit({
                 embeds: updatedEmbeds,
                 components: updateComponents(
                     interaction.message.components,

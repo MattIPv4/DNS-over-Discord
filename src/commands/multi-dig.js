@@ -5,8 +5,6 @@ import { validateDomain, handleDig } from '../utils/dig.js';
 import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
 
-import { editDeferred, sendFollowup } from '../core/api.js';
-
 import digRefresh from '../components/dig-refresh.js';
 import digProvider from '../components/dig-provider.js';
 
@@ -49,7 +47,7 @@ export default {
             choices: providers.map(({ name }) => ({ name, value: name })),
         },
     ],
-    execute: async ({ interaction, response, event, wait, sentry }) => {
+    execute: async ({ interaction, response, wait, edit, more, context, sentry }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
@@ -85,7 +83,7 @@ export default {
                 options: { short: rawShort, cdFlag: rawCdflag },
                 provider,
             };
-            const embeds = await handleDig(opts, event.env.CACHE, sentry);
+            const embeds = await handleDig(opts, context.env.CACHE, sentry);
 
             // Edit the original deferred response with the first 10 embeds
             const messageBase = {
@@ -105,20 +103,20 @@ export default {
                 ],
                 flags,
             };
-            await editDeferred(interaction, { ...messageBase, embeds: embeds.splice(0, 10) });
+            await edit({ ...messageBase, embeds: embeds.splice(0, 10) });
 
             // Track that the deferred message was edited for error handling
             deferredEdited = true;
 
             // If we have more than 10 embeds, the extras need to be sent as followups
             while (embeds.length)
-                await sendFollowup(interaction, { ...messageBase, embeds: embeds.splice(0, 10) });
+                await more({ ...messageBase, embeds: embeds.splice(0, 10) });
         })().catch(err => {
             // Log any errors
             captureException(err, sentry);
 
             // Tell the user it errored (don't edit the deferred if we've already edited it)
-            (deferredEdited ? sendFollowup : editDeferred)(interaction, {
+            (deferredEdited ? more : edit)({
                 content: 'Sorry, something went wrong when processing your DNS query',
                 flags,
             }).catch(() => {}); // Ignore any further errors

@@ -7,9 +7,9 @@ const env = dotenv.config({ path: fileURLToPath(new URL(`${NODE_ENV}.env`, impor
 
 import webpack from 'webpack';
 import WorkersSentryWebpackPlugin from 'workers-sentry/webpack.js';
+import { registerCommands } from 'workers-discord';
 
 import commands from './src/commands/index.js';
-import registerCommands from './src/core/register.js';
 
 console.log(`Using ${NODE_ENV} environment for build...`);
 
