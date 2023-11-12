@@ -1,7 +1,7 @@
 import { InteractionResponseType, ComponentType, ButtonStyle } from 'discord-api-types/payloads';
+
 import { updateComponents } from '../utils/components.js';
 import { handleDig, parseEmbed } from '../utils/dig.js';
-import { editDeferred } from '../utils/discord.js';
 import { captureException } from '../utils/error.js';
 
 const component = {
@@ -14,7 +14,7 @@ const component = {
 export default {
     name: 'dig-refresh',
     component,
-    execute: async ({ interaction, response, wait, sentry }) => {
+    execute: async ({ interaction, response, wait, edit, context, sentry }) => {
         // Parse all the embeds
         const embeds = (interaction.message.embeds || [])
             .map(embed => parseEmbed(embed)).filter(data => data !== null);
@@ -31,10 +31,10 @@ export default {
                 options: embeds[0].options,
                 provider: embeds[0].provider,
             };
-            const updatedEmbeds = await handleDig(opts, sentry);
+            const updatedEmbeds = await handleDig(opts, context.env.CACHE, sentry);
 
             // Edit the message with the new embeds
-            await editDeferred(interaction, {
+            await edit({
                 embeds: updatedEmbeds,
                 components: updateComponents(
                     interaction.message.components,

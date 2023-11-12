@@ -6,11 +6,6 @@ module.exports = {
     },
     parser: '@babel/eslint-parser',
     parserOptions: {
-        babelOptions: {
-            plugins: [
-                '@babel/plugin-syntax-import-assertions',
-            ],
-        },
         requireConfigFile: false,
         sourceType: 'module',
     },
@@ -105,15 +100,5 @@ module.exports = {
             },
         ],
         'space-infix-ops': 'error',
-
-        // Ignore unresolved tmp file from build process
-        'import/no-unresolved': [
-            'error',
-            {
-                ignore: [
-                    'tmp/commands\\.json$',
-                ],
-            },
-        ],
     },
 };

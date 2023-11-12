@@ -8,7 +8,12 @@ import { createEmbed } from './embed.js';
 
 const DNSSEC_DISABLED_WARNING_MESSAGE = ':warning: cd bit set, DNSSEC validation disabled';
 
-export const validateDomain = (input, response) => {
+/**
+ *
+ * @param {string} input User input to validate
+ * @returns
+ */
+export const validateDomain = input => {
     // Clean the input
     const cleaned = input
         .trim()
@@ -21,13 +26,13 @@ export const validateDomain = (input, response) => {
     // Return the input with an optional error
     return {
         domain: cleaned,
-        error: valid ? null : response({
+        error: valid ? null : {
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
                 content: 'A domain name could not be parsed from the given input.',
                 flags: MessageFlags.Ephemeral,
             },
-        }),
+        },
     };
 };
 
@@ -44,14 +49,15 @@ export const validateDomain = (input, response) => {
  * @param {string[]} types
  * @param {DigOptions} options
  * @param {import('./providers.js').Provider} provider
+ * @param {*} cache TODO: type
  * @param {import('workers-sentry/worker')} sentry
  * @return {Promise<import('./embed.js').Embed[]>}
  */
-export const handleDig = async ({ domain, types, options, provider }, sentry) => {
+export const handleDig = async ({ domain, types, options, provider }, cache, sentry) => {
     // Make the DNS queries
     const results = await Promise.all(types.map(type => {
         const opts = { domain, type, endpoint: provider.doh, flags: { cd: options.cdflag } };
-        return performLookupWithCache(opts.domain, opts.type, opts.endpoint, opts.flags)
+        return performLookupWithCache(opts.domain, opts.type, opts.endpoint, opts.flags, cache)
             .then(data => ({ type, data }))
             .catch(err => contextualThrow(err, { lookup: opts }))
             .catch(err => {

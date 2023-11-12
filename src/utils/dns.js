@@ -41,6 +41,7 @@ const DNS_RCODES = Object.freeze({
  * @param {import('./providers.js').ProviderEndpoint} endpoint
  * @param {T} endpoint.type
  * @param {LookupFlags} flags
+ * @param {*} kv TODO: type
  * @return {Promise<U>}
  */
 
@@ -287,9 +288,10 @@ const performLookup = async (domain, type, endpoint, flags) => {
  *
  * @type LookupMethod<'json'|'dns', LookupResult>
  */
-export const performLookupWithCache = (domain, type, endpoint, flags) => cache(
+export const performLookupWithCache = (domain, type, endpoint, flags, kv) => cache(
     performLookup,
     [ domain, type, endpoint, flags ],
+    kv,
     `dns-${domain}-${type}-${endpoint.endpoint}-${!!flags.cd}`,
     Number(process.env.CACHE_DNS_TTL) || 10,
 );
