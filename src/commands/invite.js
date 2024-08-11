@@ -1,6 +1,7 @@
-import { InteractionResponseType } from 'discord-api-types/payloads';
+import { ComponentType, InteractionResponseType } from 'discord-api-types/payloads';
 
 import { createEmbed } from '../utils/embed.js';
+import invite from '../components/invite.js';
 
 export default {
     name: 'invite',
@@ -11,8 +12,14 @@ export default {
             embeds: [
                 createEmbed(
                     'Invite',
-                    `Invite DNS over Discord to your server with [https://dns-over-discord.v4.wtf/invite](https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=applications.commands)`,
+                    'Invite DNS over Discord to your server with https://dns-over-discord.v4.wtf/invite',
                 ),
+            ],
+            components: [
+                {
+                    type: ComponentType.ActionRow,
+                    components: [ invite.component ],
+                },
             ],
         },
     }),
