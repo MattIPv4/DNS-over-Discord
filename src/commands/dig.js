@@ -1,4 +1,4 @@
-import { InteractionResponseType, ApplicationCommandOptionType, ComponentType } from 'discord-api-types/payloads';
+import { InteractionResponseType, ApplicationCommandOptionType, ComponentType, ApplicationIntegrationType, InteractionContextType } from 'discord-api-types/payloads';
 
 import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
@@ -52,6 +52,17 @@ export default {
             choices: providers.map(({ name }) => ({ name, value: name })),
         },
     ],
+    contexts: {
+        installation: [
+            ApplicationIntegrationType.GuildInstall,
+            ApplicationIntegrationType.UserInstall,
+        ],
+        interaction: [
+            InteractionContextType.Guild,
+            InteractionContextType.BotDM,
+            InteractionContextType.PrivateChannel,
+        ],
+    },
     execute: async ({ interaction, response, wait, edit, context, sentry }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();

@@ -1,4 +1,4 @@
-import { InteractionResponseType, ApplicationCommandOptionType } from 'discord-api-types/payloads';
+import { InteractionResponseType, ApplicationCommandOptionType, ApplicationIntegrationType, InteractionContextType } from 'discord-api-types/payloads';
 
 import { captureException, contextualThrow } from '../utils/error.js';
 import { performLookupWithCache } from '../utils/whois.js';
@@ -16,6 +16,17 @@ export default {
             required: true,
         },
     ],
+    contexts: {
+        installation: [
+            ApplicationIntegrationType.GuildInstall,
+            ApplicationIntegrationType.UserInstall,
+        ],
+        interaction: [
+            InteractionContextType.Guild,
+            InteractionContextType.BotDM,
+            InteractionContextType.PrivateChannel,
+        ],
+    },
     execute: async ({ interaction, response, wait, edit, context, sentry }) => {
         // Do the processing after acknowledging the Discord command
         wait((async () => {

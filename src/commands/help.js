@@ -1,4 +1,4 @@
-import { InteractionResponseType, MessageFlags, ComponentType } from 'discord-api-types/payloads';
+import { InteractionResponseType, MessageFlags, ComponentType, ApplicationIntegrationType, InteractionContextType } from 'discord-api-types/payloads';
 
 import { createEmbed } from '../utils/embed.js';
 import { cmdExplainer } from '../utils/commands.js';
@@ -9,6 +9,17 @@ import invite from '../components/invite.js';
 export default {
     name: 'help',
     description: 'Find out more about using DNS over Discord',
+    contexts: {
+        installation: [
+            ApplicationIntegrationType.GuildInstall,
+            ApplicationIntegrationType.UserInstall,
+        ],
+        interaction: [
+            InteractionContextType.Guild,
+            InteractionContextType.BotDM,
+            InteractionContextType.PrivateChannel,
+        ],
+    },
     execute: ({ response, commands }) => {
         // Create the base embed and fetch commands
         const embed = createEmbed('Help');

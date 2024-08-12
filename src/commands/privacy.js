@@ -1,4 +1,4 @@
-import { InteractionResponseType, MessageFlags } from 'discord-api-types/payloads';
+import { InteractionResponseType, MessageFlags, ApplicationIntegrationType, InteractionContextType } from 'discord-api-types/payloads';
 
 import { createEmbed } from '../utils/embed.js';
 import Privacy from '../utils/strings/privacy.js';
@@ -6,6 +6,17 @@ import Privacy from '../utils/strings/privacy.js';
 export default {
     name: 'privacy',
     description: 'View the Privacy Policy for DNS over Discord',
+    contexts: {
+        installation: [
+            ApplicationIntegrationType.GuildInstall,
+            ApplicationIntegrationType.UserInstall,
+        ],
+        interaction: [
+            InteractionContextType.Guild,
+            InteractionContextType.BotDM,
+            InteractionContextType.PrivateChannel,
+        ],
+    },
     execute: ({ response }) => response({
         type: InteractionResponseType.ChannelMessageWithSource,
         data: {
