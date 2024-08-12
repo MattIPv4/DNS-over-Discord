@@ -57,7 +57,6 @@ jobs:
           CLIENT_ID: ${{ secrets.STAGING_CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.STAGING_CLIENT_SECRET }}
           CLIENT_PUBLIC_KEY: ${{ secrets.STAGING_CLIENT_PUBLIC_KEY }}
-          TEST_GUILD_ID: ${{ secrets.STAGING_TEST_GUILD_ID }}
           SENTRY_AUTH_TOKEN: ${{ secrets.STAGING_SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.STAGING_SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.STAGING_SENTRY_PROJECT }}
