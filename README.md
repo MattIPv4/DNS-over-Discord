@@ -6,7 +6,7 @@
 
 ---
 
-1.1.1.1 works from a Discord server, thanks to the 1.1.1.1 bot. [Invite the bot to your Discord server](https://dns-over-discord.v4.wtf/invite) to start using DNS over Discord.
+1.1.1.1 works from a Discord server, thanks to the 1.1.1.1 bot. [Invite the bot to your Discord server](https://dns-over-discord.v4.wtf/invite) to start using DNS over Discord. Or, [add the bot to your Discord account](https://dns-over-discord.v4.wtf/invite/user) to use it anywhere in Discord.
 
 ## Perform DNS lookups
 
@@ -301,8 +301,9 @@ Example:
 
 ### `invite` command
 
-The `/invite` command provides the user with a quick link to invite the 1.1.1.1 DNS over Discord bot to another Discord server.
+The `/invite` command provides the user with a quick link to invite the 1.1.1.1 DNS over Discord bot to another Discord server, or to add it to a Discord account.
 The bot can be invited at any time with [https://dns-over-discord.v4.wtf/invite](https://dns-over-discord.v4.wtf/invite).
+The bot can also be added to accounts with [https://dns-over-discord.v4.wtf/invite/user](https://dns-over-discord.v4.wtf/invite/user).
 
 ```txt
 /invite
@@ -360,6 +361,16 @@ node
    - Use `npx wrangler kv:namespace create "CACHE"` to create the KV namespace, update the `id` and `preview_id` in `wrangler.toml` to match.
 5. Develop with the worker by running `npm run dev`.
 6. (Optional) Start an HTTP tunnel to your local development server by running `npm run tunnel`, using [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/run-tunnel/trycloudflare).
+
+### User-installed commands
+
+To test the user-installed commands functionality, you'll need to make sure your Discord application has the User Install option enabled.
+
+You'll then need to make sure that the `TEST_GUILD_ID` in `development.env` is commented out, as user-installed commands need to be registered globally.
+
+After that, start the worker as usual with `npm run dev`, install the application to your Discord user, and test the commands.
+
+If you no longer wish to have the commands registered globally, leave `TEST_GUILD_ID` commented and update `webpack.config.js` to pass an empty array to the `registerCommands` call, then start the worker again to remove the global commands.
 
 ## Deployments
 
