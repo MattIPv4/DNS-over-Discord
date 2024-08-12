@@ -1,5 +1,6 @@
 import WorkersSentry from 'workers-sentry/worker.js';
 import { createHandler } from 'workers-discord';
+import { ApplicationIntegrationType } from 'discord-api-types/payloads';
 
 import commands from './commands/index.js';
 import components from './components/index.js';
@@ -45,9 +46,11 @@ const handleRequest = async (request, env, ctx, sentry) => {
     if (request.method === 'GET' && url.pathname === '/terms')
         return textResponse(Terms);
 
-    // Invite redirect
+    // Invite redirects
     if (request.method === 'GET' && url.pathname === '/invite')
         return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=applications.commands`);
+    if (request.method === 'GET' && url.pathname === '/invite/user')
+        return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=applications.commands&integration_type=${ApplicationIntegrationType.UserInstall}`);
 
     // Discord redirect
     if (request.method === 'GET' && url.pathname === '/server')
