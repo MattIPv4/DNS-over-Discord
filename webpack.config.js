@@ -37,7 +37,10 @@ export default {
                     commands,
                     true,
                     process.env.TEST_GUILD_ID,
-                ),
+                ).then(res => {
+                    console.log(`Registered ${res.length} commands...`);
+                    // console.dir(res, { depth: null });
+                }),
             ),
         },
 
