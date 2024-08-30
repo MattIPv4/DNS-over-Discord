@@ -43,7 +43,7 @@
     "dotenv": "^16.3.1",
     "eslint": "^8.52.0",
     "eslint-plugin-import": "^2.29.0",
-    "webpack": "^5.89.0",
+    "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
     "wrangler": "^3.22.1"
   }
