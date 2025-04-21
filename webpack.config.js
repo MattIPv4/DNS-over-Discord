@@ -40,6 +40,9 @@ export default {
                 ).then(res => {
                     console.log(`Registered ${res.length} commands...`);
                     // console.dir(res, { depth: null });
+                }).catch(err => {
+                    console.error('Error registering commands:', err);
+                    if (NODE_ENV !== 'development') process.exit(1);
                 }),
             ),
         },
