@@ -361,6 +361,7 @@ node
    - Use `npx wrangler kv:namespace create "CACHE"` to create the KV namespace, update the `id` and `preview_id` in `wrangler.toml` to match.
 5. Develop with the worker by running `npm run dev`.
 6. (Optional) Start an HTTP tunnel to your local development server by running `npm run tunnel`, using [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/run-tunnel/trycloudflare).
+   - To use a custom hostname in your Cloudflare account, first make sure you're authenticated with `cloudflared login`, then run `npm run tunnel -- --overwrite-dns --hostname <hostname> --name <name>` (where `<name>` can be any convenient name for the tunnel).
 
 ### User-installed commands
 
