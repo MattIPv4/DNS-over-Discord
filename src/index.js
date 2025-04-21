@@ -71,26 +71,30 @@ const handleRequest = async (request, env, ctx, sentry) => {
 // Register the Worker fetch handler
 export default {
     fetch: async (request, env, ctx) => {
-        // Start Sentry
-        const sentry = new WorkersSentry({
-            type: 'fetch',
-            request,
-            waitUntil: ctx.waitUntil.bind(ctx),
-        }, process.env.SENTRY_DSN);
+        let sentry;
 
-        // Monkey-patch transaction name support
-        // TODO: Remove once https://github.com/robertcepa/toucan-js/issues/109 is resolved
-        const scopeProto = Object.getPrototypeOf(sentry.getScope());
-        scopeProto.setTransactionName = function (name) {
-            this.adapter.setTransactionName(name);
-        };
-        const adapterProto = Object.getPrototypeOf(sentry.getScope().adapter);
-        const apply = adapterProto.applyToEventSync;
-        adapterProto.applyToEventSync = function (event) {
-            const applied = apply.call(this, event);
-            if (this._transactionName) applied.transaction = this._transactionName;
-            return applied;
-        };
+        if (process.env.SENTRY_DSN) {
+            // Start Sentry
+            sentry = new WorkersSentry({
+                type: 'fetch',
+                request,
+                waitUntil: ctx.waitUntil.bind(ctx),
+            }, process.env.SENTRY_DSN);
+
+            // Monkey-patch transaction name support
+            // TODO: Remove once https://github.com/robertcepa/toucan-js/issues/109 is resolved
+            const scopeProto = Object.getPrototypeOf(sentry.getScope());
+            scopeProto.setTransactionName = function (name) {
+                this.adapter.setTransactionName(name);
+            };
+            const adapterProto = Object.getPrototypeOf(sentry.getScope().adapter);
+            const apply = adapterProto.applyToEventSync;
+            adapterProto.applyToEventSync = function (event) {
+                const applied = apply.call(this, event);
+                if (this._transactionName) applied.transaction = this._transactionName;
+                return applied;
+            };
+        }
 
         // Process the event
         return handleRequest(request, env, ctx, sentry)
