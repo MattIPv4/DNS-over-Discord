@@ -16,7 +16,7 @@ jobs:
       NODE_OPTIONS: --unhandled-rejections=strict
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
