@@ -45,6 +45,6 @@
     "eslint-plugin-import": "^2.31.0",
     "webpack": "^5.97.1",
     "webpack-cli": "^5.1.4",
-    "wrangler": "^3.92.0"
+    "wrangler": "^3.114.17"
   }
 }
