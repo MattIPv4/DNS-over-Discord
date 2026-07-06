@@ -1,4 +1,4 @@
-name: Test Latest Commit
+name: Test
 
 on:
   push:
@@ -11,9 +11,6 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-
-    env:
-      NODE_OPTIONS: --unhandled-rejections=strict
 
     steps:
       - uses: actions/checkout@v5

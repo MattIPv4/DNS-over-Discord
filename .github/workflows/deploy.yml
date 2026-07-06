@@ -1,0 +1,75 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - production
+      - staging
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test
+
+  deploy:
+    name: Deploy
+    needs: test
+    runs-on: ubuntu-latest
+
+    environment:
+      name: ${{ github.ref_name }}
+      url: ${{ github.ref_name == 'production' && 'https://dns-over-discord.v4.wtf/invite' || 'https://dns-over-discord-staging.v4.wtf/invite' }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Publish to ${{ github.ref_name }}
+        run: |
+          npx wrangler deploy --env ${{ github.ref_name }} \
+            --var SENTRY_DSN:${{ github.ref_name == 'production' && secrets.PRODUCTION_SENTRY_DSN || secrets.STAGING_SENTRY_DSN }} \
+            --var SENTRY_RELEASE:${{ github.sha }} \
+            --var DISCORD_CLIENT_ID:${{ github.ref_name == 'production' && secrets.PRODUCTION_CLIENT_ID || secrets.STAGING_CLIENT_ID }} \
+            --var DISCORD_PUBLIC_KEY:${{ github.ref_name == 'production' && secrets.PRODUCTION_CLIENT_PUBLIC_KEY || secrets.STAGING_CLIENT_PUBLIC_KEY }}
+        env:
+          DISCORD_CLIENT_ID: ${{ github.ref_name == 'production' && secrets.PRODUCTION_CLIENT_ID || secrets.STAGING_CLIENT_ID }}
+          DISCORD_CLIENT_SECRET: ${{ github.ref_name == 'production' && secrets.PRODUCTION_CLIENT_SECRET || secrets.STAGING_CLIENT_SECRET }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+
+      - name: Create Sentry Release
+        uses: getsentry/action-release@dab6548b3c03c4717878099e43782cf5be654289 # v3.5.0
+        env:
+          SENTRY_AUTH_TOKEN: ${{ github.ref_name == 'production' && secrets.PRODUCTION_SENTRY_AUTH_TOKEN || secrets.STAGING_SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: dns-over-discord
+          SENTRY_PROJECT: ${{ github.ref_name }}
+        with:
+          ignore_missing: true
+          ignore_empty: true
+          inject: false
+          release: ${{ github.sha }}
+          environment: ${{ github.ref_name }}
+          sourcemaps: dist-worker
+          strip_common_prefix: true
