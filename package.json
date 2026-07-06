@@ -2,11 +2,11 @@
   "name": "dns-over-discord",
   "version": "1.0.0",
   "description": "A 1.1.1.1 DNS resolver built for Discord",
-  "main": "dist/worker.js",
+  "main": "dist/index.js",
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "webpack",
+    "build": "tsdown",
     "dev": "wrangler dev",
     "tunnel": "cloudflared tunnel --url http://localhost:8787",
     "logs:production": "wrangler tail -e production",
@@ -27,6 +27,7 @@
   "homepage": "https://github.com/MattIPv4/DNS-over-Discord#readme",
   "dependencies": {
     "@sentry/cloudflare": "^10.63.0",
+    "buffer": "^6.0.3",
     "discord-api-types": "^0.37.110",
     "dns-packet": "^5.6.1",
     "is-valid-domain": "^0.1.6",
@@ -34,15 +35,12 @@
     "workers-discord": "0.0.12"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
     "@babel/eslint-parser": "^7.25.9",
     "@types/dns-packet": "^5.6.5",
-    "buffer": "^6.0.3",
     "dotenv": "^16.4.7",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.31.0",
-    "webpack": "^5.105.0",
-    "webpack-cli": "^5.1.4",
+    "tsdown": "^0.22.3",
     "wrangler": "^3.114.17"
   }
 }
