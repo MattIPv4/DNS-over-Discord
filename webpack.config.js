@@ -56,7 +56,11 @@ export default {
         new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
     ].filter(Boolean),
     // Don't webpack node-fetch, rely on fetch global
-    externals: { 'node-fetch': 'fetch' },
+    // Don't webpack async_hooks, Cloudflare Workers provides it
+    externals: {
+        'node-fetch': 'fetch',
+        'node:async_hooks': 'module-import node:async_hooks',
+    },
     externalsType: 'global',
     // We need to polyfill buffer for DNS packets
     resolve: {
