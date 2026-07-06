@@ -2,7 +2,6 @@ import { InteractionResponseType, ApplicationCommandOptionType, ComponentType, M
 
 import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
-import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
 
 import digRefresh from '../components/dig-refresh.js';
@@ -58,7 +57,7 @@ export default {
             InteractionContextType.PrivateChannel,
         ],
     },
-    execute: async ({ interaction, response, wait, edit, more, context, sentry }) => {
+    execute: async ({ interaction, response, wait, edit, more, context }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawTypes = ((interaction.data.options.find(opt => opt.name === 'types') || {}).value || '').trim();
@@ -94,7 +93,7 @@ export default {
                 options: { short: rawShort, cdFlag: rawCdflag },
                 provider,
             };
-            const embeds = await handleDig(opts, context.env.CACHE, sentry);
+            const embeds = await handleDig(opts, context.env.CACHE);
 
             // Edit the original deferred response with the first 10 embeds
             const messageBase = {
@@ -123,9 +122,6 @@ export default {
             while (embeds.length)
                 await more({ ...messageBase, embeds: embeds.splice(0, 10) });
         })().catch(err => {
-            // Log any errors
-            captureException(err, sentry);
-
             // Tell the user it errored (don't edit the deferred if we've already edited it)
             (deferredEdited ? more : edit)({
                 content: 'Sorry, something went wrong when processing your DNS query',

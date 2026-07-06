@@ -2,7 +2,6 @@ import { InteractionResponseType, ApplicationCommandOptionType, ComponentType, A
 
 import { VALID_TYPES } from '../utils/dns.js';
 import { validateDomain, handleDig } from '../utils/dig.js';
-import { captureException } from '../utils/error.js';
 import providers from '../utils/providers.js';
 
 import digRefresh from '../components/dig-refresh.js';
@@ -63,7 +62,7 @@ export default {
             InteractionContextType.PrivateChannel,
         ],
     },
-    execute: async ({ interaction, response, wait, edit, context, sentry }) => {
+    execute: async ({ interaction, response, wait, edit, context }) => {
         // Get the raw values from Discord
         const rawDomain = ((interaction.data.options.find(opt => opt.name === 'domain') || {}).value || '').trim();
         const rawType = ((interaction.data.options.find(opt => opt.name === 'type') || {}).value || '').trim();
@@ -90,7 +89,7 @@ export default {
                 options: { short: rawShort, cdflag: rawCdflag },
                 provider,
             };
-            const [ embed ] = await handleDig(opts, context.env.CACHE, sentry);
+            const [ embed ] = await handleDig(opts, context.env.CACHE);
 
             // Edit the original deferred response
             await edit({
@@ -111,9 +110,6 @@ export default {
                 ],
             });
         })().catch(err => {
-            // Log any errors
-            captureException(err, sentry);
-
             // Tell the user it errored
             edit({
                 content: 'Sorry, something went wrong when processing your DNS query',

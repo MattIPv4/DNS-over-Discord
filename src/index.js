@@ -5,7 +5,6 @@ import { ApplicationIntegrationType } from 'discord-api-types/payloads';
 import commands from './commands/index.js';
 import components from './components/index.js';
 
-import { captureException } from './utils/error.js';
 import Privacy from './utils/strings/privacy.js';
 import Terms from './utils/strings/terms.js';
 
