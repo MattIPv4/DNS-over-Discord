@@ -73,5 +73,5 @@ jobs:
           inject: false
           release: ${{ github.sha }}
           environment: ${{ github.ref_name }}
-          sourcemaps: dist-worker
+          sourcemaps: dist
           strip_common_prefix: true

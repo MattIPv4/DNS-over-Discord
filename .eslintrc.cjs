@@ -17,7 +17,7 @@ module.exports = {
         'import/no-unresolved': [
             'error',
             {
-                ignore: ['^cloudflare:'],
+                ignore: ['^cloudflare:', 'tsdown'],
             },
         ],
         'space-before-function-paren': [
