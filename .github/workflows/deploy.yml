@@ -37,6 +37,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Get the full history for the Sentry release commit log
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
