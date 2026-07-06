@@ -1,11 +1,10 @@
-import WorkersSentry from 'workers-sentry/worker.js';
+import * as Sentry from '@sentry/cloudflare';
 import { createHandler } from 'workers-discord';
 import { ApplicationIntegrationType } from 'discord-api-types/payloads';
 
 import commands from './commands/index.js';
 import components from './components/index.js';
 
-import { captureException } from './utils/error.js';
 import Privacy from './utils/strings/privacy.js';
 import Terms from './utils/strings/terms.js';
 
@@ -27,12 +26,12 @@ const redirectResponse = url => new Response(null, {
 });
 
 // Process all requests to the worker
-const handleRequest = async (request, env, ctx, sentry) => {
+const handleRequest = async (request, env, ctx) => {
     // Include the env in the context we pass to the handler
     ctx.env = env;
 
     // Check if this is a Discord interaction (or a health check)
-    const resp = await handler(request, ctx, sentry);
+    const resp = await handler(request, ctx);
     if (resp) return resp;
 
     // Otherwise, process the request
@@ -69,41 +68,26 @@ const handleRequest = async (request, env, ctx, sentry) => {
 };
 
 // Register the Worker fetch handler
-export default {
+export default Sentry.withSentry(env => ({
+    dsn: env.SENTRY_DSN,
+    release: env.SENTRY_RELEASE,
+    environment: env.SENTRY_ENVIRONMENT,
+}), {
     fetch: async (request, env, ctx) => {
-        let sentry;
+        Sentry.setTags({
+            requestId: crypto.randomUUID(),
+            userAgent: request.headers.get('user-agent'),
+            ray: request.headers.get('cf-ray'),
+            country: request.cf?.country,
+            colo: request.cf?.colo,
+        });
 
-        if (process.env.SENTRY_DSN) {
-            // Start Sentry
-            sentry = new WorkersSentry({
-                type: 'fetch',
-                request,
-                waitUntil: ctx.waitUntil.bind(ctx),
-            }, process.env.SENTRY_DSN);
+        Sentry.setUser({
+            ip: request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for'),
+            userAgent: request.headers.get('user-agent'),
+            colo: request.cf?.colo,
+        });
 
-            // Monkey-patch transaction name support
-            // TODO: Remove once https://github.com/robertcepa/toucan-js/issues/109 is resolved
-            const scopeProto = Object.getPrototypeOf(sentry.getScope());
-            scopeProto.setTransactionName = function (name) {
-                this.adapter.setTransactionName(name);
-            };
-            const adapterProto = Object.getPrototypeOf(sentry.getScope().adapter);
-            const apply = adapterProto.applyToEventSync;
-            adapterProto.applyToEventSync = function (event) {
-                const applied = apply.call(this, event);
-                if (this._transactionName) applied.transaction = this._transactionName;
-                return applied;
-            };
-        }
-
-        // Process the event
-        return handleRequest(request, env, ctx, sentry)
-            .catch(err => {
-                // Log any errors
-                captureException(err, sentry);
-
-                // Re-throw the error for Cf
-                throw err;
-            });
+        return handleRequest(request, env, ctx);
     },
-};
+});

@@ -6,7 +6,6 @@ import dotenv from 'dotenv';
 const env = dotenv.config({ path: fileURLToPath(new URL(`${NODE_ENV}.env`, import.meta.url)) });
 
 import webpack from 'webpack';
-import WorkersSentryWebpackPlugin from 'workers-sentry/webpack.js';
 import { registerCommands } from 'workers-discord';
 
 import commands from './src/commands/index.js';
@@ -55,19 +54,13 @@ export default {
 
         // Ensure single chunk
         new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
-
-        // Publish source maps to Sentry on each build
-        process.env.SENTRY_AUTH_TOKEN
-            && process.env.SENTRY_ORG
-            && process.env.SENTRY_PROJECT
-            && new WorkersSentryWebpackPlugin(
-                process.env.SENTRY_AUTH_TOKEN,
-                process.env.SENTRY_ORG,
-                process.env.SENTRY_PROJECT,
-            ),
     ].filter(Boolean),
     // Don't webpack node-fetch, rely on fetch global
-    externals: { 'node-fetch': 'fetch' },
+    // Don't webpack async_hooks, Cloudflare Workers provides it
+    externals: {
+        'node-fetch': 'fetch',
+        'node:async_hooks': 'module-import node:async_hooks',
+    },
     externalsType: 'global',
     // We need to polyfill buffer for DNS packets
     resolve: {
@@ -76,6 +69,5 @@ export default {
         },
     },
     // Always expose a source map
-    // WorkersSentryWebpackPlugin will do the same when there is a Sentry token
     devtool: 'source-map',
 };

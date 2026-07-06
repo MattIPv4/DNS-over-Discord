@@ -1,6 +1,6 @@
+import * as Sentry from '@sentry/cloudflare';
 import { InteractionResponseType, ApplicationCommandOptionType, ApplicationIntegrationType, InteractionContextType } from 'discord-api-types/payloads';
 
-import { captureException, contextualThrow } from '../utils/error.js';
 import { performLookupWithCache } from '../utils/whois.js';
 import { createEmbed } from '../utils/embed.js';
 import { presentTable } from '../utils/table.js';
@@ -27,7 +27,7 @@ export default {
             InteractionContextType.PrivateChannel,
         ],
     },
-    execute: async ({ interaction, response, wait, edit, context, sentry }) => {
+    execute: async ({ interaction, response, wait, edit, context }) => {
         // Do the processing after acknowledging the Discord command
         wait((async () => {
             // Get the raw values from Discord
@@ -39,7 +39,12 @@ export default {
             // TODO: Try to validate as domain/IPv4/IPv6/ASN before running lookup
 
             // Do the rdap/whois lookup
-            const data = await performLookupWithCache(query, context.env.CACHE).catch(err => contextualThrow(err, { lookup: { query } }));
+            const data = await performLookupWithCache(query, context.env.CACHE).catch(err => {
+                Sentry.withScope((scope) => {
+                    scope.setExtra('lookup', { query });
+                    throw err;
+                });
+            });
 
             // If no result, send back simple message
             if (!data)
@@ -76,9 +81,6 @@ export default {
                 embeds: [createEmbed('WHOIS', `\`\`\`\n${title}\n${table}\n\`\`\``)],
             });
         })().catch(err => {
-            // Log any errors
-            captureException(err, sentry);
-
             // Tell the user it errored
             edit({
                 content: 'Sorry, something went wrong when processing your WHOIS query',

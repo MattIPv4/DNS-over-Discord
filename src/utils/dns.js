@@ -1,8 +1,8 @@
+import * as Sentry from '@sentry/cloudflare';
 import { Buffer } from 'buffer';
 import { decode, encode, RECURSION_DESIRED, CHECKING_DISABLED } from 'dns-packet';
 import { toRcode } from 'dns-packet/rcodes.js';
 import cache from './cache.js';
-import { contextualThrow } from './error.js';
 
 const DNS_RCODES = Object.freeze({
     0: 'No error',
@@ -190,7 +190,12 @@ const processData = (type, data) => {
     }
 
     // We've handled all the known extras, so everything now should be a string
-    if (typeof data !== 'string') contextualThrow(new Error(`Expected data to be an string, got ${data === null ? 'null' : typeof data}`), { data });
+    if (typeof data !== 'string') {
+        Sentry.withScope((scope) => {
+            scope.setExtra('data', data);
+            throw new Error(`Expected data to be an string, got ${data === null ? 'null' : typeof data}`);
+        });
+    }
 
     // Handle hex rdata
     if (data.startsWith('\\#')) {
@@ -247,7 +252,12 @@ const processAnswer = (type, answer) => {
     if (answer === undefined) return [];
 
     // Handle unknown results
-    if (!Array.isArray(answer)) contextualThrow(new Error(`Expected answer to be an array, got ${answer === null ? 'null' : typeof answer}`), { answer });
+    if (!Array.isArray(answer)) {
+        Sentry.withScope((scope) => {
+            scope.setExtra('answer', answer);
+            throw new Error(`Expected answer to be an array, got ${answer === null ? 'null' : typeof answer}`);
+        });
+    }
 
     // Process each answer
     return answer.map(raw => ({
