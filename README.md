@@ -360,7 +360,7 @@ Ensure that the staging/production environments in `wrangler.toml` have been upd
 Ensure that the KV namespaces are created for staging/production environments and are configured in `wrangler.toml`.
 Use `npx wrangler kv:namespace create "CACHE" --env <staging/production>`.
 
-To deploy from local, run `npm run publish:staging` to deploy to staging, and `npm run publish:production` to deploy to the production environment.
+To deploy from local, run `npx wrangler deploy` with the `--env` flag set to either `staging` or `production` to deploy to the respective environment. You will also need to pass `--var DISCORD_CLIENT_ID:<client_id>` and `--var DISCORD_PUBLIC_KEY:<public_key>` to set the Discord application client ID and public key for the deployment. Optionally, you can pass `--var SENTRY_DSN:<dsn>` and `--var SENTRY_RELEASE:<release>` to set the Sentry DSN and release version for the deployment.
 
 To deploy using GitHub, run `make deploy-staging` to force push and deploy to staging, and `make deploy-production` to force push and deploy to the production environment.
 
