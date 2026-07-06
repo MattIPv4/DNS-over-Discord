@@ -57,12 +57,23 @@ jobs:
           CLIENT_ID: ${{ secrets.PRODUCTION_CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.PRODUCTION_CLIENT_SECRET }}
           CLIENT_PUBLIC_KEY: ${{ secrets.PRODUCTION_CLIENT_PUBLIC_KEY }}
+
+      - name: Publish to Production
+        run: npm run publish:production -- --var SENTRY_DSN:${{ secrets.PRODUCTION_SENTRY_DSN }} --var SENTRY_RELEASE:${{ github.sha }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+
+      - name: Create Sentry Release
+        uses: getsentry/action-release@dab6548b3c03c4717878099e43782cf5be654289 # v3.5.0
+        env:
           SENTRY_AUTH_TOKEN: ${{ secrets.PRODUCTION_SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.PRODUCTION_SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.PRODUCTION_SENTRY_PROJECT }}
-          SENTRY_DSN: ${{ secrets.PRODUCTION_SENTRY_DSN }}
-
-      - name: Publish to Production
-        run: npm run publish:production
-        env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        with:
+          ignore_missing: true
+          ignore_empty: true
+          inject: false
+          release: ${{ github.sha }}
+          environment: ${{ github.ref_name }}
+          sourcemaps: dist-worker
+          strip_common_prefix: true

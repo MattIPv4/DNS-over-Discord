@@ -57,12 +57,23 @@ jobs:
           CLIENT_ID: ${{ secrets.STAGING_CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.STAGING_CLIENT_SECRET }}
           CLIENT_PUBLIC_KEY: ${{ secrets.STAGING_CLIENT_PUBLIC_KEY }}
+
+      - name: Publish to Staging
+        run: npm run publish:staging -- --var SENTRY_DSN:${{ secrets.STAGING_SENTRY_DSN }} --var SENTRY_RELEASE:${{ github.sha }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+
+      - name: Create Sentry Release
+        uses: getsentry/action-release@dab6548b3c03c4717878099e43782cf5be654289 # v3.5.0
+        env:
           SENTRY_AUTH_TOKEN: ${{ secrets.STAGING_SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.STAGING_SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.STAGING_SENTRY_PROJECT }}
-          SENTRY_DSN: ${{ secrets.STAGING_SENTRY_DSN }}
-
-      - name: Publish to Staging
-        run: npm run publish:staging
-        env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        with:
+          ignore_missing: true
+          ignore_empty: true
+          inject: false
+          release: ${{ github.sha }}
+          environment: ${{ github.ref_name }}
+          sourcemaps: dist-worker
+          strip_common_prefix: true
