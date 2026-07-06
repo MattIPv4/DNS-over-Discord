@@ -37,6 +37,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Get the full history for the Sentry release commit log
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -57,7 +59,7 @@ jobs:
         env:
           DISCORD_CLIENT_ID: ${{ github.ref_name == 'production' && secrets.PRODUCTION_CLIENT_ID || secrets.STAGING_CLIENT_ID }}
           DISCORD_CLIENT_SECRET: ${{ github.ref_name == 'production' && secrets.PRODUCTION_CLIENT_SECRET || secrets.STAGING_CLIENT_SECRET }}
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
 
       - name: Create Sentry Release
         uses: getsentry/action-release@dab6548b3c03c4717878099e43782cf5be654289 # v3.5.0
