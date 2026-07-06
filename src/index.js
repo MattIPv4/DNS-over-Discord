@@ -1,3 +1,4 @@
+import { env } from 'cloudflare:workers';
 import * as Sentry from '@sentry/cloudflare';
 import { createHandler } from 'workers-discord';
 import { ApplicationIntegrationType } from 'discord-api-types/payloads';
@@ -8,7 +9,7 @@ import components from './components/index.js';
 import Privacy from './utils/strings/privacy.js';
 import Terms from './utils/strings/terms.js';
 
-const handler = createHandler(commands, components, process.env.CLIENT_PUBLIC_KEY);
+const handler = createHandler(commands, components, env.DISCORD_PUBLIC_KEY);
 
 // Util to send a plain-text response
 const textResponse = text => new Response(text, {
@@ -47,9 +48,9 @@ const handleRequest = async (request, env, ctx) => {
 
     // Invite redirects
     if (request.method === 'GET' && url.pathname === '/invite')
-        return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=applications.commands`);
+        return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${env.DISCORD_CLIENT_ID}&scope=applications.commands`);
     if (request.method === 'GET' && url.pathname === '/invite/user')
-        return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=applications.commands&integration_type=${ApplicationIntegrationType.UserInstall}`);
+        return redirectResponse(`https://discord.com/oauth2/authorize?client_id=${env.DISCORD_CLIENT_ID}&scope=applications.commands&integration_type=${ApplicationIntegrationType.UserInstall}`);
 
     // Discord redirect
     if (request.method === 'GET' && url.pathname === '/server')

@@ -1,3 +1,4 @@
+import { env } from 'cloudflare:workers';
 import * as Sentry from '@sentry/cloudflare';
 import { Buffer } from 'buffer';
 import { decode, encode, RECURSION_DESIRED, CHECKING_DISABLED } from 'dns-packet';
@@ -303,7 +304,7 @@ export const performLookupWithCache = (domain, type, endpoint, flags, kv) => cac
     [ domain, type, endpoint, flags ],
     kv,
     `dns-${domain}-${type}-${endpoint.endpoint}-${!!flags.cd}`,
-    Number(process.env.CACHE_DNS_TTL) || 10,
+    Number(env.CACHE_DNS_TTL) || 10,
 );
 
 // Ordered by "popularity", dig command offers the first 25, multi-dig supports all

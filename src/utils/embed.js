@@ -1,3 +1,5 @@
+import { env } from 'cloudflare:workers';
+
 /**
  * @typedef {Object} Embed
  * @property {string} title
@@ -16,7 +18,7 @@
  * @return {Embed}
  */
 export const createEmbed = (title, description, footer = '') => ({
-    title: `DNS over Discord${process.env.NODE_ENV === 'production' ? '' : ` [${process.env.NODE_ENV}]`}: ${title}`,
+    title: `DNS over Discord${env.ENVIRONMENT === 'production' ? '' : ` [${env.ENVIRONMENT}]`}: ${title}`,
     description: description,
     color: 0xf48120,
     timestamp: (new Date).toISOString(),

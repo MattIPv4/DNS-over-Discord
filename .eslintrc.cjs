@@ -14,6 +14,12 @@ module.exports = {
         'plugin:import/recommended',
     ],
     rules: {
+        'import/no-unresolved': [
+            'error',
+            {
+                ignore: ['^cloudflare:'],
+            },
+        ],
         'space-before-function-paren': [
             'error',
             {
