@@ -330,8 +330,8 @@ node
 ## Development
 
 1. Create your test Discord application at https://discord.com/developers/applications (this does not need a bot account, just the application).
-2. Create your `development.env` file.
-   - Copy `development.env.sample` and fill out the information from your Discord application, plus the ID of your test server/guild.
+2. Create your `.env` file.
+   - Copy `.env.sample` and fill out the information from your Discord application, plus the ID of your test server/guild.
    - A Sentry DSN is required, but the token/org/project can be set to empty if source map uploads are not required.
 3. Authenticate with Wrangler by running `npx wrangler login`.
 4. Update `wrangler.toml` for your account.
@@ -345,17 +345,15 @@ node
 
 To test the user-installed commands functionality, you'll need to make sure your Discord application has the User Install option enabled.
 
-You'll then need to make sure that the `TEST_GUILD_ID` in `development.env` is commented out, as user-installed commands need to be registered globally.
+You'll then need to make sure that the `DISCORD_GUILD_ID` in `.env` is commented out, as user-installed commands need to be registered globally.
 
 After that, start the worker as usual with `npm run dev`, install the application to your Discord user, and test the commands.
 
-If you no longer wish to have the commands registered globally, leave `TEST_GUILD_ID` commented and update `webpack.config.js` to pass an empty array to the `registerCommands` call, then start the worker again to remove the global commands.
+If you no longer wish to have the commands registered globally, leave `DISCORD_GUILD_ID` commented and update `webpack.config.js` to pass an empty array to the `registerCommands` call, then start the worker again to remove the global commands.
 
 ## Deployments
 
 `wrangler.toml` and this repository is currently designed for a staging deployment and a production deployment.
-
-Ensure that you've created and configured `staging.env` and `production.env` appropriately (`staging.env` has a test server/guild by default, but this can be removed to stage global commands).
 
 Ensure that the staging/production environments in `wrangler.toml` have been updated with your zone IDs and routes for the workers.
 

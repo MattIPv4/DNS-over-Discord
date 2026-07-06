@@ -1,16 +1,16 @@
 import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
-
-const NODE_ENV = process.env.NODE_ENV || 'development';
+import { createRequire, register } from 'module';
 import dotenv from 'dotenv';
-const env = dotenv.config({ path: fileURLToPath(new URL(`${NODE_ENV}.env`, import.meta.url)) });
-
 import webpack from 'webpack';
 import { registerCommands } from 'workers-discord';
 
-import commands from './src/commands/index.js';
+dotenv.config();
 
-console.log(`Using ${NODE_ENV} environment for build...`);
+// Stub cloudflare:workers import for commands dynamic import
+register(
+    `data:text/javascript,${encodeURIComponent('export const resolve = (spec, ctx, next) => spec === \'cloudflare:workers\' ? { url: \'data:text/javascript,export const env = {};\', shortCircuit: true } : next(spec, ctx);')}`,
+    import.meta.url,
+);
 
 export default {
     mode: 'none',
@@ -30,36 +30,30 @@ export default {
         {
             apply: compiler => compiler.hooks.beforeRun.tapPromise(
                 'RegisterCommandsBeforeWebpack',
-                () => registerCommands(
-                    process.env.CLIENT_ID,
-                    process.env.CLIENT_SECRET,
-                    commands,
-                    true,
-                    process.env.TEST_GUILD_ID,
-                ).then(res => {
-                    console.log(`Registered ${res.length} commands...`);
-                    // console.dir(res, { depth: null });
-                }).catch(err => {
-                    console.error('Error registering commands:', err);
-                    if (NODE_ENV !== 'development') process.exit(1);
-                }),
+                () => import('./src/commands/index.js')
+                    .then(({ default: commands }) => registerCommands(
+                        process.env.DISCORD_CLIENT_ID,
+                        process.env.DISCORD_CLIENT_SECRET,
+                        commands,
+                        true,
+                        process.env.DISCORD_GUILD_ID,
+                    ))
+                    .then(res => {
+                        console.log(`Registered ${res.length} commands...`);
+                        // console.dir(res, { depth: null });
+                    }),
             ),
         },
-
-        // Expose our environment in the worker
-        new webpack.DefinePlugin(Object.entries(env.parsed).reduce((obj, [ key, val ]) => {
-            obj[`process.env.${key}`] = JSON.stringify(val);
-            return obj;
-        }, { 'process.env.NODE_ENV': JSON.stringify(NODE_ENV) })),
 
         // Ensure single chunk
         new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
     ].filter(Boolean),
     // Don't webpack node-fetch, rely on fetch global
-    // Don't webpack async_hooks, Cloudflare Workers provides it
+    // Don't webpack node:async_hooks + cloudflare:workers, Cloudflare Workers provides them
     externals: {
         'node-fetch': 'fetch',
         'node:async_hooks': 'module-import node:async_hooks',
+        'cloudflare:workers': 'module-import cloudflare:workers',
     },
     externalsType: 'global',
     // We need to polyfill buffer for DNS packets
