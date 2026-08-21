@@ -118,7 +118,7 @@ export const handleDig = async ({ domain, types, options, provider }, cache) => 
         // Render and return final rows
         return `${output(finalRows)}${data.flags.cd
             ? `\n${DNSSEC_DISABLED_WARNING_MESSAGE}`
-            : ''}`;
+            : ''}\n${Array.isArray(data.comment) ? `**Comments:** ${data.comment.join("; ")}` : (data.comment ? `**Comments:** ${data.comment}` : "")}`;
     };
 
     // Convert results to an embed
