@@ -41,6 +41,6 @@
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.31.0",
     "tsdown": "^0.22.3",
-    "wrangler": "^3.114.17"
+    "wrangler": "^4.131.1"
   }
 }
