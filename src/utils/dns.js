@@ -82,6 +82,7 @@ const performLookupJson = async (domain, type, endpoint, flags) => {
             Question: data.Question,
             Answer: data.Answer,
             Flags: { cd: !!data.CD },
+            Comment: data.Comment
         }));
 };
 
@@ -276,14 +277,14 @@ const processAnswer = (type, answer) => {
  */
 const performLookup = async (domain, type, endpoint, flags) => {
     // Make the request
-    const { Status, Question, Answer, Flags } = await performLookupRequest(domain, type, endpoint, flags);
-
+    const { Status, Question, Answer, Flags, Comment } = await performLookupRequest(domain, type, endpoint, flags);
     // Return an error message for non-zero status
     if (Status !== 0)
         return {
             name: Question[0].name,
             flags: Flags,
             message: DNS_RCODES[Status] || `An unexpected error occurred [${Status}]`,
+            comment: Comment
         };
 
     // Valid answer
@@ -291,6 +292,7 @@ const performLookup = async (domain, type, endpoint, flags) => {
         name: Question[0].name,
         flags: Flags,
         answer: processAnswer(type, Answer),
+        comment: Comment
     };
 };
 
